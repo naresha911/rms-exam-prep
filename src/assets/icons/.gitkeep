@@ -1,0 +1,28 @@
+# Icons Directory
+
+This directory contains UI icons used throughout the app.
+
+## Recommended Library
+Use `@expo/vector-icons` (already included with Expo) or `@lucide-react-native` for consistent iconography.
+
+## Icon Categories
+- Navigation icons (home, practice, tests, ai, profile)
+- Action icons (bookmark, flag, share, settings)
+- Status icons (success, warning, error, info)
+- Subject icons (math, science, english, gk, intelligence)
+- Achievement icons (trophy, medal, star, fire)
+
+## Usage with Lucide
+```tsx
+import { Home, BookOpen, Trophy, Settings } from "lucide-react-native";
+
+<Home size={24} color="#4648d4" />
+<BookOpen size={20} color="#4648d4" />
+```
+
+## Stitch Design System Colors for Icons
+- Default: `COLORS.textSecondary` (#464554)
+- Active: `COLORS.primary` (#4648d4)
+- Success: `COLORS.success` (#22C55E)
+- Warning: `COLORS.warning` (#F59E0B)
+- Error: `COLORS.error` (#ba1a1a)

@@ -1,0 +1,44 @@
+# Cadet Vijay Mascot Images
+
+This directory contains 3D character assets of "Cadet Vijay" - the friendly Indian Army kid mascot.
+
+## Source
+All mascot images are designed in Stitch and hosted at:
+https://stitch.withgoogle.com/projects/8052910335609503651
+
+## Expressions Available
+- `waving` - Welcome screen, hello states
+- `happy` - Default success/positive states
+- `studying` - Practice sessions, learning
+- `thinking` - Loading, problem-solving
+- `encouraging` - Thumbs up for feedback
+- `victory` - Achievement screens
+- `celebrating` - Test completion, big wins
+- `surprised` - Error states, new content
+- `sad` - Failure states (with supportive gesture)
+
+## Usage
+Import the centralized image constants from `src/assets/images/index.ts`:
+
+```tsx
+import { MASCOT_IMAGES, getMascotImage } from "../../assets/images";
+import { MascotDisplay } from "../../components/shared/MascotDisplay";
+
+// Option 1: Use the component (recommended)
+<MascotDisplay expression="celebrating" size={120} />
+
+// Option 2: Get the URL directly
+const imageUrl = getMascotImage("happy").url;
+```
+
+## Asset Replacement
+When downloading actual PNG files from Stitch, place them in this folder:
+- `vijay-waving.png`
+- `vijay-happy.png`
+- `vijay-studying.png`
+- `vijay-thinking.png`
+- `vijay-encouraging.png`
+- `vijay-victory.png`
+- `vijay-celebrating.png`
+- `vijay-surprised.png`
+- `vijay-sad.png`

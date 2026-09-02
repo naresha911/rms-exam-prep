@@ -1,0 +1,379 @@
+-- ============================================================
+-- RMS Entrance Exam Quiz App — Final Schema (Corrected Order)
+-- ============================================================
+
+-- ============================================================
+-- 1. SCHOOLS (must come before profiles)
+-- ============================================================
+create table schools (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  code text unique,
+  address text
+);
+
+-- ============================================================
+-- 2. USERS & ROLES
+-- ============================================================
+create table profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  role text not null check (role in ('admin', 'teacher', 'student', 'parent')),
+  full_name text,
+  phone text,
+  avatar_url text,
+  school_id uuid references schools(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table parent_student (
+  parent_id uuid references profiles(id),
+  student_id uuid references profiles(id),
+  primary key (parent_id, student_id)
+);
+
+-- ============================================================
+-- 3. ACADEMIC STRUCTURE
+-- ============================================================
+create table standards (
+  id serial primary key,
+  name text unique not null,          -- '6th', '9th'
+  display_order int
+);
+
+create table streams (
+  id serial primary key,
+  name text not null,                 -- 'General', 'Science', 'Arts'
+  standard_id int references standards(id),
+  unique(name, standard_id)
+);
+
+create table subjects (
+  id serial primary key,
+  name text not null,                 -- English, Maths, GK, Intelligence
+  code text unique
+);
+
+create table topics (
+  id serial primary key,
+  subject_id int references subjects(id),
+  name text not null,
+  parent_topic_id int references topics(id),  -- sub-topics support
+  unique(subject_id, name)
+);
+
+create table classes (
+  id uuid primary key default gen_random_uuid(),
+  school_id uuid references schools(id),
+  standard_id int references standards(id),
+  stream_id int references streams(id),
+  name text,
+  academic_year text
+);
+
+create table class_students (
+  class_id uuid references classes(id),
+  student_id uuid references profiles(id),
+  primary key (class_id, student_id)
+);
+
+-- ============================================================
+-- 4. QUESTIONS (CORE)
+-- ============================================================
+create type question_type as enum (
+  'mcq_single',
+  'mcq_multi',
+  'true_false',
+  'fill_blank',
+  'short_answer',
+  'matching',
+  'comprehension',
+  'assertion_reason'
+);
+
+create type difficulty as enum ('easy', 'medium', 'hard');
+
+create table questions (
+  id uuid primary key default gen_random_uuid(),
+  question_type question_type not null,
+  subject_id int references subjects(id),
+  topic_id int references topics(id),
+  standard_id int references standards(id),
+  stream_id int references streams(id),
+  difficulty difficulty default 'medium',
+  has_diagram boolean default false,
+  diagram_path text,
+  marks numeric(4,1) default 1,
+  negative_marks numeric(4,1) default 0,
+  year int,
+  source text,
+  tags text[],
+  is_active boolean default true,
+  created_by uuid references profiles(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table question_translations (
+  id uuid primary key default gen_random_uuid(),
+  question_id uuid references questions(id) on delete cascade,
+  language_code text not null,
+  question_text text,                          -- nullable for pure-figure questions
+  explanation text,
+  explanation_diagram_path text,
+  unique(question_id, language_code)
+);
+
+create table question_options (
+  id uuid primary key default gen_random_uuid(),
+  question_id uuid references questions(id) on delete cascade,
+  option_key text not null,                    -- 'A','B','C','D'
+  is_correct boolean default false,
+  display_order int
+);
+
+create table option_translations (
+  id uuid primary key default gen_random_uuid(),
+  option_id uuid references question_options(id) on delete cascade,
+  language_code text not null,
+  option_text text,
+  option_image_path text,
+  unique(option_id, language_code),
+  constraint option_has_content check (option_text is not null or option_image_path is not null)
+);
+
+-- Matching-type questions
+create table matching_items (
+  id uuid primary key default gen_random_uuid(),
+  question_id uuid references questions(id) on delete cascade,
+  side text not null check (side in ('left', 'right')),
+  item_key text not null,
+  item_text text,
+  item_image_path text,
+  display_order int
+);
+
+create table matching_pairs (
+  question_id uuid references questions(id) on delete cascade,
+  left_item_id uuid references matching_items(id),
+  right_item_id uuid references matching_items(id),
+  primary key (question_id, left_item_id, right_item_id)
+);
+
+-- Question groups (comprehension, cloze, DI, puzzles, shared figures)
+create type question_group_type as enum (
+  'comprehension', 'cloze', 'data_interpretation', 'puzzle', 'shared_figure'
+);
+
+create table question_groups (
+  id uuid primary key default gen_random_uuid(),
+  group_type question_group_type not null,
+  subject_id int references subjects(id),
+  standard_id int references standards(id),
+  shared_image_path text,
+  created_by uuid references profiles(id),
+  created_at timestamptz default now()
+);
+
+create table question_group_translations (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid references question_groups(id) on delete cascade,
+  language_code text not null,
+  shared_text text,
+  unique(group_id, language_code)
+);
+
+create table group_questions (
+  group_id uuid references question_groups(id) on delete cascade,
+  question_id uuid references questions(id) on delete cascade,
+  question_order int,
+  blank_number int,
+  primary key (group_id, question_id)
+);
+
+create table question_tags (
+  question_id uuid references questions(id) on delete cascade,
+  tag text not null,
+  primary key (question_id, tag)
+);
+
+-- ============================================================
+-- 5. PAST YEAR PAPERS
+-- ============================================================
+create table papers (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  year int not null,
+  standard_id int references standards(id),
+  stream_id int references streams(id),
+  total_marks numeric(6,1),
+  duration_minutes int,
+  pdf_path text,
+  is_published boolean default false,
+  created_at timestamptz default now()
+);
+
+create table paper_questions (
+  paper_id uuid references papers(id) on delete cascade,
+  question_id uuid references questions(id),
+  section text,
+  question_order int,
+  marks numeric(4,1),
+  negative_marks numeric(4,1),
+  primary key (paper_id, question_id)
+);
+
+-- ============================================================
+-- 6. MOCK EXAMS / TESTS
+-- ============================================================
+create type test_creation_mode as enum ('rule_based', 'random', 'manual');
+
+create table tests (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  standard_id int references standards(id),
+  stream_id int references streams(id),
+  creation_mode test_creation_mode not null,
+  total_marks numeric(6,1),
+  duration_minutes int,
+  section_timing boolean default false,
+  negative_marking boolean default true,
+  allow_pause boolean default true,
+  max_attempts int default 1,
+  is_published boolean default false,
+  created_by uuid references profiles(id),
+  created_at timestamptz default now()
+);
+
+create table test_sections (
+  id uuid primary key default gen_random_uuid(),
+  test_id uuid references tests(id) on delete cascade,
+  name text not null,
+  section_order int,
+  instructions text,
+  time_limit_seconds int,
+  default_marks numeric(4,1) default 1,
+  default_negative_marks numeric(4,1) default 0
+);
+
+create table test_rules (
+  id uuid primary key default gen_random_uuid(),
+  test_id uuid references tests(id) on delete cascade,
+  section_id uuid references test_sections(id),
+  subject_id int references subjects(id),
+  topic_id int references topics(id),
+  difficulty difficulty,
+  question_count int not null,
+  marks_per_q numeric(4,1) default 1,
+  negative_marks_per_q numeric(4,1) default 0
+);
+
+create table test_questions (
+  test_id uuid references tests(id) on delete cascade,
+  question_id uuid references questions(id),
+  section_id uuid references test_sections(id),
+  question_order int,
+  marks numeric(4,1),
+  negative_marks numeric(4,1),
+  primary key (test_id, question_id)
+);
+
+-- ============================================================
+-- 7. ATTEMPTS & PROGRESS
+-- ============================================================
+create table test_attempts (
+  id uuid primary key default gen_random_uuid(),
+  test_id uuid references tests(id),
+  student_id uuid references profiles(id),
+  attempt_number int default 1,
+  started_at timestamptz default now(),
+  submitted_at timestamptz,
+  time_spent_seconds int,
+  is_paused boolean default false,
+  pause_data jsonb,
+  total_score numeric(6,1),
+  max_score numeric(6,1),
+  status text check (status in ('in_progress', 'submitted', 'abandoned'))
+);
+
+create type review_status as enum (
+  'not_visited', 'answered', 'not_answered', 'marked_review', 'answered_marked_review'
+);
+
+create table attempt_answers (
+  id uuid primary key default gen_random_uuid(),
+  attempt_id uuid references test_attempts(id) on delete cascade,
+  question_id uuid references questions(id),
+  review_status review_status default 'not_visited',
+  selected_options text[],
+  text_answer text,
+  matching_answer jsonb,
+  is_correct boolean,
+  marks_awarded numeric(4,1),
+  time_spent_seconds int
+);
+
+create table student_topic_stats (
+  student_id uuid references profiles(id),
+  topic_id int references topics(id),
+  questions_attempted int default 0,
+  questions_correct int default 0,
+  last_attempted_at timestamptz,
+  primary key (student_id, topic_id)
+);
+
+-- ============================================================
+-- 8. CONTENT-OPS TABLES
+-- ============================================================
+create table bookmarks (
+  student_id uuid references profiles(id),
+  question_id uuid references questions(id),
+  created_at timestamptz default now(),
+  primary key (student_id, question_id)
+);
+
+create table question_reports (
+  id uuid primary key default gen_random_uuid(),
+  question_id uuid references questions(id),
+  reported_by uuid references profiles(id),
+  reason text check (reason in ('wrong_answer','typo','bad_image','duplicate','other')),
+  comment text,
+  status text default 'open' check (status in ('open','reviewing','resolved','rejected')),
+  created_at timestamptz default now(),
+  resolved_at timestamptz
+);
+
+create table question_history (
+  id uuid primary key default gen_random_uuid(),
+  question_id uuid references questions(id),
+  edited_by uuid references profiles(id),
+  diff jsonb,
+  edited_at timestamptz default now()
+);
+
+-- ============================================================
+-- 9. INDEXES
+-- ============================================================
+create index idx_questions_standard_subject on questions(standard_id, subject_id);
+create index idx_questions_year on questions(year);
+create index idx_questions_difficulty on questions(difficulty);
+create index idx_questions_tags on questions using gin(tags);
+create index idx_question_tags_tag on question_tags(tag);
+create index idx_group_questions_group on group_questions(group_id);
+create index idx_matching_items_question on matching_items(question_id);
+create index idx_test_attempts_student on test_attempts(student_id);
+create index idx_attempt_answers_attempt on attempt_answers(attempt_id);
+create index idx_paper_questions_paper on paper_questions(paper_id);
+create index idx_bookmarks_student on bookmarks(student_id);
+create index idx_question_reports_status on question_reports(status);
+
+-- ============================================================
+-- DONE
+-- ============================================================
+-- Next steps:
+-- 1. Create Storage buckets (private):
+--    question-diagrams, option-diagrams, explanation-diagrams,
+--    group-diagrams, past-paper-pdfs, avatars
+-- 2. Add RLS policies
+-- 3. Add trigger to auto-create profile on signup

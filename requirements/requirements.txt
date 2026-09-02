@@ -1,0 +1,1972 @@
+# AISSEE Student Preparation App
+
+## Client Application Requirements — MVP + Future Roadmap
+
+**Project:** All India Sainik Schools Entrance Examination (AISSEE) Preparation Platform
+**Target Students:** Students currently studying in Class 5 and Class 8
+**Target Admission:** Class 6 and Class 9 respectively
+**Platform:** Android first, iOS/web-ready architecture
+**Status:** Initial Product Requirements Draft
+
+---
+
+# 1. Product Vision
+
+Build a fun, structured and highly engaging learning application that helps students prepare for the **All India Sainik Schools Entrance Examination (AISSEE)**.
+
+The application should not feel like a traditional exam-preparation website converted into a mobile app.
+
+It should feel like a **personal Sainik School preparation companion**.
+
+The experience should combine:
+
+* Structured learning
+* Topic-wise practice
+* Daily practice
+* Mock examinations
+* Previous-year papers
+* Performance analysis
+* Gamification
+* Revision
+* Personalized recommendations
+* Friendly AI-assisted explanations in future
+* Parent visibility in future
+
+The application should be suitable for children around the Class 5/Class 8 age group and therefore prioritize **simplicity, motivation, clarity and low cognitive load**.
+
+---
+
+# 2. Product Positioning
+
+### Proposed positioning
+
+> **"Your personal Sainik School preparation companion."**
+
+The application should help a student answer three questions every day:
+
+1. **What should I learn today?**
+2. **How well am I performing?**
+3. **What should I improve next?**
+
+Instead of simply presenting thousands of questions, the app should progressively guide the student toward exam readiness.
+
+---
+
+# 3. Target Users
+
+## 3.1 Primary Users
+
+### Class 5 Student
+
+Preparing for:
+
+**AISSEE → Admission to Class 6**
+
+The student needs preparation in:
+
+* Mathematics
+* Language
+* Intelligence
+* General Knowledge
+
+The current AISSEE pattern has 125 questions, 300 marks and 150 minutes.
+
+### Class 8 Student
+
+Preparing for:
+
+**AISSEE → Admission to Class 9**
+
+The student needs preparation in:
+
+* Mathematics
+* Intelligence
+* English
+* General Science
+* Social Science
+
+The current AISSEE pattern has 150 questions, 400 marks and 180 minutes.
+
+---
+
+# 4. Secondary User — Parent
+
+A parent account should be considered part of the product roadmap.
+
+Parents should eventually be able to see:
+
+* Student's preparation progress
+* Daily study time
+* Test scores
+* Weak subjects
+* Strong subjects
+* Topic mastery
+* Mock-test performance
+* Study streak
+* Exam readiness
+* Subscription status
+
+The existing schema already contains `parent_student`, allowing a parent-student relationship to be supported later.
+
+---
+
+# 5. Design Direction
+
+The supplied **Lingua-style screens should be used as the primary visual inspiration**, adapted for AISSEE.
+
+## 5.1 Mascot
+
+The orange fox mascot becomes the application's main character.
+
+The mascot should appear throughout the application:
+
+* Onboarding
+* Empty states
+* Daily goals
+* Achievements
+* Correct answers
+* Encouragement messages
+* Streaks
+* Test completion
+* Error states
+* Revision reminders
+
+The mascot should have different expressions/poses:
+
+* Happy
+* Thinking
+* Celebrating
+* Encouraging
+* Surprised
+* Sad but encouraging
+* Victory
+* Studying
+* Wearing a cadet/Sainik-inspired outfit where appropriate
+
+The mascot should become a recognizable part of the brand.
+
+---
+
+# 6. Visual Theme
+
+Use the supplied UI as the visual baseline.
+
+## Primary visual characteristics
+
+* Purple primary color
+* Purple-to-blue gradients where appropriate
+* White backgrounds
+* Rounded cards
+* Large rounded buttons
+* Soft shadows
+* Friendly illustrations
+* Large readable typography
+* High contrast
+* Minimal clutter
+* Large touch targets
+* Friendly micro-animations
+
+## Suggested visual hierarchy
+
+**Primary CTA:** Purple filled button
+
+**Secondary CTA:** White/outlined button
+
+**Cards:** White with subtle shadow
+
+**Progress:** Purple/orange accent
+
+**Success:** Green
+
+**Warning:** Amber/orange
+
+**Error:** Red
+
+The interface should feel energetic without looking like a game.
+
+---
+
+# 7. Onboarding
+
+The onboarding experience should closely follow the supplied mascot screens.
+
+## Screen 1 — Welcome
+
+Fox mascot with backpack.
+
+Headline:
+
+**"Your Sainik School journey starts here!"**
+
+Supporting text:
+
+"Learn smarter. Practice every day. Get exam ready."
+
+CTA:
+
+**Get Started →**
+
+---
+
+## Screen 2 — Select Target
+
+Question:
+
+**"Which class are you preparing for?"**
+
+Options:
+
+* Class 6
+* Class 9
+
+Supporting text:
+
+"Choose your target admission class."
+
+---
+
+## Screen 3 — Current Class
+
+For example:
+
+**"Which class are you studying in?"**
+
+Options:
+
+* Class 5
+* Class 8
+* Other
+
+---
+
+## Screen 4 — Goal
+
+Ask:
+
+**"What's your goal?"**
+
+Options:
+
+* Crack AISSEE
+* Improve my score
+* Practice every day
+* Prepare for my first mock test
+
+This information can later drive personalization.
+
+---
+
+# 8. Account Creation
+
+Follow the supplied "Create your account" visual style.
+
+Options:
+
+* Email
+* Password
+* Google
+* Apple where supported
+
+However, because the target audience includes children, account creation and parental consent requirements must be reviewed before production release.
+
+The user should not be forced through a long registration flow before seeing the product value.
+
+### Recommended approach
+
+Allow:
+
+**Explore → Limited free practice → Account creation**
+
+or
+
+**Account creation → Immediate onboarding → First practice session**
+
+---
+
+# 9. Student Profile
+
+Student profile should contain:
+
+* Name
+* Profile picture/avatar
+* Target class
+* Current class
+* Preparation start date
+* Preferred language
+* Daily goal
+* Study streak
+* XP/points
+* Level
+* Badges
+
+Optional:
+
+* Target Sainik School
+* Exam date
+* Study reminder time
+
+---
+
+# 10. Home Dashboard
+
+The Home screen is the most important screen after onboarding.
+
+It should follow the supplied dashboard design language.
+
+## Header
+
+Example:
+
+**"Hello, Aarav! 👋"**
+
+Below:
+
+**"Ready for today's mission?"**
+
+Display:
+
+* Current streak
+* XP
+* Notifications
+* Profile avatar
+
+---
+
+# 11. Daily Goal
+
+A prominent card:
+
+### Today's Goal
+
+**15 / 20 Questions**
+
+Progress bar
+
+Below:
+
+**5 questions remaining**
+
+CTA:
+
+**Continue Practice**
+
+The goal should be configurable.
+
+Possible goals:
+
+* 10 questions/day
+* 20 questions/day
+* 30 questions/day
+* Custom
+
+---
+
+# 12. Continue Learning
+
+A prominent card similar to the supplied "Continue learning" card.
+
+Example:
+
+### Continue Learning
+
+**Mathematics**
+
+Fractions — Unit 3
+
+**70% complete**
+
+CTA:
+
+**Continue**
+
+The system should remember the student's last activity.
+
+---
+
+# 13. Today's Plan
+
+Display 3–5 recommended activities.
+
+Example:
+
+### Today's Mission
+
+1. Mathematics — Fractions
+2. Intelligence — Number Series
+3. GK — India
+4. 10-question Speed Test
+
+Each activity should show:
+
+* Type
+* Estimated duration
+* Completion status
+
+Example:
+
+**✓ Completed**
+
+**○ Start**
+
+---
+
+# 14. Home Navigation
+
+Recommended bottom navigation:
+
+### Home
+
+🏠
+
+### Practice
+
+📖
+
+### Mock Tests
+
+📝
+
+### AI Tutor
+
+🤖
+
+### Profile
+
+👤
+
+The AI Tutor can initially be shown as **Coming Soon** if it is not part of MVP.
+
+---
+
+# 15. Practice Module
+
+Practice is the core learning experience.
+
+The student should be able to practice:
+
+* Subject
+* Topic
+* Sub-topic
+* Difficulty
+* Question count
+
+---
+
+# 16. Practice Modes
+
+## 16.1 Quick Practice
+
+Examples:
+
+* 5 questions
+* 10 questions
+* 20 questions
+
+Designed for daily usage.
+
+---
+
+## 16.2 Topic Practice
+
+Example:
+
+Mathematics → Fractions
+
+Student chooses:
+
+* 10 questions
+* 20 questions
+* Practice until mastery
+
+---
+
+## 16.3 Subject Practice
+
+Example:
+
+**Mathematics**
+
+Practice all available topics.
+
+---
+
+## 16.4 Weak Area Practice
+
+The app automatically identifies weak topics.
+
+Example:
+
+### Improve These Topics
+
+🔴 Fractions — 42%
+
+🟠 Ratio & Proportion — 58%
+
+🟢 Geometry — 82%
+
+CTA:
+
+**Practice Weak Areas**
+
+The existing `student_topic_stats` table can support this functionality.
+
+---
+
+# 17. Question Experience
+
+The question screen should be extremely clean.
+
+Example:
+
+**Question 7 / 20**
+
+Progress bar
+
+---
+
+### Question
+
+A question displayed in large readable text.
+
+Answer options:
+
+**A.** Option
+
+**B.** Option
+
+**C.** Option
+
+**D.** Option
+
+Large touch-friendly cards should be used.
+
+---
+
+# 18. Question Interaction
+
+After selecting an answer:
+
+### Correct
+
+Show:
+
+**🎉 Excellent!**
+
+Mascot celebration.
+
+Brief explanation.
+
+CTA:
+
+**Next Question →**
+
+### Incorrect
+
+Show:
+
+**Almost there!**
+
+Explain:
+
+* Correct answer
+* Why it is correct
+* Why the selected answer is incorrect
+
+CTA:
+
+**Got it →**
+
+The student should be encouraged rather than punished.
+
+---
+
+# 19. Question Explanation
+
+Every important question should support an explanation.
+
+Explanation can contain:
+
+* Text
+* Diagram
+* Step-by-step solution
+* Formula
+* Shortcut
+* Example
+
+The existing question model supports explanations and explanation diagrams.
+
+---
+
+# 20. Bookmark Question
+
+Student can bookmark a question.
+
+Button:
+
+**🔖 Save**
+
+Saved questions should appear under:
+
+**My Bookmarks**
+
+The database already contains bookmark support.
+
+---
+
+# 21. Report Question
+
+Provide:
+
+**Report Question**
+
+Reasons:
+
+* Wrong answer
+* Typo
+* Incorrect question
+* Bad image
+* Duplicate
+* Other
+
+This maps directly to the existing `question_reports` structure.
+
+---
+
+# 22. Question Types
+
+MVP should primarily support:
+
+* Single-answer MCQ
+* True/False
+* Image-based questions
+
+Future:
+
+* Multiple-answer
+* Matching
+* Assertion & Reason
+* Comprehension
+* Shared passage questions
+* Figure-based questions
+
+The underlying schema already supports a broad set of question types including MCQ, matching, comprehension and assertion-reason.
+
+---
+
+# 23. Subject Structure
+
+## Class 6
+
+### Mathematics
+
+Topics should follow the official AISSEE syllabus.
+
+### Language
+
+Support the AISSEE language options.
+
+The 2026 examination supports English, Hindi and multiple regional languages for Class VI.
+
+### Intelligence
+
+Examples:
+
+* Analogy
+* Classification
+* Series
+* Pattern recognition
+* Logical reasoning
+* Coding/decoding
+* Spatial reasoning
+
+### General Knowledge
+
+Examples:
+
+* India
+* Geography
+* History
+* Civics
+* Science awareness
+* Sports
+* Important people
+* Current affairs
+* Defence awareness
+
+---
+
+# 24. Class 9 Structure
+
+### Mathematics
+
+### Intelligence
+
+### English
+
+### General Science
+
+### Social Science
+
+The app must maintain completely separate Class 6 and Class 9 preparation paths because the official examination structures differ significantly.
+
+---
+
+# 25. Topic Browser
+
+Students should be able to navigate:
+
+**Subject → Topic → Sub-topic → Practice**
+
+Example:
+
+Mathematics
+
+→ Arithmetic
+
+→ Fractions
+
+→ Addition of Fractions
+
+→ Practice
+
+The database already supports subjects and hierarchical topics.
+
+---
+
+# 26. Mock Tests
+
+Mock Tests are a major product feature.
+
+The reference apps emphasize mock tests, previous papers, performance tracking and speed improvement.
+
+Provide:
+
+### Full AISSEE Mock Test
+
+The test should reproduce the actual examination structure.
+
+---
+
+# 27. Class 6 Mock Test
+
+Current AISSEE structure:
+
+| Section           | Questions |   Marks |
+| ----------------- | --------: | ------: |
+| Language          |        25 |      50 |
+| Mathematics       |        50 |     150 |
+| Intelligence      |        25 |      50 |
+| General Knowledge |        25 |      50 |
+| **Total**         |   **125** | **300** |
+
+Duration:
+
+**150 minutes**
+
+No negative marking for wrong responses.
+
+---
+
+# 28. Class 9 Mock Test
+
+| Section         | Questions |   Marks |
+| --------------- | --------: | ------: |
+| Mathematics     |        50 |     200 |
+| Intelligence    |        25 |      50 |
+| English         |        25 |      50 |
+| General Science |        25 |      50 |
+| Social Science  |        25 |      50 |
+| **Total**       |   **150** | **400** |
+
+Duration:
+
+**180 minutes**
+
+No negative marking for wrong responses.
+
+---
+
+# 29. Mock Test Interface
+
+The test interface should simulate the actual examination experience.
+
+Include:
+
+* Countdown timer
+* Question number
+* Answer selection
+* Previous/Next
+* Question palette
+* Mark for review
+* Answered/unanswered status
+* Submit test
+* Confirmation before submission
+
+The experience should progressively train students for the real exam rather than just function as another quiz.
+
+---
+
+# 30. Test Result
+
+Immediately after submission:
+
+### Your Result
+
+**Score: 248 / 300**
+
+**82.7%**
+
+Show:
+
+* Correct
+* Incorrect
+* Unanswered
+* Accuracy
+* Time taken
+* Average time/question
+* Subject-wise score
+
+Mascot should celebrate good performance.
+
+---
+
+# 31. Performance Analysis
+
+This is one of the major differentiators.
+
+Display:
+
+### Overall Performance
+
+**Your preparation score**
+
+82%
+
+---
+
+### Subject Performance
+
+Mathematics — 88%
+
+Intelligence — 79%
+
+Language — 84%
+
+GK — 68%
+
+---
+
+### Recommended Improvement
+
+**GK needs more practice**
+
+CTA:
+
+**Practice GK**
+
+---
+
+# 32. Topic Mastery
+
+Each topic should have a mastery score.
+
+Example:
+
+### Mathematics
+
+Fractions — 92% 🟢
+
+Decimals — 78% 🟢
+
+Ratio — 61% 🟠
+
+Geometry — 43% 🔴
+
+The goal is to convert raw test results into **actionable study recommendations**.
+
+---
+
+# 33. Speed Training
+
+Inspired by competitor functionality that includes speed tests and training modes.
+
+Provide:
+
+### Speed Challenge
+
+Example:
+
+**10 questions**
+
+**5 minutes**
+
+The system measures:
+
+* Accuracy
+* Average response time
+* Questions/minute
+* Score
+
+This helps students improve both speed and accuracy.
+
+---
+
+# 34. Previous Year Papers
+
+Provide a dedicated section:
+
+### Previous Year Papers
+
+Filter:
+
+* Class 6
+* Class 9
+* Year
+* Subject
+
+Each paper should support:
+
+**Start Paper**
+
+**View Solutions**
+
+**View Result**
+
+Past papers should be treated as a premium/high-value content category.
+
+---
+
+# 35. Daily Challenge
+
+Every day provide a small challenge.
+
+Example:
+
+### 🔥 Today's Challenge
+
+**20 questions**
+
+**5 minutes**
+
+**Can you score 80%+?**
+
+Reward:
+
+**+50 XP**
+
+This creates a reason to return every day.
+
+---
+
+# 36. Gamification
+
+Gamification should motivate learning without making the product feel like a gambling/game-reward platform.
+
+## XP
+
+Students earn XP for:
+
+* Completing practice
+* Correct answers
+* Completing daily goals
+* Finishing mock tests
+* Maintaining streaks
+
+---
+
+# 37. Levels
+
+Example:
+
+**Cadet Level 1**
+
+→ Recruit
+
+→ Junior Cadet
+
+→ Cadet
+
+→ Senior Cadet
+
+→ Champion
+
+The exact naming can be finalized later.
+
+---
+
+# 38. Streak
+
+Display prominently:
+
+🔥 **7 Day Streak**
+
+Example:
+
+"Keep your streak alive!"
+
+Streak should be based on meaningful learning activity rather than simply opening the app.
+
+---
+
+# 39. Badges
+
+Examples:
+
+🏅 First Mock Test
+
+🔥 7 Day Streak
+
+🎯 100 Questions
+
+🧠 Intelligence Master
+
+➗ Maths Master
+
+📚 10 Tests Completed
+
+🏆 90%+ Score
+
+---
+
+# 40. Leaderboard
+
+Competitor apps use leaderboards as an engagement mechanism. One current reference app advertises national ranking and monthly leaderboard functionality.
+
+Recommended implementation:
+
+### Weekly Leaderboard
+
+Rank based on learning points rather than raw money or purchases.
+
+Display:
+
+1. Student
+2. Student
+3. Student
+
+The leaderboard should optionally support:
+
+* National
+* State
+* School
+* Friends
+
+For MVP, **weekly national leaderboard** is sufficient.
+
+---
+
+# 41. Learning Content
+
+Beyond questions, the app should eventually support:
+
+* Short concept explanations
+* Notes
+* Formula sheets
+* Mind maps
+* Revision cards
+* Short videos
+* Important facts
+* Exam tips
+
+This is supported by competitor products; for example, current apps advertise study materials, videos, PDFs, notes and concept revision alongside tests.
+
+---
+
+# 42. Revision Centre
+
+Create a dedicated:
+
+## Revision
+
+Sections:
+
+* Mistakes
+* Bookmarks
+* Weak Topics
+* Recently Practiced
+* Important Questions
+* Formulae
+* GK Revision
+
+This turns mistakes into a learning loop.
+
+---
+
+# 43. My Mistakes
+
+Automatically collect questions answered incorrectly.
+
+### My Mistakes
+
+**24 questions to revise**
+
+Filters:
+
+* Subject
+* Topic
+* Recent
+* Frequently wrong
+
+CTA:
+
+**Practice Mistakes**
+
+---
+
+# 44. AI Tutor — Future Feature
+
+The supplied mascot/UI concept strongly lends itself to an AI tutor.
+
+Future screen:
+
+### AI Tutor
+
+Fox mascot
+
+**"Hi! What would you like to learn today?"**
+
+Student can ask:
+
+* Explain this question
+* Why is my answer wrong?
+* Teach me fractions
+* Give me another similar question
+* Give me a hint
+* Explain in simple words
+
+The AI must be constrained to the student's syllabus and age level.
+
+---
+
+# 45. AI Tutor Conversation
+
+Use the visual style of the supplied AI Teacher screen.
+
+Possible actions:
+
+* 🎥 Explain
+* 🎙 Ask
+* Aa Text
+* 🔊 Listen
+
+The mascot remains visible as the conversational character.
+
+---
+
+# 46. Personalized Study Plan
+
+Future feature.
+
+After enough activity, generate:
+
+### Your Study Plan
+
+**Today — 25 minutes**
+
+1. Maths — Fractions — 10 min
+2. Intelligence — Series — 5 min
+3. GK — India — 5 min
+4. Quick Test — 5 min
+
+The plan should adapt based on:
+
+* Weak topics
+* Recent scores
+* Exam date
+* Study frequency
+* Available time
+
+---
+
+# 47. Exam Readiness Score
+
+Future flagship feature.
+
+Example:
+
+## AISSEE Readiness
+
+**78%**
+
+### Subject readiness
+
+Maths — 86%
+
+Intelligence — 82%
+
+Language — 74%
+
+GK — 69%
+
+### Recommendation
+
+"Focus on GK and Language this week."
+
+This could become one of the application's strongest differentiators.
+
+---
+
+# 48. Notifications
+
+Notifications should be useful rather than spammy.
+
+Examples:
+
+**Daily reminder**
+
+"Your 20-question mission is waiting! 🦊"
+
+**Streak**
+
+"Your 6-day streak is alive. Keep going!"
+
+**Weak topic**
+
+"Let's improve Fractions today."
+
+**Mock test**
+
+"Ready for this week's full mock test?"
+
+**Achievement**
+
+"You've crossed 1,000 questions!"
+
+Parent notifications can be added later.
+
+---
+
+# 49. Offline Support
+
+Offline functionality should be considered because students may have unreliable internet connectivity.
+
+Possible offline content:
+
+* Downloaded practice sets
+* Previously downloaded papers
+* Notes
+* Selected revision content
+
+Results should synchronize when connectivity returns.
+
+This is a proven feature in competing applications.
+
+---
+
+# 50. Search
+
+Students should be able to search:
+
+* Questions
+* Topics
+* Subjects
+* Notes
+* Previous papers
+
+For younger students, visual navigation should remain the primary method.
+
+---
+
+# 51. Profile
+
+Profile screen:
+
+### Student Profile
+
+Avatar
+
+Name
+
+Target:
+
+**AISSEE Class 6**
+
+---
+
+### My Progress
+
+Questions solved
+
+Tests completed
+
+Accuracy
+
+Study streak
+
+XP
+
+---
+
+### My Learning
+
+* Bookmarks
+* Mistakes
+* Achievements
+* Study history
+
+---
+
+# 52. Settings
+
+Include:
+
+* Profile
+* Target class
+* Language
+* Notifications
+* Sound
+* Dark mode — future
+* Downloaded content
+* Privacy
+* Help
+* Report a problem
+* Logout
+
+---
+
+# 53. Subscription / Monetization
+
+### Proposed model: Freemium
+
+The application should provide enough free content to demonstrate value.
+
+## Free
+
+* Daily practice
+* Limited topic questions
+* Limited mock tests
+* Basic performance
+* Selected previous questions
+* Basic streak/XP
+
+## Premium
+
+* Full question bank
+* Unlimited practice
+* Full mock-test series
+* Previous-year papers
+* Advanced analytics
+* Weak-area practice
+* Speed tests
+* Revision library
+* Premium notes/videos
+* AI Tutor
+* Personalized study plan
+
+The exact pricing should be determined after competitor and customer validation.
+
+The reference market demonstrates that students already use apps combining MCQs, mock tests, previous papers, performance tracking, notes and revision content.
+
+---
+
+# 54. Advertising
+
+Because the target audience is children, advertising should **not be the primary monetization mechanism**.
+
+Recommended:
+
+* No intrusive ads during an examination
+* No misleading advertisements
+* No ads disguised as educational content
+* No ads affecting question selection
+* Prefer subscription/freemium monetization
+
+Any advertising strategy should be reviewed against applicable child-safety/privacy requirements before implementation.
+
+---
+
+# 55. Parent Features — Phase 2
+
+Parent dashboard:
+
+### Child's Progress
+
+**Aarav**
+
+AISSEE Class 6
+
+---
+
+### This Week
+
+Questions: 184
+
+Tests: 4
+
+Accuracy: 82%
+
+Study time: 3h 45m
+
+---
+
+### Needs Attention
+
+GK — 64%
+
+Fractions — 58%
+
+---
+
+### Doing Great
+
+Intelligence — 91%
+
+---
+
+# 56. Content Architecture
+
+Content should be organized as:
+
+**Exam**
+
+→ Target Class
+
+→ Subject
+
+→ Topic
+
+→ Sub-topic
+
+→ Questions
+
+This is aligned with the existing database design where standards, subjects, topics and questions are separate entities.
+
+---
+
+# 57. Test Architecture
+
+Tests should support:
+
+* Manual test
+* Rule-based test
+* Random test
+
+The existing schema already defines these three creation modes.
+
+This allows the Admin application to create tests while the client application consumes them.
+
+---
+
+# 58. Student Attempt Tracking
+
+For every test attempt store:
+
+* Student
+* Test
+* Start time
+* End time
+* Time spent
+* Answers
+* Review status
+* Score
+* Maximum score
+* Completion status
+
+The existing schema provides `test_attempts` and `attempt_answers` for this purpose.
+
+---
+
+# 59. Question-Level Analytics
+
+Track:
+
+* Attempt count
+* Correct count
+* Incorrect count
+* Average time
+* Topic
+* Difficulty
+* Student history
+
+This enables future adaptive learning.
+
+---
+
+# 60. Difficulty
+
+Questions should support:
+
+* Easy
+* Medium
+* Hard
+
+The database already supports these difficulty levels.
+
+The application can gradually increase difficulty as the student's mastery improves.
+
+---
+
+# 61. Adaptive Practice — Future
+
+Example:
+
+Student answers:
+
+5 easy questions correctly.
+
+System moves to:
+
+Medium questions.
+
+Student repeatedly struggles:
+
+System returns to:
+
+Concept explanation → Easier practice → Medium practice.
+
+This creates a personalized learning path.
+
+---
+
+# 62. Exam Simulation
+
+A special mode:
+
+## REAL EXAM MODE
+
+The student should experience:
+
+* Actual question distribution
+* Actual marks
+* Actual time
+* No hints
+* No explanations during exam
+* Question navigation
+* Review marking
+* Final submission
+
+After submission, provide complete analysis.
+
+---
+
+# 63. Exam Countdown
+
+If the official examination date is available:
+
+### AISSEE 2027
+
+**142 Days To Go**
+
+The countdown should be configurable from the backend because official schedules can change.
+
+The official NTA site should be treated as the authoritative source for examination notifications and updates.
+
+---
+
+# 64. Content Freshness
+
+The application should clearly separate:
+
+**Official information**
+
+from
+
+**Preparation content**
+
+The app must not imply that it is an official NTA or Sainik Schools Society application.
+
+Several competing applications explicitly state that they are independent educational resources rather than government apps.
+
+Recommended disclaimer:
+
+> "This is an independent educational application for AISSEE preparation and is not affiliated with or endorsed by the National Testing Agency, Sainik Schools Society, Ministry of Defence or Government of India."
+
+---
+
+# 65. MVP Scope
+
+The first production version should NOT attempt to build everything.
+
+## MVP — Must Have
+
+### Onboarding
+
+* Welcome
+* Target class
+* Student profile
+* Account creation
+
+### Home
+
+* Daily goal
+* Continue learning
+* Today's plan
+* Progress
+* Streak
+
+### Practice
+
+* Subject
+* Topic
+* MCQ practice
+* Explanations
+* Bookmark
+* Report question
+
+### Mock Tests
+
+* Class 6
+* Class 9
+* Full mock test
+* Timer
+* Question navigation
+* Result
+
+### Previous Papers
+
+* Browse
+* Attempt
+* Result
+* Solutions
+
+### Progress
+
+* Overall score
+* Subject performance
+* Topic performance
+* Questions solved
+* Accuracy
+
+### Gamification
+
+* XP
+* Streak
+* Basic badges
+
+### Profile
+
+* Student information
+* Progress
+* Settings
+
+---
+
+# 66. Phase 2
+
+* Weak-area practice
+* Speed tests
+* Advanced analytics
+* More gamification
+* Leaderboards
+* Download/offline content
+* Revision centre
+* Parent dashboard
+* Notifications
+* Study plans
+
+---
+
+# 67. Phase 3
+
+* AI Tutor
+* Personalized learning
+* Adaptive question difficulty
+* AI-generated explanations
+* AI-generated practice questions, subject to content-quality controls
+* Voice interaction
+* Video lessons
+* Smart revision
+
+---
+
+# 68. Phase 4
+
+Potential expansion:
+
+* RMS preparation
+* Navodaya preparation
+* Other school entrance examinations
+
+The architecture should therefore avoid hard-coding the application exclusively around one examination.
+
+The existing schema already has an exam-oriented structure around standards, streams, subjects, topics, tests and papers, which makes future expansion possible.
+
+---
+
+# 69. Recommended MVP Screen Map
+
+```text
+SPLASH
+  |
+ONBOARDING
+  |
+ACCOUNT
+  |
+PROFILE SETUP
+  |
+HOME
+  |
+  +---- Practice
+  |       |
+  |       +-- Subjects
+  |       +-- Topics
+  |       +-- Practice Session
+  |       +-- Results
+  |
+  +---- Mock Tests
+  |       |
+  |       +-- Test List
+  |       +-- Test Instructions
+  |       +-- Exam Interface
+  |       +-- Result
+  |       +-- Analysis
+  |
+  +---- Previous Papers
+  |       |
+  |       +-- Year
+  |       +-- Paper
+  |       +-- Result
+  |
+  +---- Progress
+  |       |
+  |       +-- Overall
+  |       +-- Subjects
+  |       +-- Topics
+  |
+  +---- Profile
+          |
+          +-- Bookmarks
+          +-- Mistakes
+          +-- Achievements
+          +-- Settings
+```
+
+---
+
+# 70. Core Product Loop
+
+The application should be designed around this loop:
+
+**Learn**
+
+↓
+
+**Practice**
+
+↓
+
+**Make mistakes**
+
+↓
+
+**Understand mistakes**
+
+↓
+
+**Practice weak areas**
+
+↓
+
+**Take mock test**
+
+↓
+
+**Analyze performance**
+
+↓
+
+**Improve**
+
+↓
+
+**Repeat**
+
+This should be the central product philosophy.
+
+---
+
+# 71. Key Differentiator
+
+The app should NOT compete only on:
+
+> "We have 10,000 questions."
+
+Competitors already advertise thousands of MCQs, structured levels, videos, mock tests, leaderboards and performance tracking.
+
+Instead, our differentiation should be:
+
+> **"We tell the student exactly what to practice next."**
+
+The product should progressively become a **personal AISSEE coach**.
+
+---
+
+# 72. Success Metrics
+
+The product should measure:
+
+### Engagement
+
+* Daily active students
+* Weekly active students
+* Average sessions/day
+* Average session duration
+* Daily questions/student
+* Streak retention
+
+### Learning
+
+* Accuracy improvement
+* Topic mastery improvement
+* Mock-test score improvement
+* Time/question improvement
+* Weak-topic recovery
+
+### Conversion
+
+* Free → Premium conversion
+* Trial → Premium conversion
+* Monthly retention
+* Annual retention
+
+### Exam Preparation
+
+Primary long-term metric:
+
+**Improvement in mock-test performance over time.**
+
+---
+
+# 73. Technical Integration With Existing Backend
+
+The student application should consume the existing Supabase backend rather than creating a separate content system.
+
+Existing entities that are directly relevant include:
+
+* `profiles`
+* `standards`
+* `subjects`
+* `topics`
+* `questions`
+* `question_translations`
+* `question_options`
+* `papers`
+* `paper_questions`
+* `tests`
+* `test_sections`
+* `test_questions`
+* `test_attempts`
+* `attempt_answers`
+* `student_topic_stats`
+* `bookmarks`
+* `question_reports`
+
+## These structures are already present in the supplied schema.
+
+# 74. Relationship With Admin Application
+
+The Admin application is the **content control center**, while this application is the **student learning environment**.
+
+Admin:
+
+**Create → Review → Publish**
+
+Student:
+
+**Discover → Practice → Attempt → Learn → Improve**
+
+The Admin requirements already define management of questions, question groups, past papers, mock tests, error reports and content quality.
+
+Therefore, the two applications should share the same backend/content model.
+
+---
+
+# 75. Final Product Concept
+
+The final experience should feel like:
+
+**Duolingo-style engagement**
+
+*
+
+**Sainik School-specific content**
+
+*
+
+**Real exam simulation**
+
+*
+
+**Personalized coaching**
+
+*
+
+**Fox mascot personality**
+
+*
+
+**Parent confidence**
+
+The fox should become the student's friendly guide throughout the journey.
+
+### Brand personality
+
+**Friendly**
+
+**Motivating**
+
+**Smart**
+
+**Disciplined**
+
+**Playful**
+
+**Exam-focused**
+
+But never childish to the point that an 8th-standard student feels the application is designed for very young children.
+
+---
+
+# 76. MVP Priority
+
+| Feature               | Priority |
+| --------------------- | -------- |
+| Onboarding            | P0       |
+| Student Profile       | P0       |
+| Home Dashboard        | P0       |
+| Practice              | P0       |
+| Question Explanations | P0       |
+| Mock Tests            | P0       |
+| Test Results          | P0       |
+| Performance Analysis  | P0       |
+| Previous Papers       | P0       |
+| Bookmarks             | P1       |
+| Daily Goals           | P1       |
+| Streak                | P1       |
+| XP/Badges             | P1       |
+| Weak Area Practice    | P1       |
+| Speed Tests           | P1       |
+| Leaderboard           | P2       |
+| Offline Mode          | P2       |
+| Parent Dashboard      | P2       |
+| AI Tutor              | P3       |
+| Adaptive Learning     | P3       |
+| Video Lessons         | P3       |
+
+---
+
+# 77. Recommended First Development Milestone
+
+The first clickable/working version should contain only this journey:
+
+**Onboarding**
+
+→ **Select Class 6/9**
+
+→ **Home**
+
+→ **Select Subject**
+
+→ **Select Topic**
+
+→ **10-question Practice**
+
+→ **Answer + Explanation**
+
+→ **Practice Result**
+
+→ **Performance**
+
+→ **Continue Learning**
+
+This gives us the fundamental product loop before building subscriptions, AI, leaderboards or complex gamification.
