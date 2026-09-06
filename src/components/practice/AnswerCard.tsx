@@ -41,14 +41,14 @@ const STATE_STYLES: Record<
         bg: COLORS.successLight,
         border: COLORS.success,
         letterBg: COLORS.success,
-        letterColor: "#fff",
+        letterColor: COLORS.onPrimary,
         textColor: COLORS.successText,
     },
     incorrect: {
         bg: COLORS.errorLight,
         border: COLORS.error,
         letterBg: COLORS.error,
-        letterColor: "#fff",
+        letterColor: COLORS.onPrimary,
         textColor: COLORS.errorText,
     },
 };

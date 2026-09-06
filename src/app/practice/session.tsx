@@ -11,7 +11,7 @@ import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
-import { AnswerCard } from "../../components/practice/AnswerCard";
+import { QuestionRenderer } from "../../components/questions";
 import { fetchPracticeQuestions, toggleBookmark, reportQuestion } from "../../lib/supabase";
 import { PracticeQuestion } from "../../types";
 import { useAppStore } from "../../store/useAppStore";
@@ -274,40 +274,19 @@ export default function PracticeSessionScreen() {
                     <GradientProgressBar progress={progress} height={8} style={styles.progressBar} />
                 </View>
 
-                {/* Question card — Stitch: surface with left primary accent */}
-                <View style={styles.questionCard}>
-                    <View style={styles.questionCardAccent} />
-                    <Text style={styles.questionText}>
-                        {currentQuestion.question_text || "Question text loading..."}
-                    </Text>
-                </View>
-
-                {/* Answer options — Stitch: A/B/C/D cards */}
+                {/* Question presentation — shared variants via QuestionRenderer */}
                 <View style={styles.optionsContainer}>
-                    {currentQuestion.options.map((option) => {
-                        const isSelected = selectedOption === option.option_key;
-                        const isCorrectOption = option.is_correct;
-
-                        let state: "default" | "selected" | "correct" | "incorrect" = "default";
-                        if (showFeedback) {
-                            if (isCorrectOption) state = "correct";
-                            else if (isSelected) state = "incorrect";
-                        } else if (isSelected) {
-                            state = "selected";
-                        }
-
-                        return (
-                            <AnswerCard
-                                key={option.id}
-                                label={option.option_key.toUpperCase()}
-                                text={option.option_text || ""}
-                                state={state}
-                                showCheck={showFeedback && isCorrectOption}
-                                onPress={() => handleSelectOption(option.option_key)}
-                                style={styles.answerCard}
-                            />
-                        );
-                    })}
+                    <QuestionRenderer
+                        question={currentQuestion}
+                        mode="practice"
+                        selectionMode="option_key"
+                        selectedValue={selectedOption}
+                        revealed={showFeedback}
+                        onSelect={handleSelectOption}
+                        questionNumber={currentIndex + 1}
+                        showBookmark={false}
+                        showFooter={false}
+                    />
                 </View>
 
                 {/* Inline feedback + explanation — Stitch: colored card with mascot */}
@@ -430,39 +409,9 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.full,
         overflow: "hidden",
     },
-    questionCard: {
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        marginBottom: SPACING[5],
-        overflow: "hidden",
-        position: "relative",
-    },
-    questionCardAccent: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: 4,
-        height: "100%",
-        backgroundColor: COLORS.primary,
-        borderTopLeftRadius: BORDER_RADIUS["2xl"],
-        borderBottomLeftRadius: BORDER_RADIUS["2xl"],
-    },
-    questionText: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        lineHeight: 28,
-        padding: SPACING[5],
-        paddingLeft: SPACING[6],
-    },
     optionsContainer: {
         gap: SPACING[3],
         marginBottom: SPACING[4],
-    },
-    answerCard: {
-        marginBottom: 0,
     },
     feedbackCard: {
         borderRadius: BORDER_RADIUS["2xl"],
