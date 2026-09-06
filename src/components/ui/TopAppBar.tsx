@@ -1,15 +1,17 @@
-// TopAppBar — sticky header used in home dashboard, parent dashboard, mock test result.
+// TopAppBar — sticky header used in home dashboard, parent dashboard, papers list.
 // Per Stitch: avatar (round, primary container bg, primary border) + "AISSEE Cadet" brand
-// (Cadet in primary) + trailing streak pill + notification icon.
+// (Cadet in primary) + optional subtitle + trailing streak pill + notification icon.
 
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Image } from "react-native";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
-import { MaterialIcon, MaterialIconName } from "./MaterialIcon";
+import { MaterialIcon } from "./MaterialIcon";
 
 interface TopAppBarProps {
-    title?: string;          // override brand text
-    highlight?: string;      // part of the brand to render in primary (default "Cadet")
+    title?: string; // override brand text
+    highlight?: string; // part of the brand to render in primary (default "Cadet")
+    subtitle?: string;
+    avatarUri?: string | null;
     streak?: number;
     onPressProfile?: () => void;
     onPressNotification?: () => void;
@@ -23,6 +25,8 @@ interface TopAppBarProps {
 export const TopAppBar: React.FC<TopAppBarProps> = ({
     title = "AISSEE",
     highlight = "Cadet",
+    subtitle,
+    avatarUri,
     streak,
     onPressProfile,
     onPressNotification,
@@ -41,12 +45,23 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
                 accessibilityLabel="Profile"
             >
                 <View style={styles.avatar}>
-                    <MaterialIcon name="person" size={20} color={COLORS.onPrimaryContainer} filled />
+                    {avatarUri ? (
+                        <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+                    ) : (
+                        <MaterialIcon name="person" size={20} color={COLORS.onPrimaryContainer} filled />
+                    )}
                 </View>
-                <Text style={styles.brand}>
-                    {title}{" "}
-                    <Text style={styles.brandHighlight}>{highlight}</Text>
-                </Text>
+                <View style={styles.brandTextWrap}>
+                    <Text style={styles.brand} numberOfLines={1}>
+                        {title}{" "}
+                        <Text style={styles.brandHighlight}>{highlight}</Text>
+                    </Text>
+                    {subtitle ? (
+                        <Text style={styles.subtitle} numberOfLines={1}>
+                            {subtitle}
+                        </Text>
+                    ) : null}
+                </View>
             </Pressable>
 
             <View style={styles.actions}>
@@ -87,56 +102,76 @@ const styles = StyleSheet.create({
     brandWrap: {
         flexDirection: "row",
         alignItems: "center",
-        gap: SPACING[3],
+        gap: 10,
         flexShrink: 1,
+        minWidth: 0,
     },
     avatar: {
         width: 40,
         height: 40,
         borderRadius: 20,
         backgroundColor: COLORS.primaryContainer,
-        borderWidth: 2,
-        borderColor: COLORS.primary,
+        borderWidth: 1,
+        borderColor: "rgba(70, 72, 212, 0.2)",
         alignItems: "center",
         justifyContent: "center",
+        overflow: "hidden",
+        flexShrink: 0,
+    },
+    avatarImage: {
+        width: "100%",
+        height: "100%",
+    },
+    brandTextWrap: {
+        flexShrink: 1,
+        minWidth: 0,
     },
     brand: {
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        fontWeight: "700",
+        fontFamily: "PlusJakartaSans_800ExtraBold",
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.primary,
+        fontWeight: "800",
+        letterSpacing: -0.2,
     },
     brandHighlight: {
         color: COLORS.primary,
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontWeight: "700",
+        fontFamily: "PlusJakartaSans_800ExtraBold",
+        fontWeight: "800",
+    },
+    subtitle: {
+        marginTop: 1,
+        fontFamily: "PlusJakartaSans_500Medium",
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "500",
     },
     actions: {
         flexDirection: "row",
         alignItems: "center",
-        gap: SPACING[3],
+        gap: SPACING[2],
+        flexShrink: 0,
     },
     streakPill: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "rgba(245, 158, 11, 0.10)",
-        paddingHorizontal: SPACING[3],
-        paddingVertical: SPACING[2],
+        backgroundColor: COLORS.surfaceContainerHigh,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
         borderRadius: BORDER_RADIUS.full,
     },
     streakValue: {
         fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS["warning-amber"],
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.tertiary,
         fontWeight: "700",
     },
     iconButton: {
-        width: 40,
-        height: 40,
+        width: 36,
+        height: 36,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 20,
+        borderRadius: 18,
     },
 });
 

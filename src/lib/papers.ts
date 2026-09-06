@@ -7,6 +7,7 @@ import {
     PaperAttempt,
     PaperAttemptAnswer,
     PaperAttemptSummary,
+    PaperListStatus,
     PaperSectionStat,
     PaperSessionQuestion,
     QuestionType,
@@ -441,6 +442,16 @@ export function difficultyLabel(value: Difficulty | null | undefined, year?: num
     if (value) return value.charAt(0).toUpperCase() + value.slice(1);
     if (year != null) return year >= 2023 ? 'Medium' : 'Easy';
     return 'Medium';
+}
+
+/** Map latest attempt summary → list-card status. */
+export function getPaperListStatus(
+    summary?: Pick<PaperAttemptSummary, 'status'> | null
+): PaperListStatus {
+    if (!summary) return 'unattempted';
+    if (summary.status === 'in_progress') return 'in_progress';
+    if (summary.status === 'submitted') return 'completed';
+    return 'attempted';
 }
 
 export { SUPPORTED_PAPER_TYPES };

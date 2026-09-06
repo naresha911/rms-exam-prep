@@ -255,7 +255,7 @@ export interface PaperSessionQuestion {
     supported: boolean;
 }
 
-export type PaperListStatus = 'unattempted' | 'in_progress' | 'completed';
+export type PaperListStatus = 'unattempted' | 'in_progress' | 'completed' | 'attempted';
 
 export interface PaperAttemptSummary {
     paper_id: string;
