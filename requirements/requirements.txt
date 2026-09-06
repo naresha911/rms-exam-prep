@@ -6,7 +6,9 @@
 **Target Students:** Students currently studying in Class 5 and Class 8
 **Target Admission:** Class 6 and Class 9 respectively
 **Platform:** Android first, iOS/web-ready architecture
-**Status:** Initial Product Requirements Draft
+**Status:** Living product requirements (aligned with codebase where noted)
+
+**Doc index:** see [`README.md`](README.md) in this folder. Feature deep-dives (e.g. Previous Papers) live in dedicated specs and override older short sections when linked.
 
 ---
 
@@ -913,26 +915,33 @@ This helps students improve both speed and accuracy.
 
 # 34. Previous Year Papers
 
-Provide a dedicated section:
+> **Implementation spec (source of truth):** [`previous-papers.md`](previous-papers.md)  
+> **Schema deploy:** [`sql/papers_v1.sql`](sql/papers_v1.sql) · **Verify:** [`papers-verification.md`](papers-verification.md)
+
+Provide a dedicated section in the student app:
 
 ### Previous Year Papers
 
-Filter:
+**Browse / filter**
 
-* Class 6
-* Class 9
-* Year
-* Subject
+* Target class (from student profile / onboarding — Class 6 or 9)
+* Year chips and “Recent”
+* Difficulty from `papers.difficulty` when set
+* Section summary chips from paper–question mapping
 
-Each paper should support:
+**Per paper**
 
-**Start Paper**
+* **Start Paper** / **Resume** (one in-progress attempt per student per paper)
+* Timed session using ordered `paper_questions` (marks + negative marks)
+* **Submit** → server-scored **Result** (attempt history / re-attempt)
+* Optional **Open official PDF** via private Storage signed URL (`papers.pdf_path`)
+* Offline resume for cached sessions; answers sync when online
 
-**View Solutions**
+**v1 question types in paper session:** `mcq_single`, `true_false`, `assertion_reason`.
 
-**View Result**
+**Not required in v1:** Pro entitlement lock on papers/PDF; push notifications for newly published papers; full subject filter UI beyond section chips.
 
-Past papers should be treated as a premium/high-value content category.
+Past papers remain a high-value content category; entitlement gating can be added later without changing the attempt model.
 
 ---
 
@@ -1240,12 +1249,14 @@ Parent notifications can be added later.
 
 Offline functionality should be considered because students may have unreliable internet connectivity.
 
-Possible offline content:
+**Shipped for Previous Papers (v1):** see [`previous-papers.md`](previous-papers.md) §6 — catalogue/session cache, answer queue, timer resume, sync on reconnect.
+
+Possible additional offline content (roadmap):
 
 * Downloaded practice sets
-* Previously downloaded papers
 * Notes
 * Selected revision content
+* Broader mock-test offline (mock tests still primarily online / in-memory in v1)
 
 Results should synchronize when connectivity returns.
 
@@ -1462,7 +1473,9 @@ For every test attempt store:
 * Maximum score
 * Completion status
 
-The existing schema provides `test_attempts` and `attempt_answers` for this purpose.
+The existing schema provides `test_attempts` and `attempt_answers` for mock tests.
+
+Previous-year papers use the parallel model `paper_attempts` and `paper_attempt_answers` (see `previous-papers.md`). Do not store paper UUIDs in `test_attempts.test_id`.
 
 ---
 
@@ -1614,10 +1627,16 @@ The first production version should NOT attempt to build everything.
 
 ### Previous Papers
 
-* Browse
-* Attempt
-* Result
-* Solutions
+* Browse (class, year, recent)
+* Attempt with dedicated session (ordered questions, timer, marks)
+* Persist / resume attempts (`paper_attempts`)
+* Server-side scoring on submit
+* Result + re-attempt
+* Optional official PDF (private bucket)
+* Offline session cache + answer sync (v1)
+* Local incomplete-attempt reminder (v1)
+
+See [`previous-papers.md`](previous-papers.md).
 
 ### Progress
 
@@ -1648,11 +1667,14 @@ The first production version should NOT attempt to build everything.
 * Advanced analytics
 * More gamification
 * Leaderboards
-* Download/offline content
+* Broader download/offline content (beyond papers v1)
 * Revision centre
 * Parent dashboard
-* Notifications
+* Richer notifications (e.g. push for new papers; incomplete reminders already in papers v1)
 * Study plans
+* Port paper attempt engine to mock tests
+* Additional paper question types (`mcq_multi`, matching, comprehension, …)
+* PDF / paper entitlement (Pro) gating
 
 ---
 
@@ -1840,18 +1862,27 @@ Existing entities that are directly relevant include:
 * `questions`
 * `question_translations`
 * `question_options`
-* `papers`
+* `papers` (includes optional `difficulty`, `pdf_path`)
 * `paper_questions`
+* `paper_attempts`
+* `paper_attempt_answers`
+* `paper_section_stats` (view)
 * `tests`
 * `test_sections`
 * `test_questions`
 * `test_attempts`
-* `attempt_answers`
+* `attempt_answers` (unique on `attempt_id, question_id`)
 * `student_topic_stats`
 * `bookmarks`
 * `question_reports`
 
-## These structures are already present in the supplied schema.
+Storage (private buckets, as applicable): `past-paper-pdfs`, question/option/explanation/group diagrams, avatars.
+
+Paper exam RPCs and RLS: deploy `sql/papers_v1.sql`. Full greenfield schema: `Initial_Migration.txt`.
+
+## These structures are defined in the supplied schema (and papers incremental SQL).
+
+---
 
 # 74. Relationship With Admin Application
 
@@ -1942,6 +1973,11 @@ But never childish to the point that an 8th-standard student feels the applicati
 | AI Tutor              | P3       |
 | Adaptive Learning     | P3       |
 | Video Lessons         | P3       |
+
+Notes:
+
+* Previous Papers P0 v1 is implemented in the app; see `previous-papers.md`. Deploy `sql/papers_v1.sql` and run `papers-verification.md`.
+* Papers offline + local incomplete reminders are part of papers v1; broader offline across practice/mocks remains P2.
 
 ---
 

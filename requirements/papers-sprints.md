@@ -1,6 +1,6 @@
 # Previous Papers — Sprint Tracker
 
-**Last left off:** All sprints 0–9 implemented in code. Awaiting live Supabase SQL run + device smoke tests (see `requirements/papers-verification.md`).
+**Last left off:** Requirements docs aligned with codebase (`README.md`, `previous-papers.md`, updated `requirements.txt`). Awaiting live Supabase SQL run + device smoke tests (see `requirements/papers-verification.md`).
 
 **How to resume:** Read this file first. Implement only the next incomplete sprint. Check off items when done. Update **Last left off**.
 

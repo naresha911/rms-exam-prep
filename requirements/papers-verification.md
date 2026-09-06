@@ -1,5 +1,7 @@
 # Papers v1 — live Supabase verification checklist
 
+Related docs: [`previous-papers.md`](previous-papers.md) · [`sql/papers_v1.sql`](sql/papers_v1.sql) · [`README.md`](README.md)
+
 Run after pasting [`requirements/sql/papers_v1.sql`](sql/papers_v1.sql) into the Supabase SQL Editor.
 
 ## 1. Schema
