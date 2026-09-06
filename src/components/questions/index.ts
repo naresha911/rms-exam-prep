@@ -1,3 +1,5 @@
+export { logQuestionPresentation } from './debugLog';
+
 export type {
     QuestionPresentation,
     QuestionUiMode,
@@ -25,6 +27,9 @@ export {
     getOptionValue,
     findCorrectOptionValue,
 } from './resolvePresentation';
+
+export { paperQuestionToRenderItem, testQuestionToRenderItem } from './adapters';
+export type { MinimalTestQuestion } from './adapters';
 
 export { deriveOptionState, shouldShowCorrectCheck } from './optionState';
 

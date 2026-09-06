@@ -16,7 +16,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientProgressBar } from "@/components/shared/GradientProgressBar";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { AnswerCard } from "@/components/practice/AnswerCard";
+import { QuestionRenderer, paperQuestionToRenderItem } from "@/components/questions";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
 import { useAppStore } from "@/store/useAppStore";
 import { trackEvent, EVENTS } from "@/lib/analytics";
@@ -456,30 +456,31 @@ export default function PaperSessionScreen() {
             )}
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                <View style={styles.questionCard}>
-                    <Text style={styles.marksLabel}>
-                        {current.marks} {t("papers.marks")}
-                        {current.negative_marks > 0
-                            ? ` · −${current.negative_marks} ${t("papers.negative")}`
-                            : ""}
-                    </Text>
-                    <Text style={styles.questionText}>{current.question_text}</Text>
+                <Text style={styles.marksLabel}>
+                    {current.marks} {t("papers.marks")}
+                    {current.negative_marks > 0
+                        ? ` · −${current.negative_marks} ${t("papers.negative")}`
+                        : ""}
+                </Text>
+                <View style={styles.options}>
+                    <QuestionRenderer
+                        question={paperQuestionToRenderItem(current)}
+                        mode="exam"
+                        selectionMode="option_id"
+                        selectedValue={selected ?? null}
+                        revealed={false}
+                        onSelect={(optionId) => {
+                            if (!current.supported) return;
+                            handleSelect(optionId);
+                        }}
+                        questionNumber={currentIndex + 1}
+                        showBookmark={false}
+                        showFooter={false}
+                        debugSource="PaperSession"
+                    />
                     {!current.supported && (
                         <Text style={styles.unsupported}>{t("papers.unsupportedType")}</Text>
                     )}
-                </View>
-
-                <View style={styles.options}>
-                    {current.options.map((opt) => (
-                        <AnswerCard
-                            key={opt.id}
-                            label={opt.option_key}
-                            text={opt.option_text}
-                            state={selected === opt.id ? "selected" : "default"}
-                            onPress={() => handleSelect(opt.id)}
-                            style={{ marginBottom: SPACING[2] }}
-                        />
-                    ))}
                 </View>
             </ScrollView>
 
@@ -583,16 +584,7 @@ const styles = StyleSheet.create({
     },
     warnText: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant, fontWeight: "400" },
     content: { padding: SPACING[4], paddingBottom: 120 },
-    questionCard: {
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING[4],
-        borderLeftWidth: 4,
-        borderLeftColor: COLORS.primary,
-        marginBottom: SPACING[4],
-    },
-    marksLabel: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant, marginBottom: SPACING[1] },
-    questionText: { ...TYPOGRAPHY.bodyLg, color: COLORS.onSurface },
+    marksLabel: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant, marginBottom: SPACING[2] },
     unsupported: { marginTop: SPACING[2], color: COLORS.warning, ...TYPOGRAPHY.labelSm },
     options: { gap: SPACING[1] },
     footer: {

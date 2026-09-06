@@ -1,6 +1,5 @@
 // Mock Test Session — Stitch-aligned active test screen.
-// Per Stitch: sticky header with subject + timer pill, gradient progress bar,
-// question card with left accent, AnswerCard options, bottom nav, submit confirmation modal.
+// Sticky header with timer, progress bar, QuestionRenderer (exam mode), bottom nav, submit confirm.
 import { View, Text, ScrollView, Pressable, Alert, BackHandler, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,7 +9,7 @@ import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
-import { AnswerCard } from "../../components/practice/AnswerCard";
+import { QuestionRenderer, testQuestionToRenderItem } from "../../components/questions";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, EXAM_STRUCTURE } from "../../constants";
 import { fetchPracticeQuestions, fetchPaperDetails } from "../../lib/supabase";
 import { trackEvent, trackTestSubmitted, EVENTS } from "../../lib/analytics";
@@ -18,7 +17,17 @@ import { trackEvent, trackTestSubmitted, EVENTS } from "../../lib/analytics";
 interface TestQuestion {
     id: string;
     question_text: string;
-    options: { id: string; option_key: string; option_text: string; is_correct: boolean }[];
+    question_type?: "mcq_single" | "true_false" | "assertion_reason" | "matching" | "mcq_multi" | "fill_blank" | "short_answer" | "comprehension";
+    has_diagram?: boolean;
+    diagram_path?: string | null;
+    options: {
+        id: string;
+        option_key: string;
+        option_text: string;
+        option_image_path?: string | null;
+        is_correct: boolean;
+        display_order?: number | null;
+    }[];
     explanation?: string;
 }
 
@@ -93,7 +102,17 @@ export default function TestSessionScreen() {
                 const transformed: TestQuestion[] = (data.paper_questions || []).map((entry: any) => entry.questions).filter(Boolean).map((q: any) => ({
                     id: q.id,
                     question_text: q.question_translations?.[0]?.question_text || "Question text unavailable",
-                    options: (q.question_options || []).map((opt: any) => ({ id: opt.id, option_key: opt.option_key, option_text: opt.option_translations?.[0]?.option_text || "", is_correct: opt.is_correct })),
+                    question_type: q.question_type || "mcq_single",
+                    has_diagram: !!q.has_diagram,
+                    diagram_path: q.diagram_path ?? null,
+                    options: (q.question_options || []).map((opt: any, i: number) => ({
+                        id: opt.id,
+                        option_key: opt.option_key,
+                        option_text: opt.option_translations?.[0]?.option_text || "",
+                        option_image_path: opt.option_image_path ?? null,
+                        is_correct: opt.is_correct,
+                        display_order: opt.display_order ?? i,
+                    })),
                     explanation: q.question_translations?.[0]?.explanation || undefined,
                 }));
                 setQuestions(transformed);
@@ -102,7 +121,22 @@ export default function TestSessionScreen() {
                 const questionCount = testType === 'speed' ? 10 : examInfo.totalQuestions;
                 const { data, error } = await fetchPracticeQuestions(undefined, undefined, standardId, undefined, questionCount);
                 if (data && data.length > 0 && !error) {
-                    setQuestions(data.map((q: any) => ({ id: q.id, question_text: q.question_translations?.[0]?.question_text || 'Question text unavailable', options: (q.question_options || []).map((opt: any) => ({ id: opt.id, option_key: opt.option_key, option_text: opt.option_translations?.[0]?.option_text || '', is_correct: opt.is_correct })), explanation: q.question_translations?.[0]?.explanation || undefined })));
+                    setQuestions(data.map((q: any) => ({
+                        id: q.id,
+                        question_text: q.question_translations?.[0]?.question_text || 'Question text unavailable',
+                        question_type: q.question_type || 'mcq_single',
+                        has_diagram: !!q.has_diagram,
+                        diagram_path: q.diagram_path ?? null,
+                        options: (q.question_options || []).map((opt: any, i: number) => ({
+                            id: opt.id,
+                            option_key: opt.option_key,
+                            option_text: opt.option_translations?.[0]?.option_text || '',
+                            option_image_path: opt.option_image_path ?? null,
+                            is_correct: opt.is_correct,
+                            display_order: opt.display_order ?? i,
+                        })),
+                        explanation: q.question_translations?.[0]?.explanation || undefined,
+                    })));
                 } else setQuestions([]);
             }
         } catch (e) {
@@ -314,29 +348,20 @@ export default function TestSessionScreen() {
                     <GradientProgressBar progress={progress} height={6} style={styles.progressBar} />
                 </View>
 
-                {/* Question card — Stitch: surface with left primary accent */}
-                <View style={styles.questionCard}>
-                    <View style={styles.questionCardAccent} />
-                    <Text style={styles.questionText}>
-                        {currentQuestion.question_text}
-                    </Text>
-                </View>
-
-                {/* Answer options — Stitch: A/B/C/D cards */}
+                {/* Question presentation — shared variants via QuestionRenderer */}
                 <View style={styles.optionsContainer}>
-                    {currentQuestion.options.map((option) => {
-                        const isSelected = selectedOptionId === option.id;
-                        return (
-                            <AnswerCard
-                                key={option.id}
-                                label={option.option_key.toUpperCase()}
-                                text={option.option_text || ""}
-                                state={isSelected ? "selected" : "default"}
-                                onPress={() => handleSelectOption(option.id)}
-                                style={styles.answerCard}
-                            />
-                        );
-                    })}
+                    <QuestionRenderer
+                        question={testQuestionToRenderItem(currentQuestion)}
+                        mode="exam"
+                        selectionMode="option_id"
+                        selectedValue={selectedOptionId ?? null}
+                        revealed={false}
+                        onSelect={handleSelectOption}
+                        questionNumber={currentIndex + 1}
+                        showBookmark={false}
+                        showFooter={false}
+                        debugSource="TestSession"
+                    />
                 </View>
 
                 <View style={styles.bottomPadding} />
@@ -482,38 +507,8 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.full,
         overflow: "hidden",
     },
-    questionCard: {
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        marginBottom: SPACING[5],
-        overflow: "hidden",
-        position: "relative",
-    },
-    questionCardAccent: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: 4,
-        height: "100%",
-        backgroundColor: COLORS.primary,
-        borderTopLeftRadius: BORDER_RADIUS["2xl"],
-        borderBottomLeftRadius: BORDER_RADIUS["2xl"],
-    },
-    questionText: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        lineHeight: 28,
-        padding: SPACING[5],
-        paddingLeft: SPACING[6],
-    },
     optionsContainer: {
         gap: SPACING[3],
-    },
-    answerCard: {
-        marginBottom: 0,
     },
     bottomPadding: {
         height: SPACING[6],

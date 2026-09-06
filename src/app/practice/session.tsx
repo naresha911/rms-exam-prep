@@ -1,6 +1,5 @@
 // Practice Session — Stitch-aligned MCQ practice screen.
-// Per Stitch: sticky header, gradient progress bar, question card with left accent,
-// AnswerCard options, inline explanation feedback, sticky bottom CTA.
+// Sticky header, progress bar, QuestionRenderer (practice mode), inline feedback, sticky CTA.
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
@@ -286,6 +285,7 @@ export default function PracticeSessionScreen() {
                         questionNumber={currentIndex + 1}
                         showBookmark={false}
                         showFooter={false}
+                        debugSource="PracticeSession"
                     />
                 </View>
 

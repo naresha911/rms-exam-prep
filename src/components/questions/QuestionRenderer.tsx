@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants';
-import { resolvePresentation } from './resolvePresentation';
+import { resolvePresentation, getContentFlags } from './resolvePresentation';
+import { logQuestionPresentation } from './debugLog';
 import type {
     SharedQuestionProps,
     ComprehensionGroupData,
@@ -25,6 +26,8 @@ export interface QuestionRendererProps extends SharedQuestionProps {
     /** When set (and not a group child), renders comprehension_group chrome. */
     group?: ComprehensionGroupData | null;
     listPreview?: boolean;
+    /** Dev log source label (e.g. PaperSession, TestSession). */
+    debugSource?: string;
     /** Group-only callbacks when `group` is provided */
     selectedByQuestionId?: ComprehensionGroupProps['selectedByQuestionId'];
     revealedByQuestionId?: ComprehensionGroupProps['revealedByQuestionId'];
@@ -78,6 +81,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = (props) => {
         mode,
         group,
         listPreview,
+        debugSource = 'QuestionRenderer',
         selectedByQuestionId,
         revealedByQuestionId,
         solveStatusByQuestionId,
@@ -93,6 +97,36 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = (props) => {
         listPreview,
         group,
     });
+
+    useEffect(() => {
+        logQuestionPresentation({
+            source: debugSource,
+            question,
+            mode,
+            presentation,
+            selectionMode: props.selectionMode,
+            questionNumber: props.questionNumber,
+            extra: {
+                listPreview: !!listPreview,
+                hasGroup: !!group,
+                contentFlags: getContentFlags(question),
+                variantComponent:
+                    presentation === 'comprehension_group'
+                        ? 'ComprehensionGroup'
+                        : presentation,
+            },
+        });
+    }, [
+        question.id,
+        question.question_type,
+        presentation,
+        mode,
+        listPreview,
+        group?.id,
+        props.questionNumber,
+        props.selectionMode,
+        debugSource,
+    ]);
 
     if (presentation === 'comprehension_group' && group) {
         if (!onSelectChild) {
