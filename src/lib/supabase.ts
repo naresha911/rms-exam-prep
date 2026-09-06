@@ -1,5 +1,8 @@
 // Supabase Client Configuration
 import { createClient } from '@supabase/supabase-js';
+import * as Linking from 'expo-linking';
+
+export const AUTH_CALLBACK_URL = Linking.createURL('auth/callback', { scheme: 'sainikprep' });
 
 // Types for Supabase responses
 export interface SupabaseResponse<T> {
@@ -31,10 +34,16 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
 });
 
 // Auth helpers
-export const signUp = async (email: string, password: string) => {
+export const signUp = async (email: string, password: string, fullName?: string, metadata?: Record<string, string>) => {
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: fullName || metadata
+            ? {
+                data: { ...(metadata || {}), ...(fullName ? { full_name: fullName } : {}) },
+                emailRedirectTo: AUTH_CALLBACK_URL,
+            }
+            : { emailRedirectTo: AUTH_CALLBACK_URL },
     });
     return { data, error };
 };
@@ -284,10 +293,13 @@ export const saveAnswer = async (attemptId: string, answer: {
 }) => {
     const { data, error } = await supabase
         .from('attempt_answers')
-        .upsert({
-            attempt_id: attemptId,
-            ...answer,
-        })
+        .upsert(
+            {
+                attempt_id: attemptId,
+                ...answer,
+            },
+            { onConflict: 'attempt_id,question_id' }
+        )
         .select()
         .single();
 
@@ -322,6 +334,40 @@ export const fetchPapers = async (standardId: number, year?: number) => {
     const { data, error } = await query;
 
     return { data, error };
+};
+
+// Fetch one published paper and its ordered questions. Paper attempts are not
+// part of the current schema, so this helper only reads paper content.
+export const fetchPaperDetails = async (paperId: string) => {
+    const { data: paper, error: paperError } = await supabase
+        .from('papers')
+        .select(`
+            *,
+            paper_questions (
+                section, question_order, marks, negative_marks,
+                questions (
+                    *,
+                    question_translations (question_text, explanation),
+                    question_options (
+                        id, option_key, display_order,
+                        option_translations (option_text, option_image_path)
+                    )
+                )
+            )
+        `)
+        .eq('id', paperId)
+        .eq('is_published', true)
+        .single();
+
+    if (paperError || !paper) {
+        return { data: null, error: paperError };
+    }
+
+    const orderedQuestions = [...((paper as any).paper_questions || [])].sort(
+        (a, b) => (a.question_order ?? 0) - (b.question_order ?? 0)
+    );
+
+    return { data: { ...paper, paper_questions: orderedQuestions }, error: null };
 };
 
 // Fetch bookmarks

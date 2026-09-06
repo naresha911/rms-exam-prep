@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AISSEE Cadet - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "success-green": "#22C55E",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#d8e3fb",
+                        "inverse-surface": "#263143",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "outline-variant": "#c7c4d7",
+                        "error": "#ba1a1a",
+                        "primary": "#4648d4",
+                        "outline": "#767586",
+                        "tertiary": "#994100",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#fffbff",
+                        "on-tertiary-fixed": "#341100",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#ecf1ff",
+                        "warning-amber": "#F59E0B",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#07006c",
+                        "surface-container": "#e7eeff",
+                        "gradient-start": "#6366F1",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "tertiary-container": "#c05400",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "secondary-fixed": "#d8e2ff",
+                        "primary-container": "#6063ee",
+                        "inverse-primary": "#c0c1ff",
+                        "surface": "#f9f9ff",
+                        "secondary": "#0058be",
+                        "on-secondary-fixed": "#001a42",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-surface-variant": "#464554",
+                        "background": "#f9f9ff",
+                        "on-secondary-container": "#fefcff",
+                        "on-background": "#111c2d",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-muted": "#F8FAFC",
+                        "weakness-red": "#EF4444",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#494bd6",
+                        "surface-container-highest": "#d8e3fb",
+                        "surface-container-high": "#dee8ff",
+                        "gradient-end": "#A855F7",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#e1e0ff",
+                        "tertiary-fixed": "#ffdbca",
+                        "surface-dim": "#cfdaf2",
+                        "on-surface": "#111c2d",
+                        "surface-container-low": "#f0f3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "stack-lg": "24px",
+                        "base": "8px",
+                        "touch-target": "48px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            background-image: linear-gradient(theme('colors.surface-variant') 1px, transparent 1px), linear-gradient(90deg, theme('colors.surface-variant') 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .btn-3d {
+            box-shadow: 0 4px 0 0 theme('colors.on-primary-fixed-variant');
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 0 theme('colors.on-primary-fixed-variant');
+        }
+        
+        .card-soft {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .option-card.selected {
+            background-color: theme('colors.primary-fixed');
+            border-color: theme('colors.primary');
+            box-shadow: 0 0 0 2px theme('colors.primary') inset;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-md text-on-surface">
+<!-- Top Navigation (Onboarding - Minimal) -->
+<header class="bg-surface docked full-width top-0 flat no shadows flex justify-between items-center px-margin-mobile h-touch-target w-full z-10 sticky">
+<a class="flex items-center gap-2" href="{{DATA:SCREEN:SCREEN_15}}">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">arrow_back</span>
+</a>
+<div class="font-display-lg text-headline-md text-primary tracking-tight">AISSEE Cadet</div>
+<div class="w-6"></div> <!-- Spacer -->
+</header>
+<main class="flex-grow flex flex-col px-margin-mobile md:px-margin-desktop max-w-screen-md mx-auto w-full pt-stack-lg pb-stack-lg relative">
+<!-- Progress Bar -->
+<div class="w-full h-3 bg-surface-variant rounded-full mb-8 relative">
+<div class="h-full bg-gradient-to-r from-gradient-start to-gradient-end rounded-full w-1/4 transition-all duration-500"></div>
+</div>
+<!-- Header -->
+<div class="text-center mb-10 z-10">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-2">What is your primary goal?</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Select one to personalize your training.</p>
+</div>
+<div class="flex flex-col md:flex-row gap-8 items-start relative z-10">
+<!-- Options Grid -->
+<div class="w-full md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+<button class="option-card card-soft bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 min-h-[140px] hover:bg-surface-container-low group focus:outline-none transition-colors" onclick="selectCard(this); window.location.href='{{DATA:SCREEN:SCREEN_4}}'">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface">Crack AISSEE 2026</span>
+</button>
+<button class="option-card card-soft bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 min-h-[140px] hover:bg-surface-container-low group focus:outline-none transition-colors" onclick="selectCard(this); window.location.href='{{DATA:SCREEN:SCREEN_4}}'">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface">Improve my Rank</span>
+</button>
+<button class="option-card card-soft bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 min-h-[140px] hover:bg-surface-container-low group focus:outline-none transition-colors" onclick="selectCard(this); window.location.href='{{DATA:SCREEN:SCREEN_4}}'">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">assignment</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface">Daily Practice</span>
+</button>
+<button class="option-card card-soft bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 min-h-[140px] hover:bg-surface-container-low group focus:outline-none transition-colors" onclick="selectCard(this); window.location.href='{{DATA:SCREEN:SCREEN_4}}'">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface">Complete Syllabus</span>
+</button>
+</div>
+<!-- Mascot Area -->
+<div class="w-full md:w-1/3 flex justify-center items-center relative hidden sm:flex">
+<div class="absolute inset-0 bg-primary-fixed opacity-50 rounded-full blur-3xl -z-10"></div>
+<img alt="Cadet Vijay giving a thumbs up, encouraging the user to select a goal, 3D animated style, brightly lit, positive mood." class="w-48 md:w-full max-w-[250px] object-contain drop-shadow-2xl" src="https://lh3.googleusercontent.com/aida/AEtjO1XA76ycvaCUV108Drs9u3qdoNyEh_oQrCdiHxcmlt0A1j11C4zENpOlsPmxWbmzTsUfzOR2Byce9WC9I3prn1DsuZDY14sWoNb5veYfxwGs3m8TmNvUokoJXpzGODfN4iZNv9UoFVqc-fa9i0A2pqyamdj1yhpNM7hJtq82THFG2cADjS8iW-jH3w9VEL2lyZniCJpzdLP2_Xx3_wPKDYeqkxKmgTZwttstdtNMiAOf9uimkpUa9VECjD8"/>
+</div>
+</div>
+<!-- Footer Action -->
+<div class="mt-auto pt-10 z-10 pb-4">
+<button class="w-full bg-primary text-on-primary font-label-lg text-label-lg h-touch-target rounded-xl btn-3d transition-all flex items-center justify-center gap-2" onclick="window.location.href='{{DATA:SCREEN:SCREEN_4}}'">
+                Continue Mission
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</main>
+<script>
+        function selectCard(clickedElement) {
+            // Remove selected class from all cards
+            const cards = document.querySelectorAll('.option-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            
+            // Add selected class to the clicked card
+            clickedElement.classList.add('selected');
+        }
+    </script>
+</body></html>

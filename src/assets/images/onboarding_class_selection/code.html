@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AISSEE Cadet - Goal Selection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#c05400",
+                        "success-green": "#22C55E",
+                        "surface-bright": "#f9f9ff",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "tertiary": "#994100",
+                        "gradient-end": "#A855F7",
+                        "gradient-start": "#6366F1",
+                        "surface-tint": "#494bd6",
+                        "inverse-primary": "#c0c1ff",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c7c4d7",
+                        "on-secondary-container": "#fefcff",
+                        "surface-variant": "#d8e3fb",
+                        "tertiary-fixed": "#ffdbca",
+                        "primary-container": "#6063ee",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#ecf1ff",
+                        "on-background": "#111c2d",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#cfdaf2",
+                        "on-primary-container": "#fffbff",
+                        "weakness-red": "#EF4444",
+                        "background": "#f9f9ff",
+                        "surface-container": "#e7eeff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "warning-amber": "#F59E0B",
+                        "on-tertiary-fixed": "#341100",
+                        "surface": "#f9f9ff",
+                        "secondary-container": "#2170e4",
+                        "secondary": "#0058be",
+                        "surface-container-high": "#dee8ff",
+                        "surface-container-highest": "#d8e3fb",
+                        "primary": "#4648d4",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "inverse-surface": "#263143",
+                        "on-secondary-fixed": "#001a42",
+                        "on-secondary-fixed-variant": "#004395",
+                        "primary-fixed": "#e1e0ff",
+                        "outline": "#767586",
+                        "surface-muted": "#F8FAFC",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface": "#111c2d",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-surface-variant": "#464554",
+                        "on-primary-fixed": "#07006c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "stack-sm": "8px",
+                        "margin-desktop": "32px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px",
+                        "touch-target": "48px",
+                        "gutter": "16px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .tactile-button {
+            border-bottom: 4px solid var(--tw-colors-on-primary-fixed-variant);
+            transition: all 0.1s ease;
+        }
+        .tactile-button:active {
+            border-bottom-width: 0px;
+            transform: translateY(4px);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(70, 72, 212, 0.08), 0 2px 4px -1px rgba(70, 72, 212, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+<!-- Top Nav (Transactional, suppressed Bottom Nav) -->
+<header class="w-full flex justify-center items-center px-margin-mobile h-touch-target bg-surface sticky top-0 z-10">
+<div class="w-full max-w-4xl flex items-center justify-between">
+<a class="text-on-surface-variant p-2 hover:bg-surface-variant rounded-full transition-colors flex items-center justify-center h-10 w-10" href="{{DATA:SCREEN:SCREEN_42}}">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</a>
+<!-- Progress indicator instead of brand for onboarding -->
+<div class="flex gap-2">
+<div class="w-8 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-surface-variant"></div>
+<div class="w-2 h-2 rounded-full bg-surface-variant"></div>
+</div>
+<div class="w-10"></div> <!-- Spacer to balance back button -->
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center px-margin-mobile pt-stack-lg pb-12 w-full max-w-4xl mx-auto">
+<!-- Header Section -->
+<div class="text-center w-full mb-8">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary mb-2">Which class are you preparing for?</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Choose your target admission class.</p>
+</div>
+<!-- Mascot Illustration Container -->
+<div class="w-full max-w-md mb-8 flex justify-center relative">
+<div class="absolute -top-4 right-8 bg-surface border border-outline-variant rounded-xl p-3 shadow-sm z-10 hidden md:block">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Let's set your mission parameters!</p>
+</div>
+<img alt="Cadet Vijay, a friendly Indian kid mascot in an Army uniform thinking" class="w-48 h-48 object-contain drop-shadow-md mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3RI6xr7a-X1oIVXsAh2HHNRlU5dGueD0iZ8KQol_leLqLghjRibhI02N6GRYSPlfH_Y91B3tUUrIwxBSrZCLnBl48dKWiTFTKkY7GSpUZJS63r3iUVSExJd8BsF9luGGgIj7l6nMlZAjhiZHb_cPZ5csdWAB3x7rW9feIW-qji4Dt_6buwsfxCiXkyRbypDtZrEFW6_Gt3g4V-LPIrtp8rZsHLAOrOuMYvNvCcu7I0vWXIgTD6cVv"/>
+</div>
+<!-- Selection Cards (Bento-style stack) -->
+<div class="w-full max-w-md flex flex-col gap-stack-md" id="class-selection-container">
+<!-- Option 1: Class 6 -->
+<button class="group relative w-full bg-surface border border-outline-variant rounded-xl p-6 text-left transition-all duration-200 card-shadow hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-class="6" onclick="selectClass(this); setTimeout(() =&gt; window.location.href='{{DATA:SCREEN:SCREEN_15}}', 300)">
+<div class="flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary" data-icon="school">school</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Class 6</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Admission to VI</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center group-[.selected]:border-primary group-[.selected]:bg-primary transition-colors">
+<span class="material-symbols-outlined text-white text-sm opacity-0 group-[.selected]:opacity-100" data-icon="check">check</span>
+</div>
+</div>
+<!-- Selection Highlight Overlay (Hidden by default) -->
+<div class="absolute inset-0 rounded-xl border-2 border-primary bg-primary/5 opacity-0 group-[.selected]:opacity-100 pointer-events-none transition-opacity"></div>
+</button>
+<!-- Option 2: Class 9 -->
+<button class="group relative w-full bg-surface border border-outline-variant rounded-xl p-6 text-left transition-all duration-200 card-shadow hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-class="9" onclick="selectClass(this); setTimeout(() =&gt; window.location.href='{{DATA:SCREEN:SCREEN_15}}', 300)">
+<div class="flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-secondary" data-icon="menu_book">menu_book</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Class 9</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Admission to IX</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center group-[.selected]:border-primary group-[.selected]:bg-primary transition-colors">
+<span class="material-symbols-outlined text-white text-sm opacity-0 group-[.selected]:opacity-100" data-icon="check">check</span>
+</div>
+</div>
+<!-- Selection Highlight Overlay (Hidden by default) -->
+<div class="absolute inset-0 rounded-xl border-2 border-primary bg-primary/5 opacity-0 group-[.selected]:opacity-100 pointer-events-none transition-opacity"></div>
+</button>
+</div>
+<!-- Sticky Footer CTA -->
+<div class="fixed bottom-0 left-0 w-full p-margin-mobile bg-surface/80 backdrop-blur-md border-t border-outline-variant sm:static sm:bg-transparent sm:border-none sm:mt-8 sm:p-0 flex justify-center z-50">
+<a class="w-full max-w-md bg-primary text-on-primary font-label-lg text-label-lg rounded-xl h-touch-target flex items-center justify-center gap-2 tactile-button" href="{{DATA:SCREEN:SCREEN_15}}" id="continue-btn">
+                Continue
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</main>
+<script>
+        function selectClass(selectedButton) {
+            // Remove 'selected' class from all buttons
+            const buttons = document.querySelectorAll('#class-selection-container button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Add 'selected' class to the clicked button
+            selectedButton.classList.add('selected');
+
+            // Enable the continue button
+            const continueBtn = document.getElementById('continue-btn');
+            continueBtn.disabled = false;
+            continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            // Optional: Add a slight scale animation on select
+            selectedButton.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                selectedButton.style.transform = '';
+            }, 100);
+        }
+    </script>
+</body></html>

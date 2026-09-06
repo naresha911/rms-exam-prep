@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mock Test - Mathematics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#c05400",
+                    "success-green": "#22C55E",
+                    "surface-bright": "#f9f9ff",
+                    "tertiary-fixed-dim": "#ffb690",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#783200",
+                    "tertiary": "#994100",
+                    "gradient-end": "#A855F7",
+                    "gradient-start": "#6366F1",
+                    "surface-tint": "#494bd6",
+                    "inverse-primary": "#c0c1ff",
+                    "error": "#ba1a1a",
+                    "on-primary": "#ffffff",
+                    "outline-variant": "#c7c4d7",
+                    "on-secondary-container": "#fefcff",
+                    "surface-variant": "#d8e3fb",
+                    "tertiary-fixed": "#ffdbca",
+                    "primary-container": "#6063ee",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#ecf1ff",
+                    "on-background": "#111c2d",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#cfdaf2",
+                    "on-primary-container": "#fffbff",
+                    "weakness-red": "#EF4444",
+                    "background": "#f9f9ff",
+                    "surface-container": "#e7eeff",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "warning-amber": "#F59E0B",
+                    "on-tertiary-fixed": "#341100",
+                    "surface": "#f9f9ff",
+                    "secondary-container": "#2170e4",
+                    "secondary": "#0058be",
+                    "surface-container-high": "#dee8ff",
+                    "surface-container-highest": "#d8e3fb",
+                    "primary": "#4648d4",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#fffbff",
+                    "inverse-surface": "#263143",
+                    "on-secondary-fixed": "#001a42",
+                    "on-secondary-fixed-variant": "#004395",
+                    "primary-fixed": "#e1e0ff",
+                    "outline": "#767586",
+                    "surface-muted": "#F8FAFC",
+                    "surface-container-low": "#f0f3ff",
+                    "on-surface": "#111c2d",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "on-surface-variant": "#464554",
+                    "on-primary-fixed": "#07006c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "stack-sm": "8px",
+                    "margin-desktop": "32px",
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "touch-target": "48px",
+                    "gutter": "16px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "label-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "label-lg": ["16px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .soft-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .btn-3d { border-bottom-width: 4px; }
+        .btn-3d:active { border-bottom-width: 0px; transform: translateY(4px); }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- Header (TopAppBar equivalent for transactional/focused screen) -->
+<header class="bg-surface border-b border-outline-variant px-margin-mobile md:px-margin-desktop h-16 flex items-center justify-between sticky top-0 z-10 shrink-0">
+<div class="flex items-center gap-2">
+<button aria-label="Back to Mock Test Library" class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center mr-1" onclick="window.location.href='{{DATA:SCREEN:SCREEN_8}}'">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<span class="material-symbols-outlined text-primary" data-icon="menu_book">menu_book</span>
+<h1 class="font-headline-md text-headline-md-mobile md:text-headline-md text-on-surface">Mathematics</h1>
+</div>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-error transition-colors mr-2" onclick="window.location.href='{{DATA:SCREEN:SCREEN_13}}'">
+<span class="material-symbols-outlined text-sm" data-icon="report">report</span>
+<span class="font-label-sm">Report Issue</span>
+</button><div class="flex items-center gap-4 bg-surface-container-high px-4 py-2 rounded-full shadow-inner">
+<span class="material-symbols-outlined text-error" data-icon="timer">timer</span>
+<span class="font-label-lg text-label-lg text-error font-bold tracking-wider" id="countdown">02:24:15</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col md:flex-row relative">
+<!-- Question Area (Left/Main Canvas) -->
+<div class="flex-grow flex flex-col p-margin-mobile md:p-margin-desktop overflow-y-auto">
+<div class="flex justify-between items-center mb-stack-md">
+<span class="font-label-lg text-label-lg text-on-surface-variant bg-surface-container-low px-3 py-1 rounded-full">Question 12 of 50</span>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary transition-colors" data-icon="flag">flag</span>
+</div>
+</div>
+<!-- Question Card -->
+<div class="bg-surface border border-outline-variant rounded-xl p-stack-lg mb-stack-lg soft-shadow relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<h2 class="font-body-lg text-body-lg text-on-surface">The value of XL + IX is...</h2>
+<!-- Mascot (Optional contextual placement) -->
+<div class="hidden md:flex absolute -top-4 -right-4 w-24 h-24 opacity-20">
+<img alt="Fox Mascot" class="object-contain w-full h-full" data-alt="A stylized, playful fox mascot character wearing a tiny graduation cap, looking curious. Line art style in deep purple. Clean white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB60krOIS7SFQdgrM1lHlU35geHZ8dkjNvxITJXVWTXZQ2lQsgQvOs7FQHHseXrl3HvzxOV2m6Fyhf3PrGDRSfyqkQwS9SyWdCWb7s_B5Cmo2ffcwa3JYawKCCx2RNWvoioiGxPCkQPQ1I0KXgUqV9Bhm9Dj5PjSYWMTv1aifBwEN-Bzz6Yd3KgDnJFpFeWIjdrud2S25-UM1C9PGQ1R1TO8ETH-AD7-cpnWC_EIb3LBz0_cALVPXX-"/>
+</div>
+</div>
+<!-- Options Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<!-- Option A -->
+<button class="w-full text-left bg-surface border border-outline-variant rounded-xl p-stack-md flex items-center gap-4 hover:border-primary hover:bg-surface-container-lowest transition-all group min-h-touch-target">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center font-label-lg text-label-lg text-on-surface-variant group-hover:border-primary group-hover:text-primary transition-colors">A</div>
+<span class="font-body-md text-body-md text-on-surface">49</span>
+</button>
+<!-- Option B (Selected State Example) -->
+<button class="w-full text-left bg-surface-container border-2 border-primary rounded-xl p-stack-md flex items-center gap-4 transition-all group min-h-touch-target relative shadow-[inset_0_0_10px_rgba(70,72,212,0.1)]">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-label-lg text-label-lg text-on-primary">B</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold">51</span>
+<span class="material-symbols-outlined text-primary absolute right-4" data-icon="check_circle">check_circle</span>
+</button>
+<!-- Option C -->
+<button class="w-full text-left bg-surface border border-outline-variant rounded-xl p-stack-md flex items-center gap-4 hover:border-primary hover:bg-surface-container-lowest transition-all group min-h-touch-target">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center font-label-lg text-label-lg text-on-surface-variant group-hover:border-primary group-hover:text-primary transition-colors">C</div>
+<span class="font-body-md text-body-md text-on-surface">60</span>
+</button>
+<!-- Option D -->
+<button class="w-full text-left bg-surface border border-outline-variant rounded-xl p-stack-md flex items-center gap-4 hover:border-primary hover:bg-surface-container-lowest transition-all group min-h-touch-target">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center font-label-lg text-label-lg text-on-surface-variant group-hover:border-primary group-hover:text-primary transition-colors">D</div>
+<span class="font-body-md text-body-md text-on-surface">39</span>
+</button>
+</div>
+</div>
+<!-- Question Palette Drawer/Sidebar (Right side on md+) -->
+<aside class="hidden md:flex flex-col w-64 bg-surface-muted border-l border-outline-variant p-margin-desktop shrink-0 sticky top-16" style="height: calc(100vh - 4rem - 5rem);">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-stack-md cursor-pointer hover:text-primary flex items-center gap-2" onclick="window.location.href='#'">
+<span class="material-symbols-outlined text-sm" data-icon="home">home</span>
+Question Palette
+</h3>
+<div class="grid grid-cols-4 gap-2 overflow-y-auto pb-4">
+<!-- Palette Items (Examples of states) -->
+<div class="w-10 h-10 rounded-full bg-success-green text-on-primary flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:opacity-90">1</div>
+<div class="w-10 h-10 rounded-full bg-success-green text-on-primary flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:opacity-90">2</div>
+<div class="w-10 h-10 rounded-full bg-error text-on-error flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:opacity-90">3</div>
+<div class="w-10 h-10 rounded-full bg-surface border-2 border-primary text-primary flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-low">4</div>
+<!-- Lots of empty ones -->
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">5</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">6</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">7</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">8</div>
+<div class="w-10 h-10 rounded-full bg-warning-amber text-on-primary flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:opacity-90">9</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">10</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">11</div>
+<!-- Current Active -->
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm shadow-md ring-2 ring-primary ring-offset-2 cursor-pointer">12</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">13</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">14</div>
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm shadow-sm cursor-pointer hover:bg-surface-container-lowest">15</div>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant space-y-2">
+<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-success-green"></div><span class="font-label-sm text-label-sm text-on-surface-variant">Answered</span></div>
+<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-error"></div><span class="font-label-sm text-label-sm text-on-surface-variant">Not Answered</span></div>
+<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-warning-amber"></div><span class="font-label-sm text-label-sm text-on-surface-variant">Marked for Review</span></div>
+</div>
+</aside>
+<!-- Floating FAB for Palette on Mobile -->
+<button aria-label="Question Palette" class="md:hidden fixed right-4 bottom-24 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center z-40 btn-3d border-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</button>
+</main>
+<!-- Bottom Action Bar (Contextual override from standard nav) -->
+<footer class="bg-surface border-t border-outline-variant p-4 md:px-margin-desktop shadow-[0_-4px_10px_rgba(0,0,0,0.05)] sticky bottom-0 z-20 shrink-0">
+<div class="flex flex-col sm:flex-row justify-between items-center max-w-5xl mx-auto gap-4">
+<div class="flex gap-2 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none px-6 h-touch-target bg-surface border-2 border-outline-variant text-on-surface-variant rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="flag">flag</span>
+                    Mark for Review
+                </button>
+</div>
+<div class="flex gap-2 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none px-6 h-touch-target bg-surface border-2 border-primary text-primary rounded-xl font-label-lg text-label-lg flex items-center justify-center hover:bg-surface-container-low transition-colors btn-3d border-b-primary-fixed">
+                    Previous
+                </button>
+<button class="flex-1 sm:flex-none px-8 h-touch-target bg-primary text-on-primary rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-primary-fixed-variant transition-colors btn-3d border-on-primary-fixed-variant" onclick="window.location.href='{{DATA:SCREEN:SCREEN_36}}'">
+                    Submit Test
+                    <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</footer>
+<script>
+        // Simple timer logic for demonstration
+        function startTimer(duration, display) {
+            var timer = duration, hours, minutes, seconds;
+            setInterval(function () {
+                hours = parseInt(timer / 3600, 10);
+                minutes = parseInt((timer % 3600) / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                hours = hours < 10 ? "0" + hours : hours;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = hours + ":" + minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    timer = duration; // Reset for demo purposes
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            var display = document.querySelector('#countdown');
+            // Assuming starting from 2:24:15 roughly
+            var timeInSeconds = (2 * 3600) + (24 * 60) + 15;
+            startTimer(timeInSeconds, display);
+        };
+    </script>
+</body></html>

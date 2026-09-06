@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Parent Dashboard - Cadet Quest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#341100",
+                        "background": "#f9f9ff",
+                        "secondary-container": "#2170e4",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-container-high": "#dee8ff",
+                        "inverse-primary": "#c0c1ff",
+                        "on-background": "#111c2d",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "gradient-end": "#A855F7",
+                        "surface-dim": "#cfdaf2",
+                        "on-tertiary-container": "#fffbff",
+                        "gradient-start": "#6366F1",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-tint": "#494bd6",
+                        "primary-container": "#6063ee",
+                        "on-secondary-fixed": "#001a42",
+                        "weakness-red": "#EF4444",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#464554",
+                        "surface": "#f9f9ff",
+                        "primary": "#4648d4",
+                        "tertiary": "#994100",
+                        "success-green": "#22C55E",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#ffdbca",
+                        "surface-container": "#e7eeff",
+                        "error": "#ba1a1a",
+                        "warning-amber": "#F59E0B",
+                        "surface-muted": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#07006c",
+                        "on-secondary-container": "#fefcff",
+                        "surface-bright": "#f9f9ff",
+                        "secondary": "#0058be",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "inverse-on-surface": "#ecf1ff",
+                        "outline-variant": "#c7c4d7",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#d8e3fb",
+                        "tertiary-container": "#c05400",
+                        "on-surface": "#111c2d",
+                        "surface-variant": "#d8e3fb",
+                        "inverse-surface": "#263143",
+                        "outline": "#767586",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#e1e0ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "margin-mobile": "16px",
+                        "touch-target": "48px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .tactile-button-primary {
+            border-bottom: 4px solid var(--tw-colors-primary-container);
+            transition: all 0.1s ease;
+        }
+        .tactile-button-primary:active {
+            border-bottom: 0px solid transparent;
+            transform: translateY(4px);
+            margin-bottom: 4px; /* Maintain flow */
+        }
+        .soft-card {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--tw-colors-outline-variant);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pb-24 font-body-md md:pb-0 md:pt-20">
+<!-- TopAppBar (Web & Mobile) -->
+<header class="bg-surface dark:bg-on-surface docked full-width top-0 flat no shadows flex justify-between items-center px-margin-mobile h-touch-target w-full md:fixed md:z-50 border-b md:border-b-0 border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-label-lg">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+<h1 class="font-headline-md text-headline-md-mobile text-primary dark:text-primary-fixed tracking-tight">Parent Dashboard</h1>
+</div>
+<a class="flex items-center gap-2 bg-surface-container-low rounded-full px-3 py-1 cursor-pointer hover:bg-surface-variant transition-colors" href="{{DATA:SCREEN:SCREEN_12}}">
+<span class="font-label-lg text-label-lg text-on-surface">Aarav</span>
+<span class="material-symbols-outlined text-on-surface text-sm">expand_more</span>
+</a>
+</header>
+<!-- Main Content Grid -->
+<main class="flex-grow w-full max-w-[1024px] mx-auto px-margin-mobile pt-stack-lg md:pt-stack-lg grid grid-cols-1 md:grid-cols-12 gap-stack-lg pb-stack-lg">
+<!-- Welcome Mascot Area (Full Width Mobile, spans 8 cols desktop) -->
+<section class="md:col-span-8 bg-surface-container-low rounded-xl p-stack-lg flex items-center gap-stack-md relative overflow-hidden soft-card">
+<div class="absolute -right-8 -bottom-8 opacity-20 pointer-events-none">
+<span class="material-symbols-outlined text-[120px] text-primary">school</span>
+</div>
+<img alt="Cadet Vijay Mascot" class="w-24 h-24 object-contain z-10" data-alt="A stylized, friendly vector illustration of an animated fox mascot wearing a tiny military cadet cap, saluting happily. Vibrant colors, clean lines, playful educational game aesthetic, light mode background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7USyKZuc3HHqxvGgZxJf7G699fmu_-1-HuR1FwucaMhTc0Eg_xNX7l5-rrAC7CBrZ_JDMbAavWD5oRNmXkVRbixaBS-S9qXUgbC3_Mvn8HCjg3nMhg5H25rOVlAixEzaW8FCJTvF7Tknutxm6idmOnDzUz-yHSblaJU2g3XNNRvDMC3hWL7v1M5qsE3JvN7WuglAaZYgxlB06FJr0KmIEEgt_a76WutNDqfZe3eE6QK5sgVhkEVyE"/>
+<div class="z-10">
+<h2 class="font-headline-md text-headline-md-mobile text-on-surface mb-1">Aarav is on a streak!</h2>
+<p class="font-body-md text-on-surface-variant">They've completed 4 tests this week. Keep encouraging them!</p>
+</div>
+</section>
+<!-- Readiness Score (Mobile Full, Desktop 4 cols) -->
+<section class="md:col-span-4 bg-white rounded-xl p-stack-lg flex flex-col items-center justify-center soft-card relative">
+<h3 class="font-label-lg text-label-lg text-on-surface-variant mb-4 self-start">Readiness Score</h3>
+<div class="relative w-32 h-32 flex items-center justify-center">
+<!-- Simple SVG Donut Chart representation -->
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="78, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display-lg text-display-lg text-primary">78<span class="text-xl">%</span></span>
+</div>
+</div>
+<p class="font-label-sm text-label-sm text-success-green mt-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> +5% from last week
+            </p>
+</section>
+<!-- Weekly Progress Summary -->
+<section class="md:col-span-6 bg-white rounded-xl p-stack-lg soft-card">
+<h3 class="font-headline-md text-headline-md-mobile text-on-surface mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">assessment</span>
+                Weekly Progress
+            </h3>
+<div class="grid grid-cols-2 gap-4 mb-stack-md">
+<div class="bg-surface-muted rounded-lg p-4 flex flex-col justify-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Questions Solved</span>
+<span class="font-headline-lg text-headline-lg-mobile text-on-surface">184</span>
+</div>
+<div class="bg-surface-muted rounded-lg p-4 flex flex-col justify-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Tests Completed</span>
+<span class="font-headline-lg text-headline-lg-mobile text-on-surface">4</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-lg text-label-lg text-on-surface">Accuracy</span>
+<span class="font-label-lg text-label-lg text-primary">82%</span>
+</div>
+<div class="w-full h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-gradient-start to-gradient-end rounded-full" style="width: 82%"></div>
+</div>
+</div>
+</section>
+<!-- Learning Velocity -->
+<section class="md:col-span-6 bg-white rounded-xl p-stack-lg soft-card flex flex-col">
+<div class="flex justify-between items-start mb-stack-md">
+<h3 class="font-headline-md text-headline-md-mobile text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">speed</span>
+                    Learning Velocity
+                </h3>
+<span class="font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed px-2 py-1 rounded-full">This Week</span>
+</div>
+<div class="flex-grow flex items-center justify-center flex-col">
+<div class="font-display-lg text-display-lg text-secondary mb-2">3h 45m</div>
+<p class="font-body-md text-on-surface-variant text-center max-w-[200px]">Total focused study time. Consistent effort!</p>
+</div>
+<!-- Simplified Bar Chart visual representation -->
+<div class="flex items-end justify-between h-24 mt-4 gap-2">
+<div class="w-full bg-surface-variant rounded-t-sm h-[40%] hover:bg-secondary transition-colors" title="Mon"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[60%] hover:bg-secondary transition-colors" title="Tue"></div>
+<div class="w-full bg-secondary rounded-t-sm h-[80%] opacity-80" title="Wed (Today)"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[20%] hover:bg-secondary transition-colors" title="Thu"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[50%] hover:bg-secondary transition-colors" title="Fri"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[10%] hover:bg-secondary transition-colors" title="Sat"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[30%] hover:bg-secondary transition-colors" title="Sun"></div>
+</div>
+<div class="flex justify-between mt-2 font-label-sm text-label-sm text-outline px-1">
+<span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="">S</span><span class="">S</span>
+</div>
+</section>
+<!-- Quick Actions -->
+<section class="md:col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-stack-md">
+<a class="bg-surface-container-high rounded-xl p-4 flex items-center justify-between hover:bg-inverse-on-surface transition-colors border border-transparent hover:border-primary-fixed-dim" href="{{DATA:SCREEN:SCREEN_9}}">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface">Detailed Analytics</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+<a class="bg-surface-container-high rounded-xl p-4 flex items-center justify-between hover:bg-inverse-on-surface transition-colors border border-transparent hover:border-primary-fixed-dim" href="{{DATA:SCREEN:SCREEN_4}}">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-secondary shadow-sm">
+<span class="material-symbols-outlined">workspace_premium</span>
+</div>
+<div class="flex flex-col items-start">
+<span class="font-label-lg text-label-lg text-on-surface">Subscription Plan</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Pro Plan - Active</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) - Using Shared Component logic -->
+<nav class="md:hidden bg-surface dark:bg-on-surface fixed bottom-0 w-full z-50 rounded-t-xl shadow-lg fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 border-t border-outline-variant dark:border-outline">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 w-12 h-12 hover:bg-surface-container-high transition-colors scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm sr-only">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors" href="{{DATA:SCREEN:SCREEN_9}}">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm mt-1">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors" href="{{DATA:SCREEN:SCREEN_19}}">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

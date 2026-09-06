@@ -13,9 +13,9 @@ interface QuestionCardProps {
 }
 
 const DIFFICULTY_CONFIG = {
-    easy: { label: 'Easy', color: COLORS.success, bg: '#D1FAE5' },
-    medium: { label: 'Medium', color: '#B45309', bg: '#FEF3C7' },
-    hard: { label: 'Hard', color: COLORS.error, bg: '#FEE2E2' },
+    easy: { label: 'Easy', color: COLORS.success, bg: COLORS.successLight },
+    medium: { label: 'Medium', color: COLORS.amberText, bg: COLORS.warningLight },
+    hard: { label: 'Hard', color: COLORS.error, bg: COLORS.errorLight },
 };
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({

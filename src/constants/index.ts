@@ -108,6 +108,20 @@ export const COLORS = {
     // XP
     xpGold: '#FBBF24',
 
+    // Leaderboard / Gamification (Gold, Silver, Bronze)
+    gold: '#FFD700',
+    silver: '#C0C0C0',
+    bronze: '#CD7F32',
+
+    // Onboarding / Selected state
+    onPrimarySubtle: '#E9D5FF',  // Light purple for selected text on primary
+
+    // Dark text colors for success/error states (dark shades for good contrast)
+    successText: '#065F46',       // Dark green for success text
+    errorText: '#7F1D1D',         // Dark red for error text
+    warningText: '#92400E',        // Dark amber for warning text
+    amberText: '#B45309',         // Amber text
+
     // Overlay
     overlay: 'rgba(0, 0, 0, 0.5)',
     overlayLight: 'rgba(0, 0, 0, 0.3)',
@@ -490,6 +504,9 @@ export const TABLES = {
     questionReports: 'question_reports',
     papers: 'papers',
     paperQuestions: 'paper_questions',
+    paperAttempts: 'paper_attempts',
+    paperAttemptAnswers: 'paper_attempt_answers',
+    paperSectionStats: 'paper_section_stats',
 };
 
 // Supported languages

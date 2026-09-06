@@ -209,6 +209,7 @@ create table papers (
   total_marks numeric(6,1),
   duration_minutes int,
   pdf_path text,
+  difficulty difficulty,
   is_published boolean default false,
   created_at timestamptz default now()
 );
@@ -222,6 +223,17 @@ create table paper_questions (
   negative_marks numeric(4,1),
   primary key (paper_id, question_id)
 );
+
+-- Section summary for listing cards (paper_attempts defined in section 7)
+create view paper_section_stats as
+select
+  pq.paper_id,
+  coalesce(pq.section, 'General') as section,
+  count(*)::int as question_count,
+  coalesce(sum(coalesce(pq.marks, q.marks, 1)), 0) as section_marks
+from paper_questions pq
+join questions q on q.id = pq.question_id
+group by pq.paper_id, coalesce(pq.section, 'General');
 
 -- ============================================================
 -- 6. MOCK EXAMS / TESTS
@@ -311,7 +323,43 @@ create table attempt_answers (
   matching_answer jsonb,
   is_correct boolean,
   marks_awarded numeric(4,1),
-  time_spent_seconds int
+  time_spent_seconds int,
+  unique (attempt_id, question_id)
+);
+
+-- Paper attempts (separate from test_attempts; papers are not tests)
+create table paper_attempts (
+  id uuid primary key default gen_random_uuid(),
+  paper_id uuid not null references papers(id) on delete cascade,
+  student_id uuid not null references profiles(id),
+  attempt_number int default 1,
+  started_at timestamptz default now(),
+  submitted_at timestamptz,
+  time_spent_seconds int,
+  is_paused boolean default false,
+  pause_data jsonb,
+  total_score numeric(6,1),
+  max_score numeric(6,1),
+  status text check (status in ('in_progress', 'submitted', 'abandoned')) default 'in_progress'
+);
+
+create unique index paper_attempts_one_in_progress
+  on paper_attempts (paper_id, student_id)
+  where status = 'in_progress';
+
+create table paper_attempt_answers (
+  id uuid primary key default gen_random_uuid(),
+  attempt_id uuid not null references paper_attempts(id) on delete cascade,
+  question_id uuid not null references questions(id),
+  review_status review_status default 'not_visited',
+  selected_options text[],
+  text_answer text,
+  matching_answer jsonb,
+  is_correct boolean,
+  marks_awarded numeric(4,1),
+  time_spent_seconds int,
+  updated_at timestamptz default now(),
+  unique (attempt_id, question_id)
 );
 
 create table student_topic_stats (
@@ -365,8 +413,27 @@ create index idx_matching_items_question on matching_items(question_id);
 create index idx_test_attempts_student on test_attempts(student_id);
 create index idx_attempt_answers_attempt on attempt_answers(attempt_id);
 create index idx_paper_questions_paper on paper_questions(paper_id);
+create index idx_paper_attempts_student on paper_attempts(student_id);
+create index idx_paper_attempts_paper_student on paper_attempts(paper_id, student_id);
+create index idx_paper_attempts_status on paper_attempts(status);
+create index idx_paper_attempt_answers_attempt on paper_attempt_answers(attempt_id);
 create index idx_bookmarks_student on bookmarks(student_id);
 create index idx_question_reports_status on question_reports(status);
+
+-- ============================================================
+-- 10. RLS + PAPER RPCs + STORAGE
+-- ============================================================
+-- Full pasteable script for existing projects:
+--   requirements/sql/papers_v1.sql
+--
+-- RPCs (SECURITY DEFINER, auth.uid()):
+--   start_paper_attempt(p_paper_id uuid)
+--   save_paper_answer(...)
+--   submit_paper_attempt(p_attempt_id uuid)
+--   get_paper_session_questions(p_paper_id uuid)  -- omits is_correct
+--
+-- Storage bucket (private): past-paper-pdfs
+-- Students may only obtain short-lived signed URLs for published papers.
 
 -- ============================================================
 -- DONE
@@ -375,5 +442,5 @@ create index idx_question_reports_status on question_reports(status);
 -- 1. Create Storage buckets (private):
 --    question-diagrams, option-diagrams, explanation-diagrams,
 --    group-diagrams, past-paper-pdfs, avatars
--- 2. Add RLS policies
+-- 2. Run requirements/sql/papers_v1.sql for RLS, RPCs, storage policies
 -- 3. Add trigger to auto-create profile on signup

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Onboarding - AISSEE Cadet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#fffbff",
+                        "on-surface-variant": "#464554",
+                        "surface-container-highest": "#d8e3fb",
+                        "on-error-container": "#93000a",
+                        "surface-muted": "#F8FAFC",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary-fixed": "#001a42",
+                        "gradient-start": "#6366F1",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-container": "#e7eeff",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#c0c1ff",
+                        "on-secondary-container": "#fefcff",
+                        "gradient-end": "#A855F7",
+                        "weakness-red": "#EF4444",
+                        "surface-container-high": "#dee8ff",
+                        "surface-tint": "#494bd6",
+                        "on-tertiary-fixed": "#341100",
+                        "on-primary-fixed": "#07006c",
+                        "outline": "#767586",
+                        "primary": "#4648d4",
+                        "on-background": "#111c2d",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#994100",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#ecf1ff",
+                        "warning-amber": "#F59E0B",
+                        "tertiary-fixed": "#ffdbca",
+                        "background": "#f9f9ff",
+                        "outline-variant": "#c7c4d7",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "inverse-surface": "#263143",
+                        "surface-variant": "#d8e3fb",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "on-secondary-fixed-variant": "#004395",
+                        "tertiary-container": "#c05400",
+                        "surface-dim": "#cfdaf2",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-primary": "#ffffff",
+                        "surface": "#f9f9ff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "success-green": "#22C55E",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#0058be",
+                        "on-primary-container": "#fffbff",
+                        "on-surface": "#111c2d",
+                        "primary-container": "#6063ee",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#2170e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "touch-target": "48px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .tactile-button {
+            border-bottom-width: 4px;
+            border-color: #2f2ebe; /* on-primary-fixed-variant */
+            transition: transform 0.1s, border-bottom-width 0.1s;
+        }
+        .tactile-button:active {
+            border-bottom-width: 0px;
+            transform: translateY(4px);
+        }
+        
+        .option-card {
+            border: 1px solid #c7c4d7; /* outline-variant */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+        }
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        }
+        .option-card.selected {
+            background-color: #e1e0ff; /* primary-fixed */
+            border: 2px solid #4648d4; /* primary */
+            box-shadow: inset 0 0 10px rgba(70, 72, 212, 0.1);
+        }
+        .option-card.selected .check-circle {
+            background-color: #4648d4;
+            color: #ffffff;
+            border-color: #4648d4;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface h-full flex flex-col antialiased">
+<!-- Top AppBar (Transactional/Linear flow, keeping it minimal) -->
+<header class="bg-surface sticky top-0 z-10 p-margin-mobile flex items-center justify-between">
+<button class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant transition-colors text-on-surface-variant" onclick="window.location.href='{{DATA:SCREEN:SCREEN_37}}'">
+<span class="material-symbols-outlined" data-icon="arrow_back" data-weight="regular">arrow_back</span>
+</button>
+<div class="flex space-x-1">
+<div class="h-2 w-8 bg-primary rounded-full"></div>
+<div class="h-2 w-2 bg-surface-variant rounded-full"></div>
+<div class="h-2 w-2 bg-surface-variant rounded-full"></div>
+</div>
+<div class="w-12"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-grow flex flex-col items-center px-margin-mobile pb-24 md:px-margin-desktop md:max-w-4xl md:mx-auto w-full">
+<!-- Header Section with Mascot -->
+<div class="w-full mt-4 mb-stack-lg flex flex-col items-center text-center">
+<div class="relative w-48 h-48 mb-6">
+<!-- Background decorative element -->
+<div class="absolute inset-0 bg-gradient-to-tr from-surface-variant to-surface rounded-full shadow-[0_0_40px_rgba(70,72,212,0.1)]"></div>
+<!-- Mascot Image -->
+<img alt="Cadet Vijay Thinking" class="absolute inset-0 w-full h-full object-contain rounded-full drop-shadow-xl z-10" src="https://lh3.googleusercontent.com/aida/AEtjO1WLbogbBAZkRlsNePkKMd1V0Wb3-lue6ZKO-POBMUQdoF87UEkzBHQLn8RPyZgoGZptIOCfr4l6fXMUYaCnNIOnsE87WyEjSNZBauWJeSmX6H_ODQrxzVv8O4dvtGcv1Yc40-W-NCUvWtwUBzOhimAr44Med2OscOLTy3vmlHvdze9cKQdEfsVzgb-41_XWu7nzJqFaRIx4_BwfNsqsFYQ3mSOtaYM7wBXo9WV019ZTCfRfScku7MuEveA"/>
+<!-- Chat Bubble -->
+<div class="absolute -right-4 top-4 bg-surface-container-lowest border border-outline-variant rounded-2xl rounded-bl-none p-3 shadow-md z-20 max-w-[140px]">
+<p class="font-label-sm text-label-sm text-on-surface">Hmm... where should we start?</p>
+</div>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary mb-2">
+                Which class are you studying in currently?
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                This helps us customize your mission briefings and mock tests.
+            </p>
+</div>
+<!-- Selection Cards -->
+<div class="w-full flex flex-col space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4 w-full max-w-2xl">
+<!-- Option 1: Class 5 -->
+<button class="option-card bg-surface-container-lowest rounded-xl p-4 flex items-center h-touch-target min-h-[80px] w-full text-left group focus:outline-none" onclick="selectOption(this); setTimeout(() =&gt; window.location.href='{{DATA:SCREEN:SCREEN_18}}', 300)">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center mr-4 group-hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="school" data-weight="fill" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+<div class="flex-grow">
+<span class="font-headline-md text-headline-md block">Class 5</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Preparing for Class 6 Entry</span>
+</div>
+<div class="check-circle w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-xs hidden" data-icon="check" data-weight="bold">check</span>
+</div>
+</button>
+<!-- Option 2: Class 8 -->
+<button class="option-card bg-surface-container-lowest rounded-xl p-4 flex items-center h-touch-target min-h-[80px] w-full text-left group focus:outline-none" onclick="selectOption(this); setTimeout(() =&gt; window.location.href='{{DATA:SCREEN:SCREEN_18}}', 300)">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center mr-4 group-hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="menu_book" data-weight="fill" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<div class="flex-grow">
+<span class="font-headline-md text-headline-md block">Class 8</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Preparing for Class 9 Entry</span>
+</div>
+<div class="check-circle w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-xs hidden" data-icon="check" data-weight="bold">check</span>
+</div>
+</button>
+<!-- Option 3: Other -->
+<button class="option-card bg-surface-container-lowest rounded-xl p-4 flex items-center h-touch-target min-h-[80px] w-full text-left group focus:outline-none" onclick="selectOption(this); setTimeout(() =&gt; window.location.href='{{DATA:SCREEN:SCREEN_18}}', 300)">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center mr-4 group-hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="more_horiz" data-weight="fill" style="font-variation-settings: 'FILL' 1;">more_horiz</span>
+</div>
+<div class="flex-grow">
+<span class="font-headline-md text-headline-md block">Other</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Just exploring options</span>
+</div>
+<div class="check-circle w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-xs hidden" data-icon="check" data-weight="bold">check</span>
+</div>
+</button>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<div class="fixed bottom-0 left-0 w-full p-margin-mobile bg-surface/90 backdrop-blur-sm border-t border-surface-variant z-20">
+<div class="max-w-4xl mx-auto flex justify-center">
+<button class="tactile-button bg-primary text-on-primary font-label-lg text-label-lg rounded-xl h-touch-target min-h-[56px] w-full max-w-sm flex items-center justify-center shadow-md opacity-50 cursor-not-allowed" disabled="" id="continueBtn" onclick="window.location.href='{{DATA:SCREEN:SCREEN_18}}'">
+                Continue Mission
+                <span class="material-symbols-outlined ml-2" data-icon="arrow_forward" data-weight="bold">arrow_forward</span>
+</button>
+</div>
+</div>
+<script>
+        function selectOption(selectedElement) {
+            // Remove 'selected' class and hide checks from all options
+            const options = document.querySelectorAll('.option-card');
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+                const check = opt.querySelector('.check-circle span');
+                if(check) check.classList.add('hidden');
+            });
+
+            // Add 'selected' class and show check to the clicked option
+            selectedElement.classList.add('selected');
+            const check = selectedElement.querySelector('.check-circle span');
+            if(check) check.classList.remove('hidden');
+
+            // Enable Continue button
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            continueBtn.removeAttribute('disabled');
+        }
+    </script>
+</body></html>

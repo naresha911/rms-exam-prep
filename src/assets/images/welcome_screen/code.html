@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AISSEE Cadet - Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "surface": "#f9f9ff",
+                        "background": "#f9f9ff",
+                        "on-tertiary-fixed": "#341100",
+                        "surface-variant": "#d8e3fb",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#ecf1ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "gradient-end": "#A855F7",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001a42",
+                        "on-secondary": "#ffffff",
+                        "outline": "#767586",
+                        "primary": "#4648d4",
+                        "surface-dim": "#cfdaf2",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "on-surface": "#111c2d",
+                        "surface-container-highest": "#d8e3fb",
+                        "tertiary": "#994100",
+                        "surface-muted": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "weakness-red": "#EF4444",
+                        "error": "#ba1a1a",
+                        "on-background": "#111c2d",
+                        "warning-amber": "#F59E0B",
+                        "on-secondary-container": "#fefcff",
+                        "primary-fixed": "#e1e0ff",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "surface-container-high": "#dee8ff",
+                        "on-primary-fixed": "#07006c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "secondary": "#0058be",
+                        "on-primary-container": "#fffbff",
+                        "surface-tint": "#494bd6",
+                        "secondary-fixed": "#d8e2ff",
+                        "inverse-primary": "#c0c1ff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface-variant": "#464554",
+                        "on-tertiary-container": "#fffbff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#6063ee",
+                        "on-primary": "#ffffff",
+                        "success-green": "#22C55E",
+                        "tertiary-container": "#c05400",
+                        "outline-variant": "#c7c4d7",
+                        "gradient-start": "#6366F1",
+                        "on-secondary-fixed-variant": "#004395",
+                        "inverse-surface": "#263143",
+                        "surface-bright": "#f9f9ff",
+                        "tertiary-fixed": "#ffdbca",
+                        "surface-container": "#e7eeff",
+                        "primary-fixed-dim": "#c0c1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "touch-target": "48px",
+                        "stack-lg": "24px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "stack-md": "16px",
+                        "margin-desktop": "32px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .btn-3d {
+            border-bottom: 4px solid var(--tw-colors-primary-fixed-variant, #2f2ebe);
+        }
+        .btn-3d:active {
+            border-bottom-width: 0px;
+            transform: translateY(4px);
+            margin-bottom: 4px;
+        }
+        .pattern-bg {
+            background-image: radial-gradient(var(--tw-colors-primary-fixed-dim, #c0c1ff) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container relative overflow-hidden">
+<!-- Subtle Background Pattern -->
+<div class="absolute inset-0 pattern-bg opacity-30 pointer-events-none z-0"></div>
+<!-- Main Content Container -->
+<main class="flex-grow flex flex-col justify-between items-center w-full max-w-md mx-auto px-margin-mobile py-8 relative z-10 md:max-w-4xl md:px-margin-desktop md:justify-center md:gap-12">
+<!-- Header / Logo Area -->
+<header class="w-full flex justify-center items-center gap-2 mb-8 md:mb-0 h-touch-target">
+<span class="material-symbols-outlined text-primary text-[32px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">AISSEE <span class="text-primary font-bold">Cadet</span></h1>
+</header>
+<!-- Hero Content Area -->
+<div class="flex flex-col items-center text-center w-full max-w-sm md:max-w-2xl">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-4">
+                Your Sainik School <br class="md:hidden"/>journey starts <span class="text-primary">here!</span>
+</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-[280px] md:max-w-md">
+                Learn smarter. Practice every day. Get exam ready.
+            </p>
+<!-- Mascot Illustration -->
+<div class="relative w-full max-w-[320px] aspect-square mb-12 drop-shadow-2xl">
+<!-- Decorative floating elements (simulated) -->
+<div class="absolute -top-6 -left-6 bg-surface-container-high rounded-xl p-3 shadow-sm transform -rotate-12 animate-pulse">
+<span class="font-label-lg text-label-lg text-primary">Maths!</span>
+</div>
+<div class="absolute top-12 -right-4 bg-tertiary-fixed rounded-xl p-3 shadow-sm transform rotate-6 animate-pulse" style="animation-delay: 500ms;">
+<span class="font-label-lg text-label-lg text-tertiary">G.K.</span>
+</div>
+<img alt="Cadet Vijay Mascot" class="w-full h-full object-contain rounded-2xl z-10 relative" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLsTyd3RttJFRbYba05yyK6t_g8wOhSlJ3eFXgon9dQ8pDwZD6h2YCn5krtFLQ33Q7TON5loD65QVrYKSzAe5pfgkmQCXikqZchF4-hZzMcVf-nLliL-gxzAnGWUl8PIaOMqpdYol-SwEcpyzwaBoSicMNy9zGi3CD19JDPgQCF-NvWDmWCBQDZWwoD8SMgW2CZbc52jNpdZxX-b9hQocEGTftAq9NWCQ_AfXJd38knOIej8qm9PSe"/>
+</div>
+<!-- Pagination Dots (Visual only for onboarding flow) -->
+<div class="flex gap-2 mb-8">
+<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="w-full mt-auto md:mt-0 md:max-w-sm">
+<button class="w-full h-touch-target bg-primary text-on-primary font-label-lg text-label-lg rounded-xl flex items-center justify-center gap-2 btn-3d transition-all duration-150 shadow-lg shadow-primary/20 hover:bg-surface-tint" onclick="location.href='{{DATA:SCREEN:SCREEN_37}}'">
+                Get Started
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</main>
+</body></html>

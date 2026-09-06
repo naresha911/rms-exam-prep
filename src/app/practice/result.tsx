@@ -1,9 +1,11 @@
-import { View, Text, ScrollView } from "react-native";
+// Practice Result — Stitch-aligned screen shown after a practice session completes.
+// Per Stitch: mascot + headline celebration, score breakdown, stat cards, CTA stack.
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
+import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { useAppStore } from "../../store/useAppStore";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS } from "../../constants";
 
@@ -22,165 +24,95 @@ export default function PracticeResultScreen() {
     const xpEarned = correctCount * XP_REWARDS.correctAnswer;
     const minutes = Math.floor(timeSpent / 60);
     const seconds = timeSpent % 60;
+    const wrongCount = totalCount - correctCount;
 
     const getMessage = () => {
-        if (accuracy >= 80) return { text: "Outstanding work! 🏆", emoji: "celebrating" as const };
-        if (accuracy >= 60) return { text: "Great job! Keep going! 🌟", emoji: "happy" as const };
-        if (accuracy >= 40) return { text: "Good effort! Practice more! 💪", emoji: "encouraging" as const };
-        return { text: "Keep trying! You'll improve! 🎯", emoji: "thinking" as const };
+        if (accuracy >= 80) return { text: "Outstanding work!", emoji: "celebrating" as const, color: COLORS.success };
+        if (accuracy >= 60) return { text: "Great job! Keep going!", emoji: "happy" as const, color: COLORS.primary };
+        if (accuracy >= 40) return { text: "Good effort! Practice more!", emoji: "encouraging" as const, color: COLORS.warning };
+        return { text: "Keep trying! You'll improve!", emoji: "thinking" as const, color: COLORS.error };
     };
 
     const message = getMessage();
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
-            <Stack.Screen
-                options={{
-                    headerShown: true,
-                    title: "Results",
-                    headerStyle: { backgroundColor: COLORS.background },
-                    headerShadowVisible: false,
-                }}
-            />
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+            <Stack.Screen options={{ headerShown: false }} />
+
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[5] }}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Celebration */}
-                <View style={{ alignItems: "center", marginBottom: SPACING[6] }}>
+                <View style={styles.celebration}>
                     <MascotDisplay expression={message.emoji} size={140} />
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                            fontWeight: "800",
-                            color: COLORS.textPrimary,
-                            textAlign: "center",
-                            marginTop: SPACING[3],
-                        }}
-                    >
+                    <Text style={[styles.headline, { color: message.color }]}>
                         {message.text}
                     </Text>
+                    <Text style={styles.subheadline}>
+                        You finished your practice session
+                    </Text>
                 </View>
 
-                {/* Score Card */}
-                <Card variant="elevated" style={{ marginBottom: SPACING[4] }}>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.lg,
-                            fontWeight: "700",
-                            color: COLORS.textPrimary,
-                            textAlign: "center",
-                            marginBottom: SPACING[3],
-                        }}
-                    >
-                        Your Score
-                    </Text>
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "baseline",
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize["5xl"],
-                                fontWeight: "800",
-                                color: COLORS.primary,
-                            }}
-                        >
-                            {correctCount}
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                color: COLORS.textSecondary,
-                                fontWeight: "600",
-                            }}
-                        >
-                            {" "}/ {totalCount}
-                        </Text>
+                {/* Score Card — Stitch: white surface with rounded 3xl */}
+                <View style={styles.scoreCard}>
+                    <Text style={styles.scoreLabel}>Your Score</Text>
+                    <View style={styles.scoreRow}>
+                        <Text style={styles.scoreValue}>{correctCount}</Text>
+                        <Text style={styles.scoreTotal}>/ {totalCount}</Text>
                     </View>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.base,
-                            color: COLORS.textSecondary,
-                            textAlign: "center",
-                            marginTop: SPACING[1],
-                        }}
-                    >
-                        {accuracy}% accuracy
-                    </Text>
-                </Card>
+                    <View style={styles.accuracyPill}>
+                        <MaterialIcon name="trending_up" size={14} color={COLORS.primary} filled />
+                        <Text style={styles.accuracyText}>{accuracy}% accuracy</Text>
+                    </View>
+                </View>
 
-                {/* Stats */}
-                <View style={{ flexDirection: "row", gap: SPACING[3], marginBottom: SPACING[4] }}>
+                {/* Stats — Stitch: 3 column stat row */}
+                <View style={styles.statsRow}>
                     <StatCard
-                        label="Correct"
+                        icon="check_circle"
+                        iconBg={COLORS.successLight}
+                        iconColor={COLORS.success}
                         value={correctCount.toString()}
-                        color={COLORS.success}
-                        bgColor={COLORS.successLight}
+                        label="Correct"
                     />
                     <StatCard
+                        icon="cancel"
+                        iconBg={COLORS.errorLight}
+                        iconColor={COLORS.error}
+                        value={wrongCount.toString()}
                         label="Wrong"
-                        value={(totalCount - correctCount).toString()}
-                        color={COLORS.error}
-                        bgColor={COLORS.errorLight}
                     />
                     <StatCard
-                        label="XP"
+                        icon="bolt"
+                        iconBg={COLORS.warningLight}
+                        iconColor={COLORS.xpGold}
                         value={`+${xpEarned}`}
-                        color={COLORS.xpGold}
-                        bgColor="#FEF3C7"
+                        label="XP"
                     />
                 </View>
 
-                {/* Time Card */}
-                <Card style={{ marginBottom: SPACING[6] }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING[3] }}>
-                        <View
-                            style={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 24,
-                                backgroundColor: "#DBEAFE",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <Text style={{ fontSize: 24 }}>⏱️</Text>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.base,
-                                    fontWeight: "600",
-                                    color: COLORS.textPrimary,
-                                }}
-                            >
-                                Time Spent
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xl,
-                                    fontWeight: "800",
-                                    color: COLORS.textPrimary,
-                                    marginTop: 2,
-                                }}
-                            >
-                                {minutes}m {seconds}s
-                            </Text>
-                        </View>
+                {/* Time Spent Card */}
+                <View style={styles.timeCard}>
+                    <View style={styles.timeIcon}>
+                        <MaterialIcon name="schedule" size={22} color={COLORS.secondary} />
                     </View>
-                </Card>
+                    <View style={styles.timeContent}>
+                        <Text style={styles.timeLabel}>Time Spent</Text>
+                        <Text style={styles.timeValue}>
+                            {minutes}m {seconds}s
+                        </Text>
+                    </View>
+                </View>
 
                 {/* Actions */}
-                <View style={{ gap: SPACING[3] }}>
+                <View style={styles.actions}>
                     <Button
                         title="Practice Again"
                         onPress={() => router.replace("/(tabs)/practice")}
                         fullWidth
                         size="lg"
+                        iconRight="arrow_forward"
                     />
                     <Button
                         title="Back to Home"
@@ -196,45 +128,176 @@ export default function PracticeResultScreen() {
 }
 
 function StatCard({
-    label,
+    icon,
+    iconBg,
+    iconColor,
     value,
-    color,
-    bgColor,
+    label,
 }: {
-    label: string;
+    icon: any;
+    iconBg: string;
+    iconColor: string;
     value: string;
-    color: string;
-    bgColor: string;
+    label: string;
 }) {
     return (
-        <View
-            style={{
-                flex: 1,
-                backgroundColor: bgColor,
-                padding: SPACING[4],
-                borderRadius: BORDER_RADIUS.lg,
-                alignItems: "center",
-            }}
-        >
-            <Text
-                style={{
-                    fontSize: TYPOGRAPHY.fontSize.xl,
-                    fontWeight: "800",
-                    color,
-                }}
-            >
-                {value}
-            </Text>
-            <Text
-                style={{
-                    fontSize: TYPOGRAPHY.fontSize.xs,
-                    color: COLORS.textSecondary,
-                    marginTop: 2,
-                    fontWeight: "600",
-                }}
-            >
-                {label}
-            </Text>
+        <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: iconBg }]}>
+                <MaterialIcon name={icon} size={20} color={iconColor} filled />
+            </View>
+            <Text style={styles.statValue}>{value}</Text>
+            <Text style={styles.statLabel}>{label}</Text>
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    scrollContent: {
+        padding: SPACING[5],
+    },
+    celebration: {
+        alignItems: "center",
+        marginBottom: SPACING[6],
+        marginTop: SPACING[2],
+    },
+    headline: {
+        fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+        fontSize: TYPOGRAPHY.fontSize["2xl"],
+        fontWeight: "800",
+        textAlign: "center",
+        marginTop: SPACING[3],
+    },
+    subheadline: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.onSurfaceVariant,
+        textAlign: "center",
+        marginTop: SPACING[1],
+    },
+    scoreCard: {
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["3xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        padding: SPACING[6],
+        marginBottom: SPACING[4],
+        alignItems: "center",
+    },
+    scoreLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+        fontWeight: "700",
+        marginBottom: SPACING[3],
+    },
+    scoreRow: {
+        flexDirection: "row",
+        alignItems: "baseline",
+        marginBottom: SPACING[2],
+    },
+    scoreValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+        fontSize: 56,
+        color: COLORS.primary,
+        fontWeight: "800",
+        lineHeight: 64,
+    },
+    scoreTotal: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize["2xl"],
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+    },
+    accuracyPill: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        backgroundColor: COLORS.primaryFixed,
+        paddingHorizontal: SPACING[3],
+        paddingVertical: SPACING[1],
+        borderRadius: BORDER_RADIUS.full,
+    },
+    accuracyText: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.primary,
+        fontWeight: "700",
+    },
+    statsRow: {
+        flexDirection: "row",
+        gap: SPACING[3],
+        marginBottom: SPACING[4],
+    },
+    statCard: {
+        flex: 1,
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["2xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        padding: SPACING[3],
+        alignItems: "center",
+    },
+    statIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: SPACING[2],
+    },
+    statValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.xl,
+        color: COLORS.onSurface,
+        fontWeight: "800",
+    },
+    statLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+        marginTop: 2,
+    },
+    timeCard: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[3],
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["2xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        padding: SPACING[4],
+        marginBottom: SPACING[6],
+    },
+    timeIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: COLORS.secondaryContainer,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    timeContent: {
+        flex: 1,
+    },
+    timeLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+    },
+    timeValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.xl,
+        color: COLORS.onSurface,
+        fontWeight: "800",
+        marginTop: 2,
+    },
+    actions: {
+        gap: SPACING[3],
+    },
+});

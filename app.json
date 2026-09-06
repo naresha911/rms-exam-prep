@@ -1,35 +1,36 @@
 {
-    "expo": {
-        "name": "Sainik Prep",
-        "slug": "sainik-prep",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "userInterfaceStyle": "light",
-        "newArchEnabled": true,
-        "assetBundlePatterns": [
-            "**/*"
-        ],
-        "ios": {
-            "supportsTablet": true,
-            "bundleIdentifier": "com.sainikprep.app"
-        },
-        "android": {
-            "package": "com.sainikprep.app",
-            "adaptiveIcon": {
-                "backgroundColor": "#7C3AED"
-            }
-        },
-        "plugins": [
-            "expo-router"
-        ],
-        "experiments": {
-            "typedRoutes": true
-        },
-        "scheme": "sainikprep",
-        "extra": {
-            "router": {
-                "origin": false
-            }
-        }
+  "expo": {
+    "name": "Sainik Prep",
+    "slug": "sainik-prep",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sainikprep.app"
+    },
+    "android": {
+      "package": "com.sainikprep.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#7C3AED"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "scheme": "sainikprep",
+    "extra": {
+      "router": {
+        "origin": false
+      }
     }
+  }
 }

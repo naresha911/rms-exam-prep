@@ -1,106 +1,68 @@
-import { Tabs } from "expo-router";
-import { View, Text, StyleSheet } from "react-native";
+import { Tabs, useRouter } from "expo-router";
+import { View, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS, TYPOGRAPHY } from "../../constants";
+import { MaterialIcon } from "../../components/ui/MaterialIcon";
 
-function TabIcon({ name, focused }: { name: string; focused: boolean }) {
-    const icons: Record<string, string> = {
-        home: "🏠",
-        practice: "📖",
-        tests: "📝",
-        ai: "🤖",
-        profile: "👤",
-    };
+interface TabIconProps {
+  icon: "home" | "menu_book" | "assignment" | "history_edu" | "person";
+  focused: boolean;
+}
 
-    return (
-        <View style={styles.tabIconContainer}>
-            <Text style={[styles.tabIcon, focused && styles.tabIconFocused]}>
-                {icons[name] || "📌"}
-            </Text>
-            {focused && (
-                <View style={styles.activeIndicator} />
-            )}
-        </View>
-    );
+function TabIcon({ icon, focused }: TabIconProps) {
+  const iconColor = focused ? COLORS.primary : COLORS.onSurfaceVariant;
+  return (
+    <View style={styles.iconContainer}>
+      <MaterialIcon name={icon} size={24} color={iconColor} filled={focused} />
+    </View>
+  );
 }
 
 export default function TabsLayout() {
-    return (
-        <Tabs
-            screenOptions={{
-                headerShown: false,
-                tabBarShowLabel: true,
-                tabBarActiveTintColor: COLORS.primary,
-                tabBarInactiveTintColor: COLORS.textTertiary,
-                tabBarStyle: {
-                    backgroundColor: COLORS.background,
-                    borderTopWidth: 1,
-                    borderTopColor: COLORS.cardBorder,
-                    height: 70,
-                    paddingBottom: 8,
-                    paddingTop: 8,
-                },
-                tabBarLabelStyle: {
-                    fontSize: TYPOGRAPHY.fontSize.xs,
-                    fontWeight: "600",
-                },
-            }}
-        >
-            <Tabs.Screen
-                name="index"
-                options={{
-                    title: "Home",
-                    tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
-                }}
-            />
-            <Tabs.Screen
-                name="practice"
-                options={{
-                    title: "Practice",
-                    tabBarIcon: ({ focused }) => <TabIcon name="practice" focused={focused} />,
-                }}
-            />
-            <Tabs.Screen
-                name="tests"
-                options={{
-                    title: "Tests",
-                    tabBarIcon: ({ focused }) => <TabIcon name="tests" focused={focused} />,
-                }}
-            />
-            <Tabs.Screen
-                name="ai"
-                options={{
-                    title: "AI Tutor",
-                    tabBarIcon: ({ focused }) => <TabIcon name="ai" focused={focused} />,
-                }}
-            />
-            <Tabs.Screen
-                name="profile"
-                options={{
-                    title: "Profile",
-                    tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
-                }}
-            />
-        </Tabs>
-    );
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const baseHeight = 60;
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.onSurfaceVariant,
+        tabBarStyle: {
+          backgroundColor: COLORS.surfaceContainerLowest,
+          borderTopWidth: 1,
+          borderTopColor: COLORS.surfaceContainer,
+          height: baseHeight + insets.bottom + 4,
+          paddingBottom: insets.bottom + 6,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: {
+          fontSize: TYPOGRAPHY.fontSize.xs,
+          fontWeight: "600",
+          fontFamily: "PlusJakartaSans_600SemiBold",
+          marginTop: 0,
+        },
+      }}
+    >
+      <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ focused }) => <TabIcon icon="home" focused={focused} /> }} />
+      <Tabs.Screen name="practice" options={{ title: "Learn", tabBarIcon: ({ focused }) => <TabIcon icon="menu_book" focused={focused} /> }} />
+      <Tabs.Screen name="tests" options={{ title: "Mock Tests", tabBarIcon: ({ focused }) => <TabIcon icon="assignment" focused={focused} /> }} />
+      <Tabs.Screen
+        name="ai"
+        options={{ title: "Papers", tabBarIcon: ({ focused }) => <TabIcon icon="history_edu" focused={focused} /> }}
+        listeners={{
+          tabPress: (event) => {
+            event.preventDefault();
+            router.push("/papers");
+          },
+        }}
+      />
+      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ focused }) => <TabIcon icon="person" focused={focused} /> }} />
+    </Tabs>
+  );
 }
 
 const styles = StyleSheet.create({
-    tabIconContainer: {
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    tabIcon: {
-        fontSize: 22,
-        opacity: 0.6,
-    },
-    tabIconFocused: {
-        opacity: 1,
-    },
-    activeIndicator: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: COLORS.primary,
-        marginTop: 4,
-    },
+  iconContainer: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
 });

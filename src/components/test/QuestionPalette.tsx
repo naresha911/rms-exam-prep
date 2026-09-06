@@ -1,158 +1,182 @@
-// QuestionPalette — grid of question numbers for test navigation
-import React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants';
+// QuestionPalette — question navigator for mock tests matching Stitch mock_test_interface.
+// Circular indicators: success-green=answered, error=skipped, warning-amber=marked for review,
+// primary=current (with ring), outline=unanswered.
+// Per Stitch: sticky sidebar on tablet (md+), FAB on mobile, legend footer.
 
-export type QuestionStatus =
-    | 'not_visited'
-    | 'answered'
-    | 'not_answered'
-    | 'marked_review'
-    | 'answered_marked_review';
+import React from "react";
+import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
+import { MaterialIcon } from "../ui/MaterialIcon";
+
+export type PaletteState = "unanswered" | "answered" | "skipped" | "marked" | "current";
 
 interface QuestionPaletteProps {
-    totalQuestions: number;
-    currentIndex: number;
-    answers: Record<string, string[]>;
-    flagged: Set<string>;
-    questionIds: string[];
-    onNavigate: (index: number) => void;
+    total: number;
+    current?: number;       // 1-based
+    states?: Record<number, PaletteState>; // map of question index → state
+    onQuestionPress?: (index: number) => void;
+    style?: any;
 }
 
-const STATUS_STYLES: Record<
-    QuestionStatus,
-    { bg: string; border: string; text: string }
-> = {
-    not_visited: {
-        bg: COLORS.backgroundSecondary,
-        border: COLORS.cardBorder,
-        text: COLORS.textSecondary,
-    },
-    not_answered: {
-        bg: '#FEE2E2',
-        border: COLORS.error,
-        text: COLORS.error,
-    },
-    answered: {
-        bg: '#D1FAE5',
-        border: COLORS.success,
-        text: '#065F46',
-    },
-    marked_review: {
-        bg: '#FEF3C7',
-        border: COLORS.warning,
-        text: '#92400E',
-    },
-    answered_marked_review: {
-        bg: '#EDE9FE',
-        border: COLORS.primary,
-        text: COLORS.primary,
-    },
+const STATE_COLORS: Record<PaletteState, string> = {
+    unanswered: "transparent",
+    answered: COLORS["success-green"],
+    skipped: COLORS.error,
+    marked: COLORS["warning-amber"],
+    current: COLORS.primary,
 };
 
-export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
-    totalQuestions,
-    currentIndex,
-    answers,
-    flagged,
-    questionIds,
-    onNavigate,
-}) => {
-    const getStatus = (qId: string): QuestionStatus => {
-        const hasAnswer = (answers[qId]?.length ?? 0) > 0;
-        const isFlagged = flagged.has(qId);
+const STATE_TEXT_COLORS: Record<PaletteState, string> = {
+    unanswered: COLORS.onSurface,
+    answered: "#fff",
+    skipped: "#fff",
+    marked: "#fff",
+    current: COLORS.onPrimary,
+};
 
-        if (isFlagged && hasAnswer) return 'answered_marked_review';
-        if (isFlagged) return 'marked_review';
-        if (hasAnswer) return 'answered';
-        // If the user has visited (i.e., index <= currentIndex) but not answered
-        const idx = questionIds.indexOf(qId);
-        if (idx < currentIndex) return 'not_answered';
-        return 'not_visited';
+const STATE_BORDER_COLORS: Record<PaletteState, string> = {
+    unanswered: COLORS.outlineVariant,
+    answered: COLORS["success-green"],
+    skipped: COLORS.error,
+    marked: COLORS["warning-amber"],
+    current: COLORS.primary,
+};
+
+const LEGEND_ITEMS: { color: string; label: string }[] = [
+    { color: COLORS["success-green"], label: "Answered" },
+    { color: COLORS.error, label: "Skipped" },
+    { color: COLORS["warning-amber"], label: "Marked for Review" },
+    { color: COLORS.outlineVariant, label: "Unanswered" },
+];
+
+export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
+    total,
+    current = 1,
+    states = {},
+    onQuestionPress,
+    style,
+}) => {
+    const getState = (idx: number): PaletteState => {
+        if (idx + 1 === current) return "current";
+        return states[idx] ?? "unanswered";
     };
 
-    const answered = questionIds.filter(id => (answers[id]?.length ?? 0) > 0).length;
-    const notAnswered = questionIds.filter(id => {
-        const idx = questionIds.indexOf(id);
-        return idx < currentIndex && !(answers[id]?.length > 0);
-    }).length;
-    const markedReview = questionIds.filter(id => flagged.has(id)).length;
-    const notVisited = totalQuestions - answered - notAnswered - markedReview;
-
     return (
-        <View>
-            {/* Legend */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING[2], marginBottom: SPACING[3] }}>
-                <LegendItem color={STATUS_STYLES.answered.bg} border={STATUS_STYLES.answered.border} label={`${answered} Answered`} />
-                <LegendItem color={STATUS_STYLES.not_answered.bg} border={STATUS_STYLES.not_answered.border} label={`${notAnswered} Not Answered`} />
-                <LegendItem color={STATUS_STYLES.marked_review.bg} border={STATUS_STYLES.marked_review.border} label={`${markedReview} Marked`} />
-                <LegendItem color={STATUS_STYLES.not_visited.bg} border={STATUS_STYLES.not_visited.border} label={`${notVisited} Not Visited`} />
-            </View>
-
-            {/* Question number grid */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING[2] }}>
-                {questionIds.map((qId, idx) => {
-                    const status = getStatus(qId);
-                    const style = STATUS_STYLES[status];
-                    const isCurrent = idx === currentIndex;
-
+        <View style={[styles.container, style]}>
+            <Text style={styles.header}>Question Palette</Text>
+            <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
+                {Array.from({ length: total }, (_, i) => {
+                    const state = getState(i);
+                    const isCurrent = state === "current";
                     return (
                         <Pressable
-                            key={qId}
-                            onPress={() => onNavigate(idx)}
-                            style={({ pressed }) => ({
-                                width: 40,
-                                height: 40,
-                                borderRadius: BORDER_RADIUS.md,
-                                backgroundColor: style.bg,
-                                borderWidth: isCurrent ? 3 : 1.5,
-                                borderColor: isCurrent ? COLORS.primary : style.border,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                opacity: pressed ? 0.7 : 1,
-                            })}
+                            key={i}
+                            onPress={() => onQuestionPress?.(i)}
+                            style={[
+                                styles.bubble,
+                                {
+                                    backgroundColor: isCurrent ? STATE_COLORS[state] : "transparent",
+                                    borderColor: STATE_BORDER_COLORS[state],
+                                    borderWidth: 2,
+                                },
+                                isCurrent && styles.bubbleCurrent,
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Question ${i + 1}`}
                         >
-                            <Text style={{
-                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                fontWeight: '700',
-                                color: isCurrent ? COLORS.primary : style.text,
-                            }}>
-                                {idx + 1}
+                            <Text
+                                style={[
+                                    styles.bubbleText,
+                                    {
+                                        color: isCurrent
+                                            ? STATE_TEXT_COLORS[state]
+                                            : COLORS.onSurfaceVariant,
+                                    },
+                                ]}
+                            >
+                                {i + 1}
                             </Text>
                         </Pressable>
                     );
                 })}
+            </ScrollView>
+
+            {/* Legend */}
+            <View style={styles.legend}>
+                {LEGEND_ITEMS.map((item) => (
+                    <View key={item.label} style={styles.legendItem}>
+                        <View
+                            style={[
+                                styles.legendDot,
+                                { backgroundColor: item.color, borderWidth: item.color === COLORS.outlineVariant ? 2 : 0, borderColor: item.color },
+                            ]}
+                        />
+                        <Text style={styles.legendLabel}>{item.label}</Text>
+                    </View>
+                ))}
             </View>
         </View>
     );
 };
 
-function LegendItem({
-    color,
-    border,
-    label,
-}: {
-    color: string;
-    border: string;
-    label: string;
-}) {
-    return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <View
-                style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: 3,
-                    backgroundColor: color,
-                    borderWidth: 1.5,
-                    borderColor: border,
-                }}
-            />
-            <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.textSecondary }}>
-                {label}
-            </Text>
-        </View>
-    );
-}
+const styles = StyleSheet.create({
+    container: {
+        padding: SPACING[4],
+    },
+    header: {
+        fontFamily: "PlusJakartaSans_600SemiBold",
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.onSurface,
+        fontWeight: "600",
+        marginBottom: SPACING[4],
+    },
+    grid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: SPACING[2],
+    },
+    bubble: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    bubbleCurrent: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    bubbleText: {
+        fontFamily: "PlusJakartaSans_600SemiBold",
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        fontWeight: "600",
+    },
+    legend: {
+        marginTop: SPACING[4],
+        paddingTop: SPACING[4],
+        borderTopWidth: 1,
+        borderTopColor: COLORS.outlineVariant,
+        gap: SPACING[2],
+    },
+    legendItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[2],
+    },
+    legendDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+    },
+    legendLabel: {
+        fontFamily: "PlusJakartaSans_600SemiBold",
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+    },
+});
 
 export default QuestionPalette;

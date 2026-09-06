@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MCQ Practice Session</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#ffdad6",
+                        "surface": "#f9f9ff",
+                        "background": "#f9f9ff",
+                        "on-tertiary-fixed": "#341100",
+                        "surface-variant": "#d8e3fb",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#ecf1ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "gradient-end": "#A855F7",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001a42",
+                        "on-secondary": "#ffffff",
+                        "outline": "#767586",
+                        "primary": "#4648d4",
+                        "surface-dim": "#cfdaf2",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "on-surface": "#111c2d",
+                        "surface-container-highest": "#d8e3fb",
+                        "tertiary": "#994100",
+                        "surface-muted": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "weakness-red": "#EF4444",
+                        "error": "#ba1a1a",
+                        "on-background": "#111c2d",
+                        "warning-amber": "#F59E0B",
+                        "on-secondary-container": "#fefcff",
+                        "primary-fixed": "#e1e0ff",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "surface-container-high": "#dee8ff",
+                        "on-primary-fixed": "#07006c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "secondary": "#0058be",
+                        "on-primary-container": "#fffbff",
+                        "surface-tint": "#494bd6",
+                        "secondary-fixed": "#d8e2ff",
+                        "inverse-primary": "#c0c1ff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface-variant": "#464554",
+                        "on-tertiary-container": "#fffbff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#6063ee",
+                        "on-primary": "#ffffff",
+                        "success-green": "#22C55E",
+                        "tertiary-container": "#c05400",
+                        "outline-variant": "#c7c4d7",
+                        "gradient-start": "#6366F1",
+                        "on-secondary-fixed-variant": "#004395",
+                        "inverse-surface": "#263143",
+                        "surface-bright": "#f9f9ff",
+                        "tertiary-fixed": "#ffdbca",
+                        "surface-container": "#e7eeff",
+                        "primary-fixed-dim": "#c0c1ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "gutter": "16px",
+                        "touch-target": "48px",
+                        "stack-lg": "24px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "stack-md": "16px",
+                        "margin-desktop": "32px",
+                        "stack-sm": "8px"
+                    },
+                    fontFamily: {
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"]
+                    },
+                    fontSize: {
+                        "label-lg": ["16px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "700" }],
+                        "label-sm": ["12px", { lineHeight: "16px", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "500" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "700" }],
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "700" }],
+                        "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* 3D Button Effect */
+        .btn-3d {
+            border-bottom-width: 4px;
+            transition: all 0.1s ease-in-out;
+        }
+        .btn-3d:active {
+            border-bottom-width: 0px;
+            transform: translateY(4px);
+        }
+
+        /* Radio input hiding for custom cards */
+        input[type="radio"].mcq-radio {
+            display: none;
+        }
+        
+        /* Card States */
+        .mcq-card {
+            transition: all 0.2s ease;
+        }
+        .mcq-radio:checked + .mcq-card {
+            background-color: theme('colors.primary-fixed');
+            border-color: theme('colors.primary');
+            box-shadow: inset 0 0 0 2px theme('colors.primary');
+        }
+        .mcq-radio:checked + .mcq-card .mcq-letter {
+            background-color: theme('colors.primary');
+            color: theme('colors.on-primary');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation (Mobile) -->
+<header class="bg-surface md:hidden flex justify-between items-center px-margin-mobile h-touch-target w-full z-40 sticky top-0 flat no shadows text-primary font-headline-md text-headline-md-mobile">
+<a aria-label="Go Back" class="text-on-surface hover:bg-surface-variant rounded-full p-2 flex items-center justify-center transition-colors" href="{{DATA:SCREEN:SCREEN_24}}">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</a>
+<span class="font-bold truncate px-4 text-center w-full">Mathematics - Fractions</span>
+<button aria-label="Pause" class="text-on-surface hover:bg-surface-variant rounded-full p-2 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="pause">pause</span>
+</button>
+</header>
+<!-- Top Navigation (Desktop) -->
+<header class="hidden md:flex bg-surface dark:bg-on-surface text-primary dark:text-primary-fixed justify-between items-center px-margin-desktop h-[72px] w-full z-40 sticky top-0 flat no shadows">
+<div class="flex items-center gap-4">
+<a aria-label="Go Back" class="text-on-surface hover:bg-surface-variant rounded-full p-2 flex items-center justify-center transition-colors" href="{{DATA:SCREEN:SCREEN_24}}">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</a>
+<span class="font-display-lg text-display-lg font-bold">Mathematics - Fractions</span>
+</div>
+<div class="flex items-center gap-4">
+<button aria-label="Pause" class="text-on-surface hover:bg-surface-variant rounded-full p-2 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="pause">pause</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-start w-full px-margin-mobile md:px-margin-desktop py-stack-lg pb-32">
+<div class="w-full max-w-[800px] flex flex-col gap-stack-lg">
+<!-- Progress Section -->
+<div class="w-full flex flex-col gap-base">
+<div class="flex justify-between items-center w-full">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Question 7 of 20</span>
+<span class="font-label-sm text-label-sm text-primary font-bold bg-primary-fixed px-3 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="timer">timer</span>
+                        14:32
+                    </span>
+</div>
+<!-- Progress Bar with gradient -->
+<div class="h-3 w-full bg-surface-variant rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-gradient-to-r from-gradient-start to-gradient-end rounded-full" style="width: 35%;"></div>
+</div>
+</div>
+<!-- Question Card -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-md md:p-stack-lg shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-outline-variant relative mt-4">
+<!-- Mascot (Fox) Decorative Element -->
+<div class="absolute -top-12 -right-4 w-24 h-24 hidden md:block">
+<img class="object-contain w-full h-full drop-shadow-md" data-alt="A playful, stylized 3D render of an intelligent fox cadet wearing a small military cap, acting as a mentor, set against a transparent background, high quality, engaging." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7KrvOOKsst3ZY9mW7JojfHNSwRnIBYL_5eRaXElCP6BxDAMDrDuaXaQCmWwGzDcsHC9vrbj5cBtogm5kUSt2XGgXHvuCNpfbsNe-BZ1q_h1DRptnFkeAyC1alen0XPdOnOxDG_vxaJDZ1yuXn0UOIfl2T0fTtSptuBvjU0oM-AUQYUnfrWlx8XR9LzNK67ChTFtVFPy6ms5DH5NhfJV-7NnGmScuAGx5AJ543jOjALnwwTc8Hvfrz"/>
+</div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-stack-lg">
+                    Which of the following is an <span class="text-primary underline decoration-primary decoration-4 underline-offset-4">improper fraction</span>?
+                </h1>
+<!-- Options -->
+<form class="flex flex-col gap-stack-md w-full" id="mcq-form">
+<label class="cursor-pointer relative w-full group">
+<input class="mcq-radio" name="answer" type="radio" value="A"/>
+<div class="mcq-card w-full flex items-center p-stack-md bg-surface-container-lowest border-2 border-outline-variant rounded-xl group-hover:border-primary group-hover:bg-surface-container shadow-sm min-h-touch-target">
+<div class="mcq-letter flex-shrink-0 w-10 h-10 rounded-lg bg-surface-variant text-on-surface flex items-center justify-center font-label-lg text-label-lg mr-4 transition-colors">A</div>
+<span class="font-body-lg text-body-lg text-on-surface">3/4</span>
+</div>
+</label>
+<label class="cursor-pointer relative w-full group">
+<input class="mcq-radio" name="answer" type="radio" value="B"/>
+<div class="mcq-card w-full flex items-center p-stack-md bg-surface-container-lowest border-2 border-outline-variant rounded-xl group-hover:border-primary group-hover:bg-surface-container shadow-sm min-h-touch-target">
+<div class="mcq-letter flex-shrink-0 w-10 h-10 rounded-lg bg-surface-variant text-on-surface flex items-center justify-center font-label-lg text-label-lg mr-4 transition-colors">B</div>
+<span class="font-body-lg text-body-lg text-on-surface">7/5</span>
+</div>
+</label>
+<label class="cursor-pointer relative w-full group">
+<input class="mcq-radio" name="answer" type="radio" value="C"/>
+<div class="mcq-card w-full flex items-center p-stack-md bg-surface-container-lowest border-2 border-outline-variant rounded-xl group-hover:border-primary group-hover:bg-surface-container shadow-sm min-h-touch-target">
+<div class="mcq-letter flex-shrink-0 w-10 h-10 rounded-lg bg-surface-variant text-on-surface flex items-center justify-center font-label-lg text-label-lg mr-4 transition-colors">C</div>
+<span class="font-body-lg text-body-lg text-on-surface">1/2</span>
+</div>
+</label>
+<label class="cursor-pointer relative w-full group">
+<input class="mcq-radio" name="answer" type="radio" value="D"/>
+<div class="mcq-card w-full flex items-center p-stack-md bg-surface-container-lowest border-2 border-outline-variant rounded-xl group-hover:border-primary group-hover:bg-surface-container shadow-sm min-h-touch-target">
+<div class="mcq-letter flex-shrink-0 w-10 h-10 rounded-lg bg-surface-variant text-on-surface flex items-center justify-center font-label-lg text-label-lg mr-4 transition-colors">D</div>
+<span class="font-body-lg text-body-lg text-on-surface">2 1/3</span>
+</div>
+</label>
+</form>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar (Fixed) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 p-margin-mobile flex justify-center items-center z-40">
+<div class="w-full max-w-[800px] flex gap-4">
+<button class="flex-1 bg-surface-container-lowest border-2 border-primary text-primary font-label-lg text-label-lg rounded-xl h-touch-target md:h-14 flex items-center justify-center btn-3d border-primary hover:bg-surface-container-low" style="border-bottom-color: theme('colors.primary');">
+                Skip
+            </button>
+<button class="flex-[2] bg-primary text-on-primary font-label-lg text-label-lg rounded-xl h-touch-target md:h-14 flex items-center justify-center btn-3d border-on-primary-fixed-variant disabled:opacity-50 disabled:cursor-not-allowed disabled:border-b-4 disabled:transform-none transition-all" disabled="" id="submit-btn">
+                Submit Mission
+            </button>
+</div>
+</div>
+<!-- Mobile Navigation Shell - Suppressed because this is a transactional/focused task screen -->
+<!-- The prompt indicated a linear/task focused state, so bottom nav is intentionally omitted based on instructions. -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('mcq-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const radios = document.querySelectorAll('.mcq-radio');
+
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (form.querySelector('input[name="answer"]:checked')) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                });
+            });
+
+            submitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const selected = form.querySelector('input[name="answer"]:checked');
+                if (selected) {
+                    // Simple interaction feedback
+                    submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin mr-2" data-icon="sync">sync</span> Validating...';
+                    setTimeout(() => {
+                        submitBtn.innerHTML = 'Next Mission <span class="material-symbols-outlined ml-2" data-icon="arrow_forward">arrow_forward</span>';
+                        submitBtn.classList.remove('bg-primary', 'border-on-primary-fixed-variant');
+                        submitBtn.classList.add('bg-success-green', 'border-green-800');
+                    }, 800);
+                }
+            });
+        });
+    </script>
+</body></html>

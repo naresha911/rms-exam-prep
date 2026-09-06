@@ -6,9 +6,11 @@ import {
     View,
     ViewStyle,
     TextStyle,
+    StyleSheet,
     Platform,
 } from "react-native";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+import { MaterialIcon, MaterialIconName } from "./MaterialIcon";
 
 interface ButtonProps {
     title: string;
@@ -19,9 +21,31 @@ interface ButtonProps {
     disabled?: boolean;
     fullWidth?: boolean;
     icon?: React.ReactNode;
+    iconRight?: MaterialIconName;
     style?: ViewStyle;
     textStyle?: TextStyle;
 }
+
+const VARIANT_BG: Record<NonNullable<ButtonProps["variant"]>, string> = {
+    primary: COLORS.primary,
+    secondary: COLORS.secondaryContainer,
+    outline: COLORS.cardBackground,
+    danger: COLORS.error,
+};
+
+const VARIANT_BORDER: Record<NonNullable<ButtonProps["variant"]>, string> = {
+    primary: "transparent",
+    secondary: "transparent",
+    outline: COLORS.primary,
+    danger: "transparent",
+};
+
+const VARIANT_SHADOW: Record<NonNullable<ButtonProps["variant"]>, string> = {
+    primary: COLORS.onPrimaryFixedVariant,
+    secondary: COLORS.onSecondaryFixedVariant,
+    outline: "transparent",
+    danger: COLORS.errorText,
+};
 
 export const Button: React.FC<ButtonProps> = ({
     title,
@@ -32,155 +56,166 @@ export const Button: React.FC<ButtonProps> = ({
     disabled = false,
     fullWidth = false,
     icon,
+    iconRight,
     style,
     textStyle,
 }) => {
-    // Variant styles - Stitch Design System "Tactile Tonal Layers"
-    // Primary has 3D effect with bottom shadow
-    const variantStyles: Record<string, ViewStyle> = {
-        primary: {
-            backgroundColor: COLORS.primary,
-            borderWidth: 0,
-            borderColor: "transparent",
-            // 3D tactile effect - bottom shadow
-            shadowColor: COLORS.onPrimaryFixedVariant,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-            elevation: 4,
-        },
-        secondary: {
-            backgroundColor: COLORS.secondaryContainer,
-            borderWidth: 0,
-            borderColor: "transparent",
-            shadowColor: COLORS.onSecondaryFixedVariant,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-            elevation: 4,
-        },
-        outline: {
-            backgroundColor: COLORS.cardBackground,
-            borderWidth: 2,
-            borderColor: COLORS.primary,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0,
-            shadowRadius: 0,
-            elevation: 0,
-        },
-        danger: {
-            backgroundColor: COLORS.error,
-            borderWidth: 0,
-            borderColor: "transparent",
-            shadowColor: '#7f1d1d',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-            elevation: 4,
-        },
-    };
+    const isDisabled = disabled || loading;
 
-    // Size styles with explicit minHeight to guarantee visibility
-    const sizeStyles: Record<string, ViewStyle> = {
-        sm: {
-            paddingVertical: SPACING[2],
-            paddingHorizontal: SPACING[4],
-            minHeight: 40,
-        },
-        md: {
-            paddingVertical: SPACING[3],
-            paddingHorizontal: SPACING[6],
-            minHeight: 48,
-        },
-        lg: {
-            paddingVertical: SPACING[4],
-            paddingHorizontal: SPACING[8],
-            minHeight: 56,
-        },
-    };
-
-    const textSizeStyles: Record<string, TextStyle> = {
-        sm: { fontSize: TYPOGRAPHY.fontSize.sm },
-        md: { fontSize: TYPOGRAPHY.fontSize.base },
-        lg: { fontSize: TYPOGRAPHY.fontSize.lg },
-    };
+    const rightIconColor =
+        variant === "primary" || variant === "danger" || variant === "secondary"
+            ? COLORS.onPrimary
+            : variant === "outline"
+                ? COLORS.primary
+                : COLORS.onSurface;
+    const rightIconSize = size === "lg" ? 22 : size === "sm" ? 16 : 18;
 
     const textColor =
         variant === "primary" || variant === "danger"
-            ? COLORS.textInverse
+            ? COLORS.onPrimary
             : variant === "secondary"
-                ? COLORS.onSecondaryContainer  // Use on-secondary-container for secondary button text
+                ? COLORS.onSecondaryContainer
                 : variant === "outline"
                     ? COLORS.primary
                     : COLORS.textPrimary;
 
+    const sizePad =
+        size === "lg"
+            ? { paddingVertical: SPACING[4], paddingHorizontal: SPACING[8], minHeight: 56 }
+            : size === "sm"
+                ? { paddingVertical: SPACING[2], paddingHorizontal: SPACING[4], minHeight: 40 }
+                : { paddingVertical: SPACING[3], paddingHorizontal: SPACING[6], minHeight: 48 };
+
+    const textSize =
+        size === "lg"
+            ? TYPOGRAPHY.fontSize.lg
+            : size === "sm"
+                ? TYPOGRAPHY.fontSize.sm
+                : TYPOGRAPHY.fontSize.base;
+
+    // Outer Pressable is transparent hit-target; painted surface is the inner View.
+    // NativeWind remaps Pressable and can drop backgroundColor from style callbacks,
+    // which made primary CTAs render as white-on-white on device.
     return (
         <Pressable
             onPress={onPress}
-            disabled={disabled || loading}
-            // 3D Tactile Effect - Stitch Design System
-            style={({ pressed }) => {
-                const isDisabled = disabled || loading;
-                const isPressed = pressed && !isDisabled;
-
-                // 3D effect: when pressed, button moves down and shadow reduces
-                const baseStyle: ViewStyle = {
-                    borderRadius: BORDER_RADIUS.xl,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexDirection: "row",
-                    width: fullWidth ? "100%" : undefined,
-                    // CRITICAL: Ensure button is always visible
-                    zIndex: 1,
-                    elevation: Platform.OS === "android" ? 3 : 0,
-                    // Apply backgroundColor explicitly
-                    backgroundColor:
-                        variantStyles[variant].backgroundColor || COLORS.primary,
-                    // Apply border if defined
-                    borderWidth: variantStyles[variant].borderWidth || 0,
-                    borderColor: variantStyles[variant].borderColor || "transparent",
-                    // Apply size
-                    paddingVertical: sizeStyles[size].paddingVertical,
-                    paddingHorizontal: sizeStyles[size].paddingHorizontal,
-                    minHeight: sizeStyles[size].minHeight,
-                    // 3D Transform: translate down when pressed
-                    transform: [{ translateY: isPressed ? 2 : 0 }],
-                    // 3D Shadow: reduce when pressed
-                    shadowColor: variantStyles[variant].shadowColor || '#000',
-                    shadowOffset: { width: 0, height: isPressed ? 2 : 4 },
-                    shadowOpacity: isPressed ? 0.5 : 1,
-                    shadowRadius: 0,
-                    // Opacity for disabled states only (not pressed - preserve 3D effect)
+            disabled={isDisabled}
+            style={({ pressed }) => [
+                styles.pressable,
+                fullWidth && styles.fullWidth,
+                {
                     opacity: isDisabled ? 0.5 : 1,
-                };
-                return [baseStyle, style];
-            }}
+                    transform: [{ translateY: pressed && !isDisabled ? 2 : 0 }],
+                },
+                style,
+            ]}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isDisabled }}
         >
-            {loading ? (
-                <ActivityIndicator
-                    color={variant === "primary" || variant === "danger" ? "#fff" : COLORS.primary}
-                    size="small"
-                />
-            ) : (
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    {icon && <View style={{ marginRight: SPACING[2] }}>{icon}</View>}
-                    <Text
-                        style={[
-                            {
-                                color: textColor,
-                                fontWeight: "700",
+            {({ pressed }) => (
+                <View
+                    style={[
+                        styles.surface,
+                        sizePad,
+                        fullWidth && styles.fullWidth,
+                        {
+                            backgroundColor: VARIANT_BG[variant],
+                            borderWidth: variant === "outline" ? 2 : 0,
+                            borderColor: VARIANT_BORDER[variant],
+                            // 3D tactile bottom edge (Stitch btn-3d)
+                            borderBottomWidth: variant === "outline" ? 2 : 4,
+                            borderBottomColor:
+                                variant === "outline"
+                                    ? COLORS.primary
+                                    : VARIANT_SHADOW[variant],
+                            shadowColor: VARIANT_SHADOW[variant],
+                            shadowOffset: {
+                                width: 0,
+                                height: pressed && !isDisabled ? 2 : 4,
                             },
-                            textSizeStyles[size],
-                            textStyle,
-                        ]}
-                    >
-                        {title}
-                    </Text>
+                            shadowOpacity: variant === "outline" ? 0 : pressed && !isDisabled ? 0.5 : 1,
+                            shadowRadius: 0,
+                            elevation:
+                                variant === "outline"
+                                    ? 0
+                                    : Platform.OS === "android"
+                                        ? pressed && !isDisabled
+                                            ? 2
+                                            : 4
+                                        : 0,
+                        },
+                    ]}
+                >
+                    {loading ? (
+                        <ActivityIndicator
+                            color={
+                                variant === "primary" || variant === "danger"
+                                    ? COLORS.onPrimary
+                                    : COLORS.primary
+                            }
+                            size="small"
+                        />
+                    ) : (
+                        <View style={styles.content}>
+                            {icon && <View style={styles.iconLeft}>{icon}</View>}
+                            <Text
+                                style={[
+                                    styles.label,
+                                    { color: textColor, fontSize: textSize },
+                                    textStyle,
+                                ]}
+                            >
+                                {title}
+                            </Text>
+                            {iconRight && (
+                                <View style={styles.iconRight}>
+                                    <MaterialIcon
+                                        name={iconRight}
+                                        size={rightIconSize}
+                                        color={rightIconColor}
+                                        weight={700}
+                                        filled
+                                    />
+                                </View>
+                            )}
+                        </View>
+                    )}
                 </View>
             )}
         </Pressable>
     );
 };
+
+const styles = StyleSheet.create({
+    pressable: {
+        borderRadius: BORDER_RADIUS.xl,
+        alignSelf: "stretch",
+    },
+    fullWidth: {
+        width: "100%",
+    },
+    surface: {
+        borderRadius: BORDER_RADIUS.xl,
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+    },
+    content: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    iconLeft: {
+        marginRight: SPACING[2],
+    },
+    iconRight: {
+        marginLeft: SPACING[2],
+    },
+    label: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontWeight: "700",
+        color: COLORS.onPrimary,
+    },
+});
 
 export default Button;

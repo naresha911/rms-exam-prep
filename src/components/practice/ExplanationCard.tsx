@@ -19,21 +19,21 @@ export const ExplanationCard: React.FC<ExplanationCardProps> = ({
 }) => {
     const config = isCorrect
         ? {
-              mascot: 'celebrating' as const,
-              headline: 'Excellent! 🎉',
-              subtext: "That's the right answer!",
-              bg: '#D1FAE5',
-              border: COLORS.success,
-              headlineColor: '#065F46',
-          }
+            mascot: 'celebrating' as const,
+            headline: 'Excellent! 🎉',
+            subtext: "That's the right answer!",
+            bg: COLORS.successLight,
+            border: COLORS.success,
+            headlineColor: COLORS.successText,
+        }
         : {
-              mascot: 'encouraging' as const,
-              headline: 'Almost there! 💪',
-              subtext: `The correct answer is ${correctOptionKey}`,
-              bg: '#FEF3C7',
-              border: COLORS.warning,
-              headlineColor: '#92400E',
-          };
+            mascot: 'encouraging' as const,
+            headline: 'Almost there! 💪',
+            subtext: `The correct answer is ${correctOptionKey}`,
+            bg: COLORS.warningLight,
+            border: COLORS.warning,
+            headlineColor: COLORS.warningText,
+        };
 
     return (
         <View

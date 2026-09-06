@@ -1,370 +1,364 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Card } from "../../components/ui/Card";
-import { MascotDisplay } from "../../components/shared/MascotDisplay";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+// Parent Dashboard — Stitch-aligned parent monitoring screen.
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import { SafeAreaView } from "react-native";
+import { router } from "expo-router";
 
-// Mock student data
-const STUDENT_DATA = {
-    name: "Rohit Kumar",
-    class: "Class 5",
-    targetClass: "Class 6",
-    overallProgress: 68,
-    questionsAttempted: 487,
-    averageAccuracy: 78,
-    studyTime: "23h 45m",
-    currentStreak: 12,
-    xp: 2450,
-    rank: 42,
-};
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { TopAppBar } from "@/components/ui/TopAppBar";
+import { Card } from "@/components/ui/Card";
+import { MascotDisplay } from "@/components/shared/MascotDisplay";
 
+// Mock data — replace with Supabase fetch
+const STUDENT = { name: "Rahul Kumar", class: "Class 6", overallProgress: 68 };
+const STATS = [
+    { label: "Questions", value: "847", icon: "quiz" as const },
+    { label: "Accuracy", value: "72%", icon: "trending_up" as const },
+    { label: "Study Time", value: "12h", icon: "schedule" as const },
+    { label: "Streak", value: "7 days", icon: "local_fire_department" as const },
+];
 const WEEKLY_DATA = [
-    { day: "Mon", questions: 18, accuracy: 80 },
-    { day: "Tue", questions: 25, accuracy: 75 },
-    { day: "Wed", questions: 15, accuracy: 85 },
-    { day: "Thu", questions: 30, accuracy: 70 },
-    { day: "Fri", questions: 22, accuracy: 82 },
-    { day: "Sat", questions: 35, accuracy: 78 },
-    { day: "Sun", questions: 28, accuracy: 90 },
+    { day: "Mon", hours: 1.5 },
+    { day: "Tue", hours: 2.0 },
+    { day: "Wed", hours: 0.5 },
+    { day: "Thu", hours: 1.5 },
+    { day: "Fri", hours: 2.5 },
+    { day: "Sat", hours: 3.0 },
+    { day: "Sun", hours: 1.0 },
 ];
-
 const SUBJECT_PERFORMANCE = [
-    { subject: "Mathematics", progress: 75, color: "#6366F1" },
-    { subject: "English", progress: 68, color: "#22C55E" },
-    { subject: "Intelligence", progress: 82, color: "#F59E0B" },
-    { subject: "GK", progress: 60, color: "#EF4444" },
+    { name: "Mathematics", score: 75, color: COLORS.primary },
+    { name: "Intelligence", score: 62, color: "#F59E0B" },
+    { name: "English", score: 80, color: "#10B981" },
+    { name: "GK & Current Affairs", score: 55, color: "#8B5CF6" },
 ];
-
-const WEAK_AREAS = [
-    "Indian Geography (40%)",
-    "Algebraic Equations (55%)",
-    "Verbal Analogies (58%)",
-];
-
-const STRENGTHS = [
-    "Pattern Recognition (92%)",
-    "Reading Comprehension (88%)",
-    "Number Series (85%)",
-];
+const STRENGTHS = ["Strong in Arithmetic", "Good reasoning skills", "Improving vocabulary"];
+const WEAK_AREAS = ["Geometry proofs", "Current affairs", "Logical sequences"];
 
 export default function ParentDashboardScreen() {
-    const maxQuestions = Math.max(...WEEKLY_DATA.map((d) => d.questions));
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
+
+    const maxHours = Math.max(...WEEKLY_DATA.map((d) => d.hours));
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <SafeAreaView style={styles.container}>
+            <TopAppBar
+                title="Parent Dashboard"
+                showNotification
+                onPressNotification={() => { }}
+            />
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[5] }}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
-                <View style={{ marginBottom: SPACING[5] }}>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                            fontWeight: "800",
-                            color: COLORS.textPrimary,
-                        }}
-                    >
-                        Parent Dashboard
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.base,
-                            color: COLORS.textSecondary,
-                            marginTop: SPACING[1],
-                        }}
-                    >
-                        Track your child's progress
-                    </Text>
-                </View>
-
                 {/* Student Profile Card */}
-                <Card
-                    variant="elevated"
-                    style={{
-                        backgroundColor: COLORS.primary,
-                        marginBottom: SPACING[4],
-                    }}
-                >
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <View
-                            style={{
-                                width: 64,
-                                height: 64,
-                                borderRadius: 32,
-                                backgroundColor: "rgba(255,255,255,0.2)",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                marginRight: SPACING[4],
-                            }}
-                        >
-                            <MascotDisplay expression="happy" size={56} />
+                <View style={styles.profileCard}>
+                    <View style={styles.profileRow}>
+                        <View style={styles.profileMascot}>
+                            <MascotDisplay expression="celebrating" size={64} />
                         </View>
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xl,
-                                    fontWeight: "800",
-                                    color: COLORS.onPrimary,
-                                }}
-                            >
-                                {STUDENT_DATA.name}
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    color: "rgba(255,255,255,0.8)",
-                                }}
-                            >
-                                {STUDENT_DATA.class} → {STUDENT_DATA.targetClass}
-                            </Text>
+                        <View style={styles.profileInfo}>
+                            <Text style={styles.profileName}>{STUDENT.name}</Text>
+                            <Text style={styles.profileClass}>{STUDENT.class}</Text>
                         </View>
-                        <View style={{ alignItems: "flex-end" }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                    fontWeight: "800",
-                                    color: COLORS.warning,
-                                }}
-                            >
-                                {STUDENT_DATA.overallProgress}%
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xs,
-                                    color: "rgba(255,255,255,0.8)",
-                                }}
-                            >
-                                Overall
-                            </Text>
+                        <View style={styles.profileProgress}>
+                            <Text style={styles.progressValue}>{STUDENT.overallProgress}%</Text>
+                            <Text style={styles.progressLabel}>Overall</Text>
                         </View>
                     </View>
-                </Card>
+                </View>
 
-                {/* Key Stats Grid */}
-                <View
-                    style={{
-                        flexDirection: "row",
-                        flexWrap: "wrap",
-                        gap: SPACING[3],
-                        marginBottom: SPACING[4],
-                    }}
-                >
-                    {[
-                        { label: "Questions", value: STUDENT_DATA.questionsAttempted, icon: "📝", color: COLORS.primary },
-                        { label: "Accuracy", value: `${STUDENT_DATA.averageAccuracy}%`, icon: "🎯", color: COLORS.success },
-                        { label: "Study Time", value: STUDENT_DATA.studyTime, icon: "⏱️", color: COLORS.warning },
-                        { label: "Streak", value: `${STUDENT_DATA.currentStreak} days`, icon: "🔥", color: COLORS.error },
-                    ].map((stat, index) => (
-                        <View
-                            key={index}
-                            style={{
-                                flex: 1,
-                                minWidth: "47%",
-                            }}
-                        >
-                            <Card variant="elevated" style={{ alignItems: "center" }}>
-                                <Text style={{ fontSize: 28 }}>{stat.icon}</Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.lg,
-                                        fontWeight: "800",
-                                        color: stat.color,
-                                        marginTop: SPACING[1],
-                                    }}
-                                >
-                                    {stat.value}
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.xs,
-                                        color: COLORS.textSecondary,
-                                    }}
-                                >
-                                    {stat.label}
-                                </Text>
+                {/* Stats Grid */}
+                <View style={styles.statsGrid}>
+                    {STATS.map((stat, index) => (
+                        <View key={index} style={styles.statCardWrap}>
+                            <Card variant="elevated" style={styles.statCard}>
+                                <MaterialIcon name={stat.icon} size={22} color={COLORS.primary} />
+                                <Text style={styles.statValue}>{stat.value}</Text>
+                                <Text style={styles.statLabel}>{stat.label}</Text>
                             </Card>
                         </View>
                     ))}
                 </View>
 
-                {/* Weekly Performance Chart */}
-                <Card variant="elevated" style={{ marginBottom: SPACING[4] }}>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.lg,
-                            fontWeight: "700",
-                            color: COLORS.textPrimary,
-                            marginBottom: SPACING[4],
-                        }}
-                    >
-                        This Week's Activity
-                    </Text>
-
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-around",
-                            alignItems: "flex-end",
-                            height: 120,
-                        }}
-                    >
+                {/* Weekly Study Chart */}
+                <Card variant="elevated" style={styles.chartCard}>
+                    <Text style={styles.sectionTitle}>Weekly Study Time</Text>
+                    <View style={styles.chartContainer}>
                         {WEEKLY_DATA.map((day, index) => (
-                            <View key={index} style={{ alignItems: "center" }}>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.xs,
-                                        color: COLORS.textSecondary,
-                                        marginBottom: SPACING[1],
-                                    }}
-                                >
-                                    {day.questions}
-                                </Text>
-                                <View
-                                    style={{
-                                        width: 24,
-                                        height: (day.questions / maxQuestions) * 80,
-                                        backgroundColor: COLORS.primary,
-                                        borderTopLeftRadius: 4,
-                                        borderTopRightRadius: 4,
-                                    }}
-                                />
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.xs,
-                                        color: COLORS.textSecondary,
-                                        marginTop: SPACING[1],
-                                    }}
-                                >
-                                    {day.day}
-                                </Text>
+                            <View key={index} style={styles.barColumn}>
+                                <Text style={styles.barValue}>{day.hours}h</Text>
+                                <View style={styles.barTrack}>
+                                    <View
+                                        style={[
+                                            styles.barFill,
+                                            {
+                                                height: `${(day.hours / maxHours) * 100}%`,
+                                            },
+                                        ]}
+                                    />
+                                </View>
+                                <Text style={styles.barLabel}>{day.day}</Text>
                             </View>
                         ))}
                     </View>
                 </Card>
 
                 {/* Subject Performance */}
-                <Card variant="elevated" style={{ marginBottom: SPACING[4] }}>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.lg,
-                            fontWeight: "700",
-                            color: COLORS.textPrimary,
-                            marginBottom: SPACING[4],
-                        }}
-                    >
-                        Subject-wise Progress
-                    </Text>
+                <Card variant="elevated" style={styles.subjectCard}>
+                    <Text style={styles.sectionTitle}>Subject Progress</Text>
                     {SUBJECT_PERFORMANCE.map((subject, index) => (
-                        <View key={index} style={{ marginBottom: SPACING[3] }}>
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    justifyContent: "space-between",
-                                    marginBottom: SPACING[1],
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.base,
-                                        fontWeight: "600",
-                                        color: COLORS.textPrimary,
-                                    }}
-                                >
-                                    {subject.subject}
+                        <View key={index} style={styles.subjectRow}>
+                            <Text style={styles.subjectName}>{subject.name}</Text>
+                            <View style={styles.subjectProgressContainer}>
+                                <View style={styles.subjectProgressTrack}>
+                                    <View
+                                        style={[
+                                            styles.subjectProgressFill,
+                                            { width: `${subject.score}%`, backgroundColor: subject.color },
+                                        ]}
+                                    />
+                                </View>
+                                <Text style={[styles.subjectScore, { color: subject.color }]}>
+                                    {subject.score}%
                                 </Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.sm,
-                                        fontWeight: "700",
-                                        color: subject.color,
-                                    }}
-                                >
-                                    {subject.progress}%
-                                </Text>
-                            </View>
-                            <View
-                                style={{
-                                    height: 8,
-                                    backgroundColor: COLORS.surfaceContainer,
-                                    borderRadius: 4,
-                                    overflow: "hidden",
-                                }}
-                            >
-                                <View
-                                    style={{
-                                        width: `${subject.progress}%`,
-                                        height: "100%",
-                                        backgroundColor: subject.color,
-                                    }}
-                                />
                             </View>
                         </View>
                     ))}
                 </Card>
 
-                {/* Strengths & Weaknesses */}
-                <View style={{ flexDirection: "row", gap: SPACING[3], marginBottom: SPACING[4] }}>
-                    <View style={{ flex: 1 }}>
-                        <Card variant="elevated" style={{ backgroundColor: COLORS.successLight }}>
-                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: SPACING[2] }}>
-                                <Text style={{ fontSize: 20 }}>💪</Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.base,
-                                        fontWeight: "700",
-                                        color: COLORS.success,
-                                        marginLeft: SPACING[2],
-                                    }}
-                                >
-                                    Strengths
-                                </Text>
+                {/* Strengths & Weak Areas */}
+                <View style={styles.insightRow}>
+                    <View style={styles.insightCard}>
+                        <View style={[styles.insightInner, { backgroundColor: COLORS.secondaryLight }]}>
+                            <View style={styles.insightHeader}>
+                                <MaterialIcon name="thumb_up" size={20} color={COLORS.secondary} />
+                                <Text style={styles.insightTitle}>Strengths</Text>
                             </View>
                             {STRENGTHS.map((item, index) => (
-                                <Text
-                                    key={index}
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.sm,
-                                        color: COLORS.textPrimary,
-                                        marginBottom: SPACING[1],
-                                    }}
-                                >
+                                <Text key={index} style={styles.insightItem}>
                                     • {item}
                                 </Text>
                             ))}
-                        </Card>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Card variant="elevated" style={{ backgroundColor: COLORS.errorLight }}>
-                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: SPACING[2] }}>
-                                <Text style={{ fontSize: 20 }}>📚</Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.base,
-                                        fontWeight: "700",
-                                        color: COLORS.error,
-                                        marginLeft: SPACING[2],
-                                    }}
-                                >
-                                    Focus Areas
-                                </Text>
+                    <View style={styles.insightCard}>
+                        <View style={[styles.insightInner, { backgroundColor: COLORS.tertiaryLight }]}>
+                            <View style={styles.insightHeader}>
+                                <MaterialIcon name="trending_up" size={20} color={COLORS.tertiary} />
+                                <Text style={styles.insightTitle}>Focus Areas</Text>
                             </View>
                             {WEAK_AREAS.map((item, index) => (
-                                <Text
-                                    key={index}
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.sm,
-                                        color: COLORS.textPrimary,
-                                        marginBottom: SPACING[1],
-                                    }}
-                                >
+                                <Text key={index} style={styles.insightItem}>
                                     • {item}
                                 </Text>
                             ))}
-                        </Card>
+                        </View>
                     </View>
                 </View>
             </ScrollView>
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingHorizontal: SPACING[4],
+        paddingBottom: SPACING[10],
+    },
+    profileCard: {
+        marginTop: SPACING[4],
+        backgroundColor: COLORS.primary,
+        borderRadius: BORDER_RADIUS["2xl"],
+        padding: SPACING[4],
+        marginBottom: SPACING[4],
+    },
+    profileRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    profileMascot: {
+        marginRight: SPACING[3],
+    },
+    profileInfo: {
+        flex: 1,
+    },
+    profileName: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.xl,
+        color: COLORS.onPrimary,
+        marginBottom: SPACING[1],
+    },
+    profileClass: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onPrimary,
+        opacity: 0.85,
+    },
+    profileProgress: {
+        alignItems: "flex-end",
+    },
+    progressValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize["2xl"],
+        color: COLORS.onPrimary,
+    },
+    progressLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onPrimary,
+        opacity: 0.8,
+    },
+    statsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: SPACING[2],
+        marginBottom: SPACING[4],
+    },
+    statCardWrap: {
+        width: "48%",
+    },
+    statCard: {
+        alignItems: "center",
+        paddingVertical: SPACING[4],
+        borderRadius: BORDER_RADIUS["2xl"],
+    },
+    statValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.xl,
+        color: COLORS.onSurface,
+        marginTop: SPACING[2],
+    },
+    statLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        marginTop: SPACING[1],
+    },
+    chartCard: {
+        marginBottom: SPACING[4],
+        borderRadius: BORDER_RADIUS["2xl"],
+        padding: SPACING[4],
+    },
+    sectionTitle: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+        marginBottom: SPACING[4],
+    },
+    chartContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        height: 120,
+    },
+    barColumn: {
+        flex: 1,
+        alignItems: "center",
+    },
+    barValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        marginBottom: SPACING[1],
+    },
+    barTrack: {
+        width: 24,
+        height: 80,
+        backgroundColor: COLORS.surfaceVariant,
+        borderRadius: BORDER_RADIUS.md,
+        justifyContent: "flex-end",
+        overflow: "hidden",
+    },
+    barFill: {
+        width: "100%",
+        backgroundColor: COLORS.primary,
+        borderRadius: BORDER_RADIUS.md,
+    },
+    barLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        marginTop: SPACING[2],
+    },
+    subjectCard: {
+        marginBottom: SPACING[4],
+        borderRadius: BORDER_RADIUS["2xl"],
+        padding: SPACING[4],
+    },
+    subjectRow: {
+        marginBottom: SPACING[3],
+    },
+    subjectName: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+        marginBottom: SPACING[2],
+    },
+    subjectProgressContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[2],
+    },
+    subjectProgressTrack: {
+        flex: 1,
+        height: 8,
+        backgroundColor: COLORS.surfaceVariant,
+        borderRadius: 4,
+        overflow: "hidden",
+    },
+    subjectProgressFill: {
+        height: "100%",
+        borderRadius: 4,
+    },
+    subjectScore: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        minWidth: 40,
+        textAlign: "right",
+    },
+    insightRow: {
+        flexDirection: "row",
+        gap: SPACING[3],
+        marginBottom: SPACING[4],
+    },
+    insightCard: {
+        flex: 1,
+    },
+    insightInner: {
+        borderRadius: BORDER_RADIUS["2xl"],
+        padding: SPACING[4],
+    },
+    insightHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[2],
+        marginBottom: SPACING[2],
+    },
+    insightTitle: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+    },
+    insightItem: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        lineHeight: 20,
+    },
+});

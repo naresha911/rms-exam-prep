@@ -184,7 +184,7 @@ export default function TopicPracticeScreen() {
                                 borderRadius: BORDER_RADIUS.lg,
                                 borderWidth: 2,
                                 borderColor: selectedCount === count ? COLORS.primary : COLORS.cardBorder,
-                                backgroundColor: selectedCount === count ? "#EDE9FE" : COLORS.background,
+                                backgroundColor: selectedCount === count ? COLORS.primaryFixed : COLORS.background,
                                 alignItems: "center",
                                 opacity: pressed ? 0.8 : 1,
                             })}

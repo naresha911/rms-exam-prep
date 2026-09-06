@@ -85,7 +85,7 @@ export const TestInstructions: React.FC<TestInstructionsProps> = ({
                         key={item.label}
                         style={{
                             flex: 1,
-                            backgroundColor: '#EDE9FE',
+                            backgroundColor: COLORS.primaryFixed,
                             borderRadius: BORDER_RADIUS.xl,
                             padding: SPACING[3],
                             alignItems: 'center',

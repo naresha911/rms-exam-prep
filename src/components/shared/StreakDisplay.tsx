@@ -26,7 +26,7 @@ export const StreakDisplay: React.FC<StreakDisplayProps> = ({
             style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: "#FFF7ED",
+                backgroundColor: COLORS.tertiaryLight,
                 paddingHorizontal: style.padding,
                 paddingVertical: style.padding / 2,
                 borderRadius: BORDER_RADIUS.full,

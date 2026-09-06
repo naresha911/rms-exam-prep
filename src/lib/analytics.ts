@@ -16,6 +16,14 @@ let posthogClient: PostHog | null = null;
  * Initialize PostHog. Call once at app startup.
  */
 export const initAnalytics = (): void => {
+    // Development devices frequently cannot reach the configured PostHog host.
+    // Avoid starting the SDK in Expo development so failed flush retries do not
+    // fill the screen with LogBox errors or interfere with UI interaction.
+    if (__DEV__) {
+        console.log('[Analytics] Development build, analytics disabled');
+        return;
+    }
+
     if (!POSTHOG_API_KEY) {
         console.warn('[Analytics] No PostHog API key found, analytics disabled');
         return;
@@ -106,6 +114,18 @@ export const EVENTS = {
     TEST_STARTED: 'test_started',
     TEST_SUBMITTED: 'test_submitted',
     TEST_ABANDONED: 'test_abandoned',
+
+    // Previous Year Papers
+    PAPERS_LIST_VIEWED: 'papers_list_viewed',
+    PAPER_FILTER_SELECTED: 'paper_filter_selected',
+    PAPER_OPENED: 'paper_opened',
+    PAPER_STARTED: 'paper_started',
+    PAPER_RESUMED: 'paper_resumed',
+    PAPER_COMPLETED: 'paper_completed',
+    PAPER_RESULT_VIEWED: 'paper_result_viewed',
+    PAPER_REATTEMPTED: 'paper_reattempted',
+    PAPER_PDF_OPENED: 'paper_pdf_opened',
+    PAPER_DOWNLOAD_FAILED: 'paper_download_failed',
 
     // Gamification
     XP_EARNED: 'xp_earned',

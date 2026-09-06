@@ -27,40 +27,40 @@ export const OptionCard: React.FC<OptionCardProps> = ({
         if (isCorrect === true && isSelected) {
             // Correct and selected
             return {
-                bg: '#D1FAE5',
+                bg: COLORS.successLight,
                 border: COLORS.success,
                 labelBg: COLORS.success,
-                labelColor: '#fff',
-                textColor: '#065F46',
+                labelColor: COLORS.textInverse,
+                textColor: COLORS.successText,
             };
         }
         if (isCorrect === false && isSelected) {
             // Wrong answer selected
             return {
-                bg: '#FEE2E2',
+                bg: COLORS.errorLight,
                 border: COLORS.error,
                 labelBg: COLORS.error,
-                labelColor: '#fff',
-                textColor: '#7F1D1D',
+                labelColor: COLORS.textInverse,
+                textColor: COLORS.errorText,
             };
         }
         if (isCorrect === true && !isSelected) {
             // Show correct answer after wrong selection
             return {
-                bg: '#D1FAE5',
+                bg: COLORS.successLight,
                 border: COLORS.success,
                 labelBg: COLORS.success,
-                labelColor: '#fff',
-                textColor: '#065F46',
+                labelColor: COLORS.textInverse,
+                textColor: COLORS.successText,
             };
         }
         if (isSelected) {
             // Selected but not yet revealed
             return {
-                bg: '#EDE9FE',
+                bg: COLORS.primaryFixed,
                 border: COLORS.primary,
                 labelBg: COLORS.primary,
-                labelColor: '#fff',
+                labelColor: COLORS.textInverse,
                 textColor: COLORS.primary,
             };
         }

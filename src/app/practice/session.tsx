@@ -1,15 +1,19 @@
+// Practice Session — Stitch-aligned MCQ practice screen.
+// Per Stitch: sticky header, gradient progress bar, question card with left accent,
+// AnswerCard options, inline explanation feedback, sticky bottom CTA.
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
-import { ProgressBar } from "../../components/ui/ProgressBar";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
+import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { MaterialIcon } from "../../components/ui/MaterialIcon";
+import { AnswerCard } from "../../components/practice/AnswerCard";
 import { fetchPracticeQuestions, toggleBookmark, reportQuestion } from "../../lib/supabase";
-import { PracticeQuestion, QuestionOption } from "../../types";
+import { PracticeQuestion } from "../../types";
 import { useAppStore } from "../../store/useAppStore";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS, SUBJECTS } from "../../constants";
 import { trackEvent, trackPracticeCompletion, EVENTS } from "../../lib/analytics";
@@ -26,7 +30,7 @@ export default function PracticeSessionScreen() {
     const [loading, setLoading] = useState(true);
     const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+    const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const [correctCount, setCorrectCount] = useState(0);
@@ -36,6 +40,11 @@ export default function PracticeSessionScreen() {
     const questionCount = parseInt(count || "10", 10);
     const subjectIdNum = parseInt(subjectId || "0", 10);
     const topicIdNum = topicId ? parseInt(topicId, 10) : undefined;
+
+    // Get subject name for header
+    const allSubjects = [...SUBJECTS.class6, ...SUBJECTS.class9];
+    const subject = allSubjects.find((s) => s.id === subjectIdNum);
+    const subjectName = subject?.name || "Practice";
 
     useEffect(() => {
         loadQuestions();
@@ -48,7 +57,7 @@ export default function PracticeSessionScreen() {
             const { data, error } = await fetchPracticeQuestions(
                 subjectIdNum,
                 topicIdNum,
-                user?.target_class === "9" ? 2 : 1, // standard id (1=class 6, 2=class 9)
+                user?.target_class === "9" ? 2 : 1,
                 undefined,
                 questionCount
             );
@@ -59,7 +68,6 @@ export default function PracticeSessionScreen() {
             }
 
             if (data && data.length > 0) {
-                // Transform data to PracticeQuestion format
                 const transformedQuestions: PracticeQuestion[] = data.map((q: any) => ({
                     ...q,
                     question_text: q.question_translations?.[0]?.question_text || "",
@@ -71,7 +79,6 @@ export default function PracticeSessionScreen() {
                 }));
                 setQuestions(transformedQuestions);
             } else {
-                // No questions available in Supabase for this subject/topic
                 setQuestions([]);
             }
         } catch (e: any) {
@@ -84,21 +91,21 @@ export default function PracticeSessionScreen() {
 
     const currentQuestion = questions[currentIndex];
     const isLastQuestion = currentIndex === questions.length - 1;
+    const progress = (currentIndex + 1) / questions.length;
 
     const handleSelectOption = (optionKey: string) => {
-        if (showFeedback) return; // Already answered
-        setSelectedOptions([optionKey]);
+        if (showFeedback) return;
+        setSelectedOption(optionKey);
     };
 
     const handleSubmit = () => {
-        if (selectedOptions.length === 0) {
+        if (!selectedOption) {
             Alert.alert("Select an answer", "Please select an option to continue.");
             return;
         }
 
-        // Check if selected option is correct
         const correctOption = currentQuestion.options.find((opt) => opt.is_correct);
-        const correct = correctOption && selectedOptions.includes(correctOption.option_key);
+        const correct = correctOption && selectedOption === correctOption.option_key;
 
         setIsCorrect(correct || false);
         setShowFeedback(true);
@@ -150,28 +157,21 @@ export default function PracticeSessionScreen() {
 
     const handleNext = () => {
         if (isLastQuestion) {
-            // Show result
             handleFinish();
         } else {
             setCurrentIndex((i) => i + 1);
-            setSelectedOptions([]);
+            setSelectedOption(null);
             setShowFeedback(false);
             setIsCorrect(false);
         }
     };
 
     const handleFinish = () => {
-        // Award daily goal bonus if completed
         if (checkDailyGoal()) {
             addXP(XP_REWARDS.dailyGoalComplete);
             unlockBadge("daily_goal_complete");
         }
 
-        // Save last practice activity for Continue Learning card
-        const allSubjects = [
-            ...SUBJECTS.class6,
-            ...SUBJECTS.class9,
-        ];
         const subject = allSubjects.find((s) => s.id === subjectIdNum);
         setLastPracticeActivity({
             subjectId: subjectIdNum,
@@ -182,7 +182,6 @@ export default function PracticeSessionScreen() {
         });
         trackPracticeCompletion(subjectIdNum, correctCount, questions.length, correctCount * XP_REWARDS.correctAnswer);
 
-        // Navigate to result
         router.replace({
             pathname: "/practice/result",
             params: {
@@ -219,264 +218,318 @@ export default function PracticeSessionScreen() {
         );
     }
 
-    const progress = (currentIndex + 1) / questions.length;
-
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
-            <Stack.Screen
-                options={{
-                    headerShown: true,
-                    title: `Question ${currentIndex + 1} of ${questions.length}`,
-                    headerStyle: { backgroundColor: COLORS.background },
-                    headerShadowVisible: false,
-                    headerBackTitle: "Exit",
-                }}
-            />
-            <View style={{ flex: 1, padding: SPACING[5] }}>
-                {/* Progress */}
-                <View style={{ marginBottom: SPACING[4] }}>
-                    <ProgressBar
-                        progress={progress}
-                        color={COLORS.primary}
-                        height={6}
-                    />
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.xs,
-                            color: COLORS.textSecondary,
-                            marginTop: 4,
-                            textAlign: "right",
-                        }}
+        <SafeAreaView style={styles.container} edges={['top']}>
+            <Stack.Screen options={{ headerShown: false }} />
+
+            {/* Stitch-style sticky header */}
+            <View style={styles.header}>
+                <Pressable
+                    onPress={() => router.back()}
+                    style={({ pressed }) => [styles.headerBtn, pressed && styles.headerBtnPressed]}
+                    accessibilityLabel="Exit practice"
+                >
+                    <MaterialIcon name="close" size={24} color={COLORS.onSurface} />
+                </Pressable>
+
+                <Text style={styles.headerTitle} numberOfLines={1}>
+                    {subjectName}
+                </Text>
+
+                <View style={styles.headerActions}>
+                    <Pressable
+                        onPress={handleToggleBookmark}
+                        style={({ pressed }) => [styles.headerBtn, pressed && styles.headerBtnPressed]}
+                        accessibilityLabel={isBookmarked ? "Remove bookmark" : "Bookmark question"}
                     >
-                        {currentIndex + 1}/{questions.length}
+                        <MaterialIcon
+                            name={isBookmarked ? "bookmark" : "bookmark_border"}
+                            size={22}
+                            color={isBookmarked ? COLORS.primary : COLORS.onSurfaceVariant}
+                        />
+                    </Pressable>
+                    <Pressable
+                        onPress={handleReport}
+                        style={({ pressed }) => [styles.headerBtn, pressed && styles.headerBtnPressed]}
+                        accessibilityLabel="Report issue"
+                    >
+                        <MaterialIcon name="flag" size={22} color={COLORS.onSurfaceVariant} />
+                    </Pressable>
+                </View>
+            </View>
+
+            {/* Main scrollable content */}
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* Progress section */}
+                <View style={styles.progressSection}>
+                    <View style={styles.progressRow}>
+                        <Text style={styles.questionCount}>
+                            Question {currentIndex + 1} of {questions.length}
+                        </Text>
+                    </View>
+                    <GradientProgressBar progress={progress} height={8} style={styles.progressBar} />
+                </View>
+
+                {/* Question card — Stitch: surface with left primary accent */}
+                <View style={styles.questionCard}>
+                    <View style={styles.questionCardAccent} />
+                    <Text style={styles.questionText}>
+                        {currentQuestion.question_text || "Question text loading..."}
                     </Text>
                 </View>
 
-                {/* Question Card */}
-                <ScrollView
-                    style={{ flex: 1 }}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <Card variant="elevated" style={{ marginBottom: SPACING[4] }}>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.xs,
-                                color: COLORS.primary,
-                                fontWeight: "700",
-                                textTransform: "uppercase",
-                                marginBottom: SPACING[2],
-                            }}
-                        >
-                            Question {currentIndex + 1}
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.lg,
-                                color: COLORS.textPrimary,
-                                lineHeight: 28,
-                                fontWeight: "500",
-                            }}
-                        >
-                            {currentQuestion.question_text || "Question text loading..."}
-                        </Text>
-                    </Card>
+                {/* Answer options — Stitch: A/B/C/D cards */}
+                <View style={styles.optionsContainer}>
+                    {currentQuestion.options.map((option) => {
+                        const isSelected = selectedOption === option.option_key;
+                        const isCorrectOption = option.is_correct;
 
-                    {/* Options */}
-                    <View style={{ gap: SPACING[3], marginBottom: SPACING[4] }}>
-                        {currentQuestion.options.map((option) => {
-                            const isSelected = selectedOptions.includes(option.option_key);
-                            const isCorrectOption = option.is_correct;
-                            const showAsCorrect = showFeedback && isCorrectOption;
-                            const showAsWrong = showFeedback && isSelected && !isCorrectOption;
+                        let state: "default" | "selected" | "correct" | "incorrect" = "default";
+                        if (showFeedback) {
+                            if (isCorrectOption) state = "correct";
+                            else if (isSelected) state = "incorrect";
+                        } else if (isSelected) {
+                            state = "selected";
+                        }
 
-                            return (
-                                <Pressable
-                                    key={option.id}
-                                    onPress={() => handleSelectOption(option.option_key)}
-                                    disabled={showFeedback}
-                                >
-                                    <View
-                                        style={{
-                                            backgroundColor: showAsCorrect
-                                                ? COLORS.successLight
-                                                : showAsWrong
-                                                    ? COLORS.errorLight
-                                                    : isSelected
-                                                        ? COLORS.primaryLight + "30"
-                                                        : COLORS.background,
-                                            borderWidth: 2,
-                                            borderColor: showAsCorrect
-                                                ? COLORS.success
-                                                : showAsWrong
-                                                    ? COLORS.error
-                                                    : isSelected
-                                                        ? COLORS.primary
-                                                        : COLORS.cardBorder,
-                                            borderRadius: BORDER_RADIUS.lg,
-                                            padding: SPACING[4],
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <View
-                                            style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 18,
-                                                backgroundColor: showAsCorrect
-                                                    ? COLORS.success
-                                                    : showAsWrong
-                                                        ? COLORS.error
-                                                        : isSelected
-                                                            ? COLORS.primary
-                                                            : COLORS.backgroundSecondary,
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                marginRight: SPACING[3],
-                                            }}
-                                        >
-                                            <Text
-                                                style={{
-                                                    color: isSelected || showAsCorrect || showAsWrong
-                                                        ? "#fff"
-                                                        : COLORS.textPrimary,
-                                                    fontWeight: "700",
-                                                }}
-                                            >
-                                                {option.option_key}
-                                            </Text>
-                                        </View>
-                                        <Text
-                                            style={{
-                                                flex: 1,
-                                                fontSize: TYPOGRAPHY.fontSize.base,
-                                                color: COLORS.textPrimary,
-                                            }}
-                                        >
-                                            {option.option_text}
-                                        </Text>
-                                        {showAsCorrect && <Text style={{ fontSize: 20 }}>✓</Text>}
-                                        {showAsWrong && <Text style={{ fontSize: 20 }}>✗</Text>}
-                                    </View>
-                                </Pressable>
-                            );
-                        })}
-                    </View>
+                        return (
+                            <AnswerCard
+                                key={option.id}
+                                label={option.option_key.toUpperCase()}
+                                text={option.option_text || ""}
+                                state={state}
+                                showCheck={showFeedback && isCorrectOption}
+                                onPress={() => handleSelectOption(option.option_key)}
+                                style={styles.answerCard}
+                            />
+                        );
+                    })}
+                </View>
 
-                    {/* Bookmark & Report Actions */}
-                    {showFeedback && (
-                        <View style={{ flexDirection: "row", gap: SPACING[3], marginBottom: SPACING[4] }}>
-                            <Pressable
-                                onPress={handleToggleBookmark}
-                                style={{
-                                    flex: 1,
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    padding: SPACING[3],
-                                    borderRadius: BORDER_RADIUS.lg,
-                                    borderWidth: 1,
-                                    borderColor: isBookmarked ? COLORS.primary : COLORS.cardBorder,
-                                    backgroundColor: isBookmarked ? COLORS.primary + "10" : COLORS.background,
-                                    gap: SPACING[2],
-                                }}
-                            >
-                                <Text style={{ fontSize: 16 }}>{isBookmarked ? "🔖" : "📑"}</Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.sm,
-                                        fontWeight: "600",
-                                        color: isBookmarked ? COLORS.primary : COLORS.textSecondary,
-                                    }}
-                                >
-                                    {isBookmarked ? "Saved" : "Save"}
-                                </Text>
-                            </Pressable>
-                            <Pressable
-                                onPress={handleReport}
-                                style={{
-                                    flex: 1,
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    padding: SPACING[3],
-                                    borderRadius: BORDER_RADIUS.lg,
-                                    borderWidth: 1,
-                                    borderColor: COLORS.cardBorder,
-                                    backgroundColor: COLORS.background,
-                                    gap: SPACING[2],
-                                }}
-                            >
-                                <Text style={{ fontSize: 16 }}>🚩</Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.sm,
-                                        fontWeight: "600",
-                                        color: COLORS.textSecondary,
-                                    }}
-                                >
-                                    Report
-                                </Text>
-                            </Pressable>
-                        </View>
-                    )}
-
-                    {/* Feedback / Explanation */}
-                    {showFeedback && currentQuestion.explanation && (
-                        <Card
-                            style={{
-                                backgroundColor: isCorrect ? COLORS.successLight : COLORS.errorLight,
-                                borderColor: isCorrect ? COLORS.success : COLORS.error,
-                                borderWidth: 1,
-                                marginBottom: SPACING[4],
-                            }}
-                        >
-                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: SPACING[2] }}>
-                                <MascotDisplay expression={isCorrect ? "celebrating" : "encouraging"} size={40} />
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.base,
-                                        fontWeight: "700",
-                                        color: isCorrect ? COLORS.success : COLORS.error,
-                                        marginLeft: SPACING[2],
-                                    }}
-                                >
+                {/* Inline feedback + explanation — Stitch: colored card with mascot */}
+                {showFeedback && (
+                    <View style={[styles.feedbackCard, isCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect]}>
+                        <View style={styles.feedbackHeader}>
+                            <MascotDisplay
+                                expression={isCorrect ? "celebrating" : "encouraging"}
+                                size={64}
+                            />
+                            <View style={styles.feedbackHeaderText}>
+                                <Text style={[styles.feedbackHeadline, isCorrect ? styles.textSuccess : styles.textWarning]}>
                                     {isCorrect ? "Excellent! 🎉" : "Almost there! 💪"}
                                 </Text>
+                                <Text style={styles.feedbackSubtext}>
+                                    {isCorrect
+                                        ? "That's the right answer!"
+                                        : "The correct answer is shown above."}
+                                </Text>
                             </View>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    color: COLORS.textPrimary,
-                                    lineHeight: 20,
-                                }}
-                            >
-                                {currentQuestion.explanation}
-                            </Text>
-                        </Card>
-                    )}
-                </ScrollView>
+                        </View>
 
-                {/* Bottom Action Button */}
-                <View style={{ paddingTop: SPACING[3] }}>
-                    {showFeedback ? (
-                        <Button
-                            title={isLastQuestion ? "See Results →" : "Next Question →"}
-                            onPress={handleNext}
-                            fullWidth
-                            size="lg"
-                        />
-                    ) : (
-                        <Button
-                            title="Check Answer"
-                            onPress={handleSubmit}
-                            fullWidth
-                            size="lg"
-                            disabled={selectedOptions.length === 0}
-                        />
-                    )}
-                </View>
+                        {currentQuestion.explanation && (
+                            <>
+                                <View style={styles.feedbackDivider} />
+                                <Text style={styles.explanationLabel}>📖 Explanation</Text>
+                                <Text style={styles.explanationText}>{currentQuestion.explanation}</Text>
+                            </>
+                        )}
+                    </View>
+                )}
+
+                {/* Bottom padding for sticky CTA */}
+                <View style={styles.bottomPadding} />
+            </ScrollView>
+
+            {/* Stitch-style sticky bottom CTA */}
+            <View style={styles.ctaBar}>
+                {showFeedback ? (
+                    <Button
+                        title={isLastQuestion ? "See Results" : "Next Question"}
+                        onPress={handleNext}
+                        fullWidth
+                        size="lg"
+                        iconRight="arrow_forward"
+                    />
+                ) : (
+                    <Button
+                        title="Check Answer"
+                        onPress={handleSubmit}
+                        fullWidth
+                        size="lg"
+                        disabled={!selectedOption}
+                    />
+                )}
             </View>
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: SPACING[4],
+        height: 56,
+        backgroundColor: COLORS.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.outlineVariant,
+    },
+    headerBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    headerBtnPressed: {
+        backgroundColor: COLORS.surfaceVariant,
+    },
+    headerTitle: {
+        flex: 1,
+        textAlign: "center",
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+        fontWeight: "700",
+        marginHorizontal: SPACING[2],
+    },
+    headerActions: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[1],
+    },
+    scrollContent: {
+        padding: SPACING[4],
+        paddingBottom: SPACING[4],
+    },
+    progressSection: {
+        marginBottom: SPACING[5],
+    },
+    progressRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: SPACING[2],
+    },
+    questionCount: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+    },
+    progressBar: {
+        borderRadius: BORDER_RADIUS.full,
+        overflow: "hidden",
+    },
+    questionCard: {
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["2xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        marginBottom: SPACING[5],
+        overflow: "hidden",
+        position: "relative",
+    },
+    questionCardAccent: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: 4,
+        height: "100%",
+        backgroundColor: COLORS.primary,
+        borderTopLeftRadius: BORDER_RADIUS["2xl"],
+        borderBottomLeftRadius: BORDER_RADIUS["2xl"],
+    },
+    questionText: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+        lineHeight: 28,
+        padding: SPACING[5],
+        paddingLeft: SPACING[6],
+    },
+    optionsContainer: {
+        gap: SPACING[3],
+        marginBottom: SPACING[4],
+    },
+    answerCard: {
+        marginBottom: 0,
+    },
+    feedbackCard: {
+        borderRadius: BORDER_RADIUS["2xl"],
+        borderWidth: 2,
+        padding: SPACING[4],
+        marginTop: SPACING[3],
+    },
+    feedbackCorrect: {
+        backgroundColor: COLORS.successLight,
+        borderColor: COLORS.success,
+    },
+    feedbackIncorrect: {
+        backgroundColor: COLORS.warningLight,
+        borderColor: COLORS.warning,
+    },
+    feedbackHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[4],
+    },
+    feedbackHeaderText: {
+        flex: 1,
+    },
+    feedbackHeadline: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.xl,
+        fontWeight: "800",
+    },
+    textSuccess: {
+        color: COLORS.successText,
+    },
+    textWarning: {
+        color: COLORS.warningText,
+    },
+    feedbackSubtext: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        marginTop: 2,
+    },
+    feedbackDivider: {
+        height: 1,
+        backgroundColor: COLORS.outline,
+        opacity: 0.3,
+        marginVertical: SPACING[3],
+    },
+    explanationLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "700",
+        marginBottom: SPACING[1],
+    },
+    explanationText: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.onSurface,
+        lineHeight: 24,
+    },
+    bottomPadding: {
+        height: SPACING[6],
+    },
+    ctaBar: {
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[4],
+        backgroundColor: COLORS.surface,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.outlineVariant,
+    },
+});

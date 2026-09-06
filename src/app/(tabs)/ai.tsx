@@ -1,3 +1,6 @@
+// AI Tutor Screen — Stitch-aligned chat interface with Cadet Vijay mascot.
+// Per Stitch: sticky header with mascot + name, quick topic chips,
+// chat bubbles (user=primary, AI=surface-container), sticky input bar.
 import { useState, useRef } from "react";
 import {
     View,
@@ -7,14 +10,15 @@ import {
     Pressable,
     KeyboardAvoidingView,
     Platform,
+    StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
+import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
 
-// Mock AI responses for demo
+// Mock AI responses
 const AI_RESPONSES = [
     "Great question! Let me explain this concept step by step. First, let's break down the key points...",
     "I notice you're working hard! Here's a helpful tip for this topic: remember to focus on the core concepts first.",
@@ -28,6 +32,13 @@ interface Message {
     isUser: boolean;
     timestamp: Date;
 }
+
+const QUICK_TOPICS: { label: string; icon: "calculate" | "language" | "psychology" | "public" }[] = [
+    { label: "Math Tips", icon: "calculate" },
+    { label: "English Grammar", icon: "language" },
+    { label: "Logic Puzzles", icon: "psychology" },
+    { label: "GK Facts", icon: "public" },
+];
 
 export default function AIScreen() {
     const scrollViewRef = useRef<ScrollView>(null);
@@ -56,7 +67,6 @@ export default function AIScreen() {
         setInputText("");
         setIsTyping(true);
 
-        // Simulate AI response
         setTimeout(() => {
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),
@@ -69,96 +79,51 @@ export default function AIScreen() {
         }, 1500);
     };
 
-    const quickTopics = [
-        { icon: "📐", label: "Math Tips" },
-        { icon: "📖", label: "English Grammar" },
-        { icon: "🧠", label: "Logic Puzzles" },
-        { icon: "🌍", label: "GK Facts" },
-    ];
-
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
             >
-                {/* Header */}
-                <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        paddingHorizontal: SPACING[5],
-                        paddingVertical: SPACING[4],
-                        borderBottomWidth: 1,
-                        borderBottomColor: COLORS.cardBorder,
-                    }}
-                >
-                    <MascotDisplay expression="encouraging" size={50} showBackground />
-                    <View style={{ marginLeft: SPACING[3] }}>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.lg,
-                                fontWeight: "700",
-                                color: COLORS.textPrimary,
-                            }}
-                        >
-                            Cadet Vijay
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                color: COLORS.success,
-                            }}
-                        >
-                            AI Study Buddy
-                        </Text>
+                {/* Stitch-style sticky header */}
+                <View style={styles.header}>
+                    <MascotDisplay expression="encouraging" size={44} />
+                    <View style={styles.headerText}>
+                        <Text style={styles.headerName}>Cadet Vijay</Text>
+                        <View style={styles.headerStatus}>
+                            <View style={styles.statusDot} />
+                            <Text style={styles.headerStatusText}>AI Study Buddy</Text>
+                        </View>
                     </View>
                 </View>
 
-                {/* Quick Topics */}
+                {/* Quick topic chips — Stitch: surface-container chips */}
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{
-                        paddingHorizontal: SPACING[5],
-                        paddingVertical: SPACING[3],
-                        gap: SPACING[2],
-                    }}
+                    contentContainerStyle={styles.chipsContainer}
                 >
-                    {quickTopics.map((topic, index) => (
+                    {QUICK_TOPICS.map((topic) => (
                         <Pressable
-                            key={index}
+                            key={topic.label}
                             onPress={() => setInputText(`Explain ${topic.label}`)}
-                            style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                backgroundColor: COLORS.surfaceContainer,
-                                paddingHorizontal: SPACING[4],
-                                paddingVertical: SPACING[2],
-                                borderRadius: BORDER_RADIUS.full,
-                                gap: SPACING[1],
-                            }}
+                            style={({ pressed }) => [
+                                styles.chip,
+                                pressed && styles.chipPressed,
+                            ]}
                         >
-                            <Text style={{ fontSize: 16 }}>{topic.icon}</Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    fontWeight: "600",
-                                    color: COLORS.textPrimary,
-                                }}
-                            >
-                                {topic.label}
-                            </Text>
+                            <MaterialIcon name={topic.icon} size={16} color={COLORS.primary} />
+                            <Text style={styles.chipText}>{topic.label}</Text>
                         </Pressable>
                     ))}
                 </ScrollView>
 
-                {/* Chat Messages */}
+                {/* Chat messages */}
                 <ScrollView
                     ref={scrollViewRef}
                     style={{ flex: 1 }}
-                    contentContainerStyle={{ padding: SPACING[5] }}
+                    contentContainerStyle={styles.chatContent}
                     showsVerticalScrollIndicator={false}
                     onContentSizeChange={() =>
                         scrollViewRef.current?.scrollToEnd({ animated: true })
@@ -168,103 +133,46 @@ export default function AIScreen() {
                         <View
                             key={message.id}
                             style={[
-                                {
-                                    flexDirection: "row",
-                                    marginBottom: SPACING[4],
-                                    alignItems: "flex-start",
-                                },
-                                message.isUser && {
-                                    justifyContent: "flex-end",
-                                },
+                                styles.messageRow,
+                                message.isUser && styles.messageRowUser,
                             ]}
                         >
                             {!message.isUser && (
-                                <MascotDisplay
-                                    expression={message.text.includes("?") ? "thinking" : "happy"}
-                                    size={36}
-                                    showBackground
-                                />
+                                <MascotDisplay expression="thinking" size={36} />
                             )}
+
                             <View
                                 style={[
-                                    {
-                                        maxWidth: "75%",
-                                        padding: SPACING[4],
-                                        borderRadius: BORDER_RADIUS.xl,
-                                        marginLeft: SPACING[2],
-                                    },
-                                    message.isUser
-                                        ? {
-                                            backgroundColor: COLORS.primary,
-                                            borderBottomRightRadius: 4,
-                                        }
-                                        : {
-                                            backgroundColor: COLORS.surfaceContainer,
-                                            borderBottomLeftRadius: 4,
-                                        },
+                                    styles.bubble,
+                                    message.isUser ? styles.bubbleUser : styles.bubbleAI,
                                 ]}
                             >
                                 <Text
                                     style={[
-                                        {
-                                            fontSize: TYPOGRAPHY.fontSize.base,
-                                            lineHeight: 22,
-                                        },
-                                        message.isUser
-                                            ? { color: COLORS.onPrimary }
-                                            : { color: COLORS.textPrimary },
+                                        styles.bubbleText,
+                                        message.isUser && styles.bubbleTextUser,
                                     ]}
                                 >
                                     {message.text}
                                 </Text>
                             </View>
+
                             {message.isUser && (
-                                <View
-                                    style={{
-                                        width: 36,
-                                        height: 36,
-                                        borderRadius: 18,
-                                        backgroundColor: COLORS.primaryLight,
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginLeft: SPACING[2],
-                                    }}
-                                >
-                                    <Text style={{ fontSize: 14 }}>👤</Text>
+                                <View style={styles.userAvatar}>
+                                    <MaterialIcon name="person" size={18} color={COLORS.onPrimary} filled />
                                 </View>
                             )}
                         </View>
                     ))}
 
-                    {/* Typing Indicator */}
+                    {/* Typing indicator */}
                     {isTyping && (
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginBottom: SPACING[4],
-                            }}
-                        >
-                            <MascotDisplay expression="thinking" size={36} showBackground />
-                            <View
-                                style={{
-                                    backgroundColor: COLORS.surfaceContainer,
-                                    padding: SPACING[4],
-                                    borderRadius: BORDER_RADIUS.xl,
-                                    marginLeft: SPACING[2],
-                                }}
-                            >
-                                <View style={{ flexDirection: "row", gap: 4 }}>
+                        <View style={[styles.messageRow, styles.messageRowAI]}>
+                            <MascotDisplay expression="thinking" size={36} />
+                            <View style={[styles.bubble, styles.bubbleAI]}>
+                                <View style={styles.typingIndicator}>
                                     {[0, 1, 2].map((i) => (
-                                        <View
-                                            key={i}
-                                            style={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: 4,
-                                                backgroundColor: COLORS.textTertiary,
-                                            }}
-                                        />
+                                        <View key={i} style={styles.typingDot} />
                                     ))}
                                 </View>
                             </View>
@@ -272,59 +180,195 @@ export default function AIScreen() {
                     )}
                 </ScrollView>
 
-                {/* Input Area */}
-                <View
-                    style={{
-                        padding: SPACING[4],
-                        borderTopWidth: 1,
-                        borderTopColor: COLORS.cardBorder,
-                        backgroundColor: COLORS.background,
-                    }}
-                >
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "flex-end",
-                            gap: SPACING[2],
-                        }}
+                {/* Stitch-style sticky input bar */}
+                <View style={styles.inputBar}>
+                    <TextInput
+                        value={inputText}
+                        onChangeText={setInputText}
+                        placeholder="Ask Cadet Vijay anything..."
+                        placeholderTextColor={COLORS.onSurfaceVariant}
+                        multiline
+                        maxLength={500}
+                        style={styles.textInput}
+                    />
+                    <Pressable
+                        onPress={handleSend}
+                        disabled={!inputText.trim()}
+                        style={({ pressed }) => [
+                            styles.sendBtn,
+                            inputText.trim() && styles.sendBtnActive,
+                            pressed && styles.sendBtnPressed,
+                        ]}
                     >
-                        <TextInput
-                            value={inputText}
-                            onChangeText={setInputText}
-                            placeholder="Ask me anything about AISSEE..."
-                            placeholderTextColor={COLORS.textTertiary}
-                            multiline
-                            maxLength={500}
-                            style={{
-                                flex: 1,
-                                backgroundColor: COLORS.surfaceContainer,
-                                borderRadius: BORDER_RADIUS.xl,
-                                paddingHorizontal: SPACING[4],
-                                paddingVertical: SPACING[3],
-                                fontSize: TYPOGRAPHY.fontSize.base,
-                                color: COLORS.textPrimary,
-                                maxHeight: 120,
-                            }}
+                        <MaterialIcon
+                            name="send"
+                            size={22}
+                            color={inputText.trim() ? COLORS.onPrimary : COLORS.onSurfaceVariant}
                         />
-                        <Pressable
-                            onPress={handleSend}
-                            disabled={!inputText.trim()}
-                            style={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 24,
-                                backgroundColor: inputText.trim()
-                                    ? COLORS.primary
-                                    : COLORS.surfaceContainer,
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <Text style={{ fontSize: 20 }}>➤</Text>
-                        </Pressable>
-                    </View>
+                    </Pressable>
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[3],
+        backgroundColor: COLORS.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.outlineVariant,
+        gap: SPACING[3],
+    },
+    headerText: {
+        flex: 1,
+    },
+    headerName: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+        fontWeight: "700",
+    },
+    headerStatus: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        marginTop: 2,
+    },
+    statusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: COLORS.success,
+    },
+    headerStatusText: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.success,
+        fontWeight: "500",
+    },
+    chipsContainer: {
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[3],
+        gap: SPACING[2],
+        flexDirection: "row",
+    },
+    chip: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: COLORS.surfaceContainerHigh,
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[2],
+        borderRadius: BORDER_RADIUS.full,
+        gap: 4,
+    },
+    chipPressed: {
+        backgroundColor: COLORS.surfaceVariant,
+    },
+    chipText: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.primary,
+        fontWeight: "600",
+    },
+    chatContent: {
+        padding: SPACING[4],
+        paddingBottom: SPACING[6],
+    },
+    messageRow: {
+        flexDirection: "row",
+        alignItems: "flex-end",
+        marginBottom: SPACING[4],
+    },
+    messageRowUser: {
+        justifyContent: "flex-end",
+    },
+    messageRowAI: {
+        justifyContent: "flex-start",
+    },
+    bubble: {
+        maxWidth: "75%",
+        padding: SPACING[4],
+        borderRadius: BORDER_RADIUS.xl,
+    },
+    bubbleAI: {
+        backgroundColor: COLORS.surfaceContainerHigh,
+        borderBottomLeftRadius: 4,
+        marginLeft: SPACING[2],
+    },
+    bubbleUser: {
+        backgroundColor: COLORS.primary,
+        borderBottomRightRadius: 4,
+        marginRight: SPACING[2],
+    },
+    bubbleText: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.onSurface,
+        lineHeight: 24,
+    },
+    bubbleTextUser: {
+        color: COLORS.onPrimary,
+    },
+    userAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: COLORS.primaryContainer,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    typingIndicator: {
+        flexDirection: "row",
+        gap: 4,
+        paddingVertical: 4,
+    },
+    typingDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: COLORS.onSurfaceVariant,
+    },
+    inputBar: {
+        flexDirection: "row",
+        alignItems: "flex-end",
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[3],
+        backgroundColor: COLORS.surface,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.outlineVariant,
+        gap: SPACING[2],
+    },
+    textInput: {
+        flex: 1,
+        backgroundColor: COLORS.surfaceContainerHigh,
+        borderRadius: BORDER_RADIUS.xl,
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[3],
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.onSurface,
+        maxHeight: 120,
+    },
+    sendBtn: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: COLORS.surfaceContainerHigh,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    sendBtnActive: {
+        backgroundColor: COLORS.primary,
+    },
+    sendBtnPressed: {
+        opacity: 0.8,
+    },
+});

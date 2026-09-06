@@ -178,8 +178,97 @@ export interface Paper {
     total_marks: number | null;
     duration_minutes: number | null;
     pdf_path: string | null;
+    difficulty: Difficulty | null;
     is_published: boolean;
     created_at: string;
+}
+
+export interface PaperQuestion {
+    paper_id?: string;
+    question_id?: string;
+    section: string | null;
+    question_order: number;
+    marks: number | null;
+    negative_marks: number | null;
+    questions: PracticeQuestion | null;
+}
+
+export interface PaperWithQuestions extends Paper {
+    paper_questions: PaperQuestion[];
+}
+
+export interface PaperSectionStat {
+    paper_id: string;
+    section: string;
+    question_count: number;
+    section_marks: number;
+}
+
+export interface PaperAttempt {
+    id: string;
+    paper_id: string;
+    student_id: string;
+    attempt_number: number;
+    started_at: string;
+    submitted_at: string | null;
+    time_spent_seconds: number | null;
+    is_paused: boolean;
+    pause_data: Record<string, unknown> | null;
+    total_score: number | null;
+    max_score: number | null;
+    status: TestStatus;
+}
+
+export interface PaperAttemptAnswer {
+    id: string;
+    attempt_id: string;
+    question_id: string;
+    review_status: ReviewStatus;
+    selected_options: string[];
+    text_answer: string | null;
+    matching_answer: Record<string, unknown> | null;
+    is_correct: boolean | null;
+    marks_awarded: number | null;
+    time_spent_seconds: number | null;
+    updated_at?: string;
+}
+
+/** Session question payload from get_paper_session_questions (no is_correct). */
+export interface PaperSessionQuestion {
+    question_id: string;
+    section: string | null;
+    question_order: number;
+    marks: number;
+    negative_marks: number;
+    question_type: QuestionType;
+    has_diagram: boolean;
+    diagram_path: string | null;
+    question_text: string;
+    explanation?: string;
+    options: {
+        id: string;
+        option_key: string;
+        display_order: number | null;
+        option_text: string;
+        option_image_path?: string | null;
+    }[];
+    supported: boolean;
+}
+
+export type PaperListStatus = 'unattempted' | 'in_progress' | 'completed';
+
+export interface PaperAttemptSummary {
+    paper_id: string;
+    attempt_id: string;
+    status: TestStatus;
+    total_score: number | null;
+    max_score: number | null;
+    attempt_number: number;
+    started_at: string;
+    submitted_at: string | null;
+    time_spent_seconds: number | null;
+    is_paused: boolean;
+    pause_data: Record<string, unknown> | null;
 }
 
 // Test Attempt

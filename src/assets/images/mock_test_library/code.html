@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mock Test Series</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#341100",
+                      "background": "#f9f9ff",
+                      "secondary-container": "#2170e4",
+                      "on-error-container": "#93000a",
+                      "on-primary-container": "#fffbff",
+                      "on-secondary-fixed-variant": "#004395",
+                      "surface-container-high": "#dee8ff",
+                      "inverse-primary": "#c0c1ff",
+                      "on-background": "#111c2d",
+                      "on-tertiary-fixed-variant": "#783200",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "gradient-end": "#A855F7",
+                      "surface-dim": "#cfdaf2",
+                      "on-tertiary-container": "#fffbff",
+                      "gradient-start": "#6366F1",
+                      "surface-container-low": "#f0f3ff",
+                      "secondary-fixed": "#d8e2ff",
+                      "surface-tint": "#494bd6",
+                      "primary-container": "#6063ee",
+                      "on-secondary-fixed": "#001a42",
+                      "weakness-red": "#EF4444",
+                      "on-secondary": "#ffffff",
+                      "on-surface-variant": "#464554",
+                      "surface": "#f9f9ff",
+                      "primary": "#4648d4",
+                      "tertiary": "#994100",
+                      "success-green": "#22C55E",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "tertiary-fixed": "#ffdbca",
+                      "surface-container": "#e7eeff",
+                      "error": "#ba1a1a",
+                      "warning-amber": "#F59E0B",
+                      "surface-muted": "#F8FAFC",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed": "#07006c",
+                      "on-secondary-container": "#fefcff",
+                      "surface-bright": "#f9f9ff",
+                      "secondary": "#0058be",
+                      "tertiary-fixed-dim": "#ffb690",
+                      "inverse-on-surface": "#ecf1ff",
+                      "outline-variant": "#c7c4d7",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#d8e3fb",
+                      "tertiary-container": "#c05400",
+                      "on-surface": "#111c2d",
+                      "surface-variant": "#d8e3fb",
+                      "inverse-surface": "#263143",
+                      "outline": "#767586",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#e1e0ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "32px",
+                      "gutter": "16px",
+                      "stack-sm": "8px",
+                      "base": "8px",
+                      "stack-lg": "24px",
+                      "stack-md": "16px",
+                      "margin-mobile": "16px",
+                      "touch-target": "48px"
+              },
+              "fontFamily": {
+                      "label-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "label-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        /* 3D Button Effect from Style Guidance */
+        .btn-3d {
+            border-bottom: 4px solid var(--tw-colors-on-primary-fixed-variant, #2f2ebe);
+            transition: all 0.1s ease-in-out;
+        }
+        .btn-3d:active {
+            border-bottom-width: 0px;
+            transform: translateY(4px);
+        }
+
+        .soft-card {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--tw-colors-outline-variant, #c7c4d7);
+        }
+        
+        .soft-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        /* Hide scrollbar for horizontal scrolling containers */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-[80px] md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-surface w-full top-0 z-40 hidden md:flex justify-between items-center px-margin-desktop h-[72px] flat no shadows">
+<div class="flex items-center gap-4">
+<span class="font-display-lg text-display-lg text-primary dark:text-primary-fixed">AISSEE Cadet</span>
+</div>
+<nav class="flex gap-6 items-center">
+<a class="text-on-surface-variant hover:bg-surface-variant font-label-lg text-label-lg px-4 py-2 rounded-full transition-colors flex items-center gap-2" href="{{DATA:SCREEN:SCREEN_40}}">
+<span class="material-symbols-outlined">home</span> Home
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-variant font-label-lg text-label-lg px-4 py-2 rounded-full transition-colors flex items-center gap-2" href="SCREEN_21">
+<span class="material-symbols-outlined">menu_book</span> Practice
+            </a>
+<a class="text-primary font-bold bg-primary-container text-on-primary-container font-label-lg text-label-lg px-4 py-2 rounded-full transition-colors flex items-center gap-2 scale-95 transition-transform duration-150" href="{{DATA:SCREEN:SCREEN_38}}">
+<span class="material-symbols-outlined">assignment</span> Mock Tests
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-variant font-label-lg text-label-lg px-4 py-2 rounded-full transition-colors flex items-center gap-2" href="SCREEN_10">
+<span class="material-symbols-outlined">smart_toy</span> AI Tutor
+            </a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 bg-surface-variant text-on-surface px-4 py-2 rounded-full font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-warning-amber" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                12
+            </button>
+<div class="w-10 h-10 rounded-full bg-surface-variant border-2 border-primary overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+</div>
+</header>
+<!-- Mobile Top Header -->
+<header class="md:hidden bg-surface flex justify-between items-center px-margin-mobile h-touch-target w-full sticky top-0 z-40">
+<div class="flex items-center gap-3">
+<a class="material-symbols-outlined text-on-surface flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant transition-colors" href="{{DATA:SCREEN:SCREEN_40}}">arrow_back</a>
+<div class="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">person</span>
+</div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold">Mock Tests</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg">12 🔥</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-[1024px] mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
+<!-- Mascot Motivation Hero -->
+<section class="bg-primary text-on-primary rounded-xl p-6 mb-stack-lg flex items-center relative overflow-hidden soft-card">
+<!-- Decorative background blob -->
+<div class="absolute -right-10 -top-10 w-48 h-48 bg-gradient-end rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+<div class="flex-1 z-10 pr-4">
+<h1 class="font-headline-lg text-headline-lg md:text-[32px] md:leading-[40px] mb-2 font-bold tracking-tight">Mission: Victory!</h1>
+<p class="font-body-md text-body-md opacity-90 mb-4 max-w-[280px] md:max-w-md">
+                    "Every test is a step closer to the uniform. Show them what you're made of, Cadet!"
+                </p>
+<div class="inline-block bg-on-primary text-primary font-label-lg text-label-lg px-4 py-2 rounded-full">
+                    Ready to test your skills?
+                </div>
+</div>
+<div class="w-[120px] h-[120px] md:w-[160px] md:h-[160px] flex-shrink-0 z-10">
+<img alt="Cadet Vijay mascot motivating the student" class="w-full h-full object-contain filter drop-shadow-lg scale-110 origin-bottom" src="https://lh3.googleusercontent.com/aida/AEtjO1XFlEvhmt8J1tnVDY8IdzPPLV5NJJwPIZYFNmNmRUGd3_vTCsCnlJR6sW_NZBKL0yj0pprd1G08T-QF6RMg2yYtqEJMw_Aw51GpWD_tPRCzZBC8M1v7Gh-krMfnD1vBYAftxrypt6B9NsEPVdcIyfEcF-R58_cwdIjRBNgUeYWvZRKCozmx9MintLFhXe6Mi3IfJEPgtKt-mAzTBSfR-2voqdTo-wSWshF2Y2v7LVMNiUVsgyEKKnH1BA"/>
+</div>
+</section>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-stack-md">Select Your Mission</h2>
+<!-- Bento Grid for Test Categories -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Full Mock Tests (Large Priority Card) -->
+<a class="col-span-1 md:col-span-8 bg-surface-container-low rounded-xl p-6 soft-card block transition-transform group" href="{{DATA:SCREEN:SCREEN_38}}">
+<div class="flex justify-between items-start mb-12">
+<div>
+<div class="bg-primary-container text-on-primary-container inline-flex items-center justify-center p-3 rounded-xl mb-4">
+<span class="material-symbols-outlined text-[32px]">assignment</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Full Mock Tests</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">AISSEE Pattern</p>
+</div>
+<span class="bg-white text-primary font-label-sm text-label-sm px-3 py-1 rounded-full border border-primary">
+                        15 Available
+                    </span>
+</div>
+<div class="flex justify-between items-end mt-auto">
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span> 150 mins • 300 marks
+                    </p>
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+</div>
+</a>
+<!-- Subject-Wise Tests -->
+<a class="col-span-1 md:col-span-4 bg-surface rounded-xl p-6 soft-card block transition-transform group" href="{{DATA:SCREEN:SCREEN_38}}">
+<div class="bg-secondary-fixed text-on-secondary-fixed inline-flex items-center justify-center p-3 rounded-xl mb-4">
+<span class="material-symbols-outlined text-[32px]">category</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface mb-1 text-lg">Subject-Wise Tests</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Focus on specific areas</p>
+<div class="flex justify-between items-center mt-auto">
+<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-md">
+                        42 Tests
+                    </span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+</a>
+<!-- Speed Challenges -->
+<a class="col-span-1 md:col-span-6 bg-surface rounded-xl p-6 soft-card block transition-transform group" href="{{DATA:SCREEN:SCREEN_38}}">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-tertiary-fixed text-on-tertiary-fixed inline-flex items-center justify-center p-3 rounded-xl">
+<span class="material-symbols-outlined text-[32px]">timer</span>
+</div>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-md">
+                        Daily Refreshed
+                    </span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface mb-1 text-lg">Speed Challenges</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Quick 10-minute drills</p>
+<!-- Mini Progress/Status -->
+<div class="mt-4 pt-4 border-t border-outline-variant flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-warning-amber flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span> Hot topic today
+                    </span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+</a>
+<!-- Previous Year Papers -->
+<a class="col-span-1 md:col-span-6 bg-surface rounded-xl p-6 soft-card block transition-transform group relative overflow-hidden" href="{{DATA:SCREEN:SCREEN_38}}">
+<!-- Subtle pattern background for PYP -->
+<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, black 1px, transparent 0); background-size: 16px 16px;"></div>
+<div class="flex justify-between items-start mb-6 relative z-10">
+<div class="bg-surface-container-high text-on-surface inline-flex items-center justify-center p-3 rounded-xl">
+<span class="material-symbols-outlined text-[32px]">history_edu</span>
+</div>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-md">
+                        2018 - 2023
+                    </span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface mb-1 text-lg relative z-10">Previous Year Papers</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 relative z-10">Real exam experience</p>
+<div class="mt-4 pt-4 border-t border-outline-variant flex justify-between items-center relative z-10">
+<span class="font-label-sm text-label-sm text-on-surface-variant">
+                        6 Papers
+                    </span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+</a>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface dark:bg-on-surface text-primary dark:text-primary-fixed fixed bottom-0 w-full z-50 rounded-t-xl border-t border-outline-variant dark:border-outline shadow-lg fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors rounded-lg" href="{{DATA:SCREEN:SCREEN_40}}">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors rounded-lg" href="SCREEN_21">
+<span class="material-symbols-outlined mb-1">menu_book</span>
+<span class="font-label-sm text-label-sm">Practice</span>
+</a>
+<!-- Active Tab -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 w-16 h-16 -mt-6 shadow-md scale-90 transition-all duration-200" href="{{DATA:SCREEN:SCREEN_38}}">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="font-label-sm text-label-sm text-[10px] mt-1 leading-none text-center">Tests</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors rounded-lg" href="SCREEN_10">
+<span class="material-symbols-outlined mb-1">smart_toy</span>
+<span class="font-label-sm text-label-sm">AI Tutor</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors rounded-lg" href="SCREEN_19">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

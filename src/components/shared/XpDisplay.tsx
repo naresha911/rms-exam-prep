@@ -28,7 +28,7 @@ export const XpDisplay: React.FC<XpDisplayProps> = ({
             style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: "#FEF3C7",
+                backgroundColor: COLORS.warningLight,
                 paddingHorizontal: style.padding,
                 paddingVertical: style.padding / 2,
                 borderRadius: BORDER_RADIUS.full,
@@ -40,7 +40,7 @@ export const XpDisplay: React.FC<XpDisplayProps> = ({
                 style={{
                     fontSize: style.fontSize,
                     fontWeight: "700",
-                    color: "#B45309",
+                    color: COLORS.practiceModeTopicText,
                 }}
             >
                 {xp} XP

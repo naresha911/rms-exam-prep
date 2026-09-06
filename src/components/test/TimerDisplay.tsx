@@ -31,8 +31,8 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
     const timerColor = isDanger
         ? COLORS.error
         : isWarning
-        ? COLORS.warning
-        : COLORS.textPrimary;
+            ? COLORS.warning
+            : COLORS.textPrimary;
 
     const sizeConfig = {
         sm: { fontSize: TYPOGRAPHY.fontSize.base, padding: SPACING[2], iconSize: 14 },
@@ -49,10 +49,10 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
                     flexDirection: 'row',
                     alignItems: 'center',
                     backgroundColor: isDanger
-                        ? '#FEE2E2'
+                        ? COLORS.errorLight
                         : isWarning
-                        ? '#FEF3C7'
-                        : COLORS.backgroundSecondary,
+                            ? COLORS.warningLight
+                            : COLORS.backgroundSecondary,
                     paddingHorizontal: cfg.padding,
                     paddingVertical: cfg.padding / 2,
                     borderRadius: BORDER_RADIUS.lg,

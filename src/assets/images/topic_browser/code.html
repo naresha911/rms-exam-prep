@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Subject &amp; Topic Selection - AISSEE Cadet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#07006c",
+                        "secondary-container": "#2170e4",
+                        "surface-muted": "#F8FAFC",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-surface-variant": "#464554",
+                        "inverse-on-surface": "#ecf1ff",
+                        "on-tertiary-fixed": "#341100",
+                        "on-tertiary": "#ffffff",
+                        "weakness-red": "#EF4444",
+                        "surface-container-low": "#f0f3ff",
+                        "surface-container-high": "#dee8ff",
+                        "on-tertiary-container": "#fffbff",
+                        "primary": "#4648d4",
+                        "success-green": "#22C55E",
+                        "surface": "#f9f9ff",
+                        "tertiary": "#994100",
+                        "error": "#ba1a1a",
+                        "gradient-end": "#A855F7",
+                        "gradient-start": "#6366F1",
+                        "tertiary-container": "#c05400",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffdbca",
+                        "surface-container": "#e7eeff",
+                        "primary-container": "#6063ee",
+                        "surface-dim": "#cfdaf2",
+                        "surface-tint": "#494bd6",
+                        "on-secondary-fixed-variant": "#004395",
+                        "outline-variant": "#c7c4d7",
+                        "secondary": "#0058be",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#fffbff",
+                        "surface-bright": "#f9f9ff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-background": "#111c2d",
+                        "on-surface": "#111c2d",
+                        "outline": "#767586",
+                        "on-secondary-fixed": "#001a42",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-primary": "#c0c1ff",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "surface-variant": "#d8e3fb",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#d8e2ff",
+                        "inverse-surface": "#263143",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#e1e0ff",
+                        "background": "#f9f9ff",
+                        "warning-amber": "#F59E0B",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-container-highest": "#d8e3fb",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "gutter": "16px",
+                        "stack-lg": "24px",
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "32px",
+                        "touch-target": "48px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .tactile-button {
+            border-bottom-width: 4px;
+            border-color: var(--tw-colors-primary-container, #4648d4); /* Fallback */
+            transition: all 0.1s ease;
+        }
+        .tactile-button:active {
+            border-bottom-width: 0px;
+            transform: translateY(4px);
+        }
+        .soft-card {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-surface flex justify-between items-center px-margin-mobile h-touch-target w-full sticky top-0 z-40">
+<div class="flex items-center gap-3">
+<a class="material-symbols-outlined text-on-surface hover:text-primary transition-colors" href="{{DATA:SCREEN:SCREEN_40}}">arrow_back</a>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold">
+                C
+            </div>
+<h1 class="font-headline-md text-headline-md-mobile text-primary dark:text-primary-fixed">AISSEE Cadet</h1>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-highest px-3 py-1 rounded-full">
+<span class="font-label-lg text-label-lg text-on-surface">12</span>
+<span class="text-warning-amber">🔥</span>
+</div>
+</header>
+<main class="flex-grow flex flex-col max-w-5xl mx-auto w-full px-margin-mobile md:px-margin-desktop py-stack-lg gap-stack-lg">
+<!-- Welcome Section -->
+<section class="flex items-center justify-between bg-surface-container-low rounded-xl p-stack-md soft-card relative overflow-hidden border border-outline-variant">
+<div class="z-10 w-2/3">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-on-surface mb-2">What would you like to study today?</h2>
+<p class="font-body-md text-on-surface-variant">Pick a subject to start your mission.</p>
+</div>
+<div class="absolute right-0 bottom-0 w-32 h-32 md:w-48 md:h-48">
+<img alt="Cadet Vijay waving" class="object-contain w-full h-full transform translate-y-4 md:translate-y-6" src="https://lh3.googleusercontent.com/aida/AEtjO1WGfnQPONJr4yHeUuEat0NreEx-GlZRbsHUcD1KTg48dcLiwj-eoCuU1H1Kr7XowIEzmy0VpeFAt6jINylScYDirX1_L8u_oJ3g0Cdxt-HdhfjGYbQvhPYVmlqwaIBQcEA7AHGcQ1JWuE7gUP_BmTCDaMLnm9vXjoDbPYbWBBIEcmbLZFcZdCg_2Yup6hg_oWQRGsqCfAtFSPVxS9s8txEU8oC738PX94oiaqe4HF-6Ibtw2mQZSpIGj3s"/>
+</div>
+</section>
+<!-- Subjects Grid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+<!-- Mathematics -->
+<button class="bg-surface rounded-xl p-stack-md flex flex-col items-center justify-center gap-2 border-2 border-primary tactile-button hover:bg-surface-variant group relative overflow-hidden" onclick="toggleTopics('math')">
+<div class="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-2 z-10">
+<span class="material-symbols-outlined" style="font-size: 24px;">calculate</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface z-10">Mathematics</h3>
+<div class="w-full bg-surface-variant rounded-full h-2 mt-2 z-10">
+<div class="bg-gradient-to-r from-gradient-start to-gradient-end h-2 rounded-full" style="width: 75%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant z-10">75% Mastery</span>
+</button>
+<!-- Intelligence -->
+<button class="bg-surface rounded-xl p-stack-md flex flex-col items-center justify-center gap-2 border border-outline-variant hover:border-primary soft-card hover:bg-surface-variant transition-colors group relative overflow-hidden" onclick="toggleTopics('intelligence')">
+<div class="w-12 h-12 rounded-full bg-surface-variant text-primary flex items-center justify-center mb-2 z-10 group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">psychology</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface z-10">Intelligence</h3>
+<div class="w-full bg-surface-variant rounded-full h-2 mt-2 z-10">
+<div class="bg-gradient-to-r from-gradient-start to-gradient-end h-2 rounded-full" style="width: 40%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant z-10">40% Mastery</span>
+</button>
+<!-- Language -->
+<button class="bg-surface rounded-xl p-stack-md flex flex-col items-center justify-center gap-2 border border-outline-variant hover:border-primary soft-card hover:bg-surface-variant transition-colors group relative overflow-hidden" onclick="toggleTopics('language')">
+<div class="w-12 h-12 rounded-full bg-surface-variant text-primary flex items-center justify-center mb-2 z-10 group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">language</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface z-10">Language</h3>
+<div class="w-full bg-surface-variant rounded-full h-2 mt-2 z-10">
+<div class="bg-gradient-to-r from-gradient-start to-gradient-end h-2 rounded-full" style="width: 90%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant z-10">90% Mastery</span>
+</button>
+<!-- General Knowledge -->
+<button class="bg-surface rounded-xl p-stack-md flex flex-col items-center justify-center gap-2 border border-outline-variant hover:border-primary soft-card hover:bg-surface-variant transition-colors group relative overflow-hidden" onclick="toggleTopics('gk')">
+<div class="w-12 h-12 rounded-full bg-surface-variant text-primary flex items-center justify-center mb-2 z-10 group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">public</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface z-10">Gen. Knowledge</h3>
+<div class="w-full bg-surface-variant rounded-full h-2 mt-2 z-10">
+<div class="bg-gradient-to-r from-gradient-start to-gradient-end h-2 rounded-full" style="width: 20%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant z-10">20% Mastery</span>
+</button>
+</section>
+<!-- Topics List (Initially showing Math) -->
+<section class="bg-surface rounded-xl border border-outline-variant p-stack-md md:p-stack-lg soft-card mt-4" id="topics-section">
+<div class="flex items-center justify-between mb-stack-md">
+<h3 class="font-headline-md text-headline-md-mobile text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">calculate</span>
+                    Mathematics Topics
+                </h3>
+</div>
+<div class="flex flex-col gap-base">
+<!-- Topic Item -->
+<a class="flex items-center justify-between p-stack-sm hover:bg-surface-variant rounded-lg cursor-pointer transition-colors group" href="{{DATA:SCREEN:SCREEN_39}}">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-success-green/20 text-success-green flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 20px;">check_circle</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Number System</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">15/15 lessons completed</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end">
+<div class="w-24 bg-surface-variant rounded-full h-1.5 mt-1">
+<div class="bg-success-green h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-success-green mt-1">100%</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">chevron_right</span>
+</div>
+</a>
+<!-- Topic Item -->
+<a class="flex items-center justify-between p-stack-sm bg-surface-container-low rounded-lg cursor-pointer transition-colors group border-l-4 border-primary" href="{{DATA:SCREEN:SCREEN_39}}">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 20px;">play_arrow</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-primary">Fractions</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Next up: Adding unlike fractions</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end">
+<div class="w-24 bg-surface-variant rounded-full h-1.5 mt-1">
+<div class="bg-gradient-to-r from-gradient-start to-gradient-end h-1.5 rounded-full" style="width: 60%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-primary mt-1">60%</span>
+</div>
+<span class="material-symbols-outlined text-primary">chevron_right</span>
+</div>
+</a>
+<!-- Topic Item -->
+<a class="flex items-center justify-between p-stack-sm hover:bg-surface-variant rounded-lg cursor-pointer transition-colors group" href="{{DATA:SCREEN:SCREEN_39}}">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 20px;">lock</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface-variant">Decimals</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Complete Fractions to unlock</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end opacity-50">
+<div class="w-24 bg-surface-variant rounded-full h-1.5 mt-1">
+<div class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">0%</span>
+</div>
+</div>
+</a>
+<!-- Topic Item -->
+<a class="flex items-center justify-between p-stack-sm hover:bg-surface-variant rounded-lg cursor-pointer transition-colors group" href="{{DATA:SCREEN:SCREEN_39}}">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 20px;">lock</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface-variant">Geometry</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Complete Decimals to unlock</p>
+</div>
+</div>
+</a>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-on-surface border-t border-outline-variant dark:border-outline shadow-lg rounded-t-xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors" href="{{DATA:SCREEN:SCREEN_40}}">
+<span class="material-symbols-outlined" style="font-size: 24px;">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 w-16 h-16 -mt-6 shadow-md tactile-button">
+<span class="material-symbols-outlined" style="font-size: 28px;">menu_book</span>
+<span class="font-label-sm text-label-sm mt-1 leading-none">Practice</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">assignment</span>
+<span class="font-label-sm text-label-sm mt-1">Mock Tests</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">smart_toy</span>
+<span class="font-label-sm text-label-sm mt-1">AI Tutor</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profile</span>
+</button>
+</nav>
+<script>
+        // Simple script to handle visual toggle for demonstration
+        function toggleTopics(subject) {
+            const buttons = document.querySelectorAll('section.grid button');
+            buttons.forEach(btn => {
+                btn.classList.remove('border-primary', 'border-2', 'tactile-button');
+                btn.classList.add('border-outline-variant', 'border');
+            });
+            
+            const activeBtn = event.currentTarget;
+            activeBtn.classList.remove('border-outline-variant', 'border');
+            activeBtn.classList.add('border-primary', 'border-2', 'tactile-button');
+
+            // In a real app, this would fetch new topics
+            console.log('Switched to:', subject);
+        }
+    </script>
+</body></html>

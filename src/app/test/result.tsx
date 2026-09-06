@@ -1,11 +1,14 @@
-// Test Result Screen - Shows score and analysis after test completion
-import { View, Text, ScrollView, Pressable } from "react-native";
+// Mock Test Result — Stitch-aligned screen shown after a mock test completes.
+// Per Stitch: mascot + headline, score circle card, accuracy progress, stat cards,
+// performance section cards, sticky bottom actions.
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
-import { COLORS, SPACING, TYPOGRAPHY, XP_REWARDS } from "../../constants";
+import { MaterialIcon } from "../../components/ui/MaterialIcon";
+import { CircularProgress } from "../../components/shared/CircularProgress";
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS } from "../../constants";
 
 export default function TestResultScreen() {
     const router = useRouter();
@@ -22,237 +25,155 @@ export default function TestResultScreen() {
     const minutes = Math.floor(timeSpent / 60);
     const seconds = timeSpent % 60;
 
-    // Calculate XP earned
+    // Calculate XP
     const baseXP = correct * XP_REWARDS.correctAnswer;
     const completionXP = XP_REWARDS.mockTestComplete;
     const perfectBonus = percentage === 100 ? XP_REWARDS.perfectScore : 0;
     const totalXP = baseXP + completionXP + perfectBonus;
 
-    // Determine result
     const getResult = () => {
-        if (percentage >= 80) return { emoji: "🏆", text: "Excellent!", color: COLORS.success };
-        if (percentage >= 60) return { emoji: "👍", text: "Good Job!", color: COLORS.primary };
-        if (percentage >= 40) return { emoji: "💪", text: "Keep Trying!", color: COLORS.warning };
-        return { emoji: "📚", text: "Need Practice", color: COLORS.error };
+        if (percentage >= 80) return { emoji: "celebrating" as const, text: "Excellent!", color: COLORS.success };
+        if (percentage >= 60) return { emoji: "happy" as const, text: "Good Job!", color: COLORS.primary };
+        if (percentage >= 40) return { emoji: "encouraging" as const, text: "Keep Trying!", color: COLORS.warning };
+        return { emoji: "thinking" as const, text: "Need Practice", color: COLORS.error };
     };
 
     const result = getResult();
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <Stack.Screen options={{ headerShown: false }} />
 
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[5] }}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
-                <View style={{ alignItems: "center", marginVertical: SPACING[4] }}>
+                {/* Header — mascot + headline */}
+                <View style={styles.header}>
                     <MascotDisplay
-                        expression={percentage >= 60 ? "celebrating" : "encouraging"}
+                        expression={result.emoji}
                         size={140}
                     />
+                    <Text style={[styles.headline, { color: result.color }]}>
+                        {result.text}
+                    </Text>
+                    <Text style={styles.subheadline}>
+                        {testType === "sectional" && sectionName ? `${sectionName} Test` :
+                            testType === "speed" ? "Speed Test" : "Full Mock Test"} Completed
+                    </Text>
                 </View>
 
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize["3xl"],
-                        fontWeight: "800",
-                        color: result.color,
-                        textAlign: "center",
-                        marginBottom: SPACING[1],
-                    }}
-                >
-                    {result.emoji} {result.text}
-                </Text>
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.base,
-                        color: COLORS.textSecondary,
-                        textAlign: "center",
-                        marginBottom: SPACING[6],
-                    }}
-                >
-                    {testType === "sectional" && sectionName ? `${sectionName} Test` : testType === "speed" ? "Speed Test" : "Full Mock Test"} Completed
-                </Text>
-
-                {/* Score Card */}
-                <Card style={{ marginBottom: SPACING[4] }}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-                        <ScoreCircle
-                            value={correct}
-                            label="Correct"
-                            color={COLORS.success}
-                            suffix=""
+                {/* Score Card — Stitch: surface with circular score indicator */}
+                <View style={styles.scoreCard}>
+                    <View style={styles.scoreCircle}>
+                        <CircularProgress
+                            percentage={percentage}
+                            size={100}
+                            strokeWidth={8}
                         />
-                        <ScoreCircle
-                            value={total - correct}
-                            label="Wrong"
-                            color={COLORS.error}
-                            suffix=""
-                        />
-                        <ScoreCircle
-                            value={percentage}
-                            label="Accuracy"
-                            color={COLORS.primary}
-                            suffix="%"
-                        />
-                    </View>
-                </Card>
-
-                {/* Time Taken */}
-                <Card style={{ marginBottom: SPACING[4] }}>
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Text style={{ fontSize: 24, marginRight: SPACING[3] }}>⏱️</Text>
-                        <View>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary }}>
-                                Time Taken
-                            </Text>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.xl, fontWeight: "800", color: COLORS.textPrimary }}>
-                                {minutes}m {seconds}s
-                            </Text>
+                        <View style={styles.scoreCircleInner}>
+                            <Text style={[styles.scorePercent, { color: result.color }]}>{percentage}%</Text>
                         </View>
                     </View>
-                </Card>
-
-                {/* XP Earned */}
-                <Card style={{ marginBottom: SPACING[4], backgroundColor: COLORS.xpGold + "20", borderColor: COLORS.xpGold }}>
-                    <View style={{ alignItems: "center" }}>
-                        <Text style={{ fontSize: 40 }}>⭐</Text>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize["3xl"],
-                                fontWeight: "800",
-                                color: COLORS.xpGold,
-                            }}
-                        >
-                            +{totalXP} XP
-                        </Text>
-                        <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary }}>
-                            XP Earned
-                        </Text>
+                    <View style={styles.scoreStats}>
+                        <View style={styles.scoreStatItem}>
+                            <Text style={styles.scoreStatValue}>{correct}/{total}</Text>
+                            <Text style={styles.scoreStatLabel}>Score</Text>
+                        </View>
+                        <View style={styles.scoreDivider} />
+                        <View style={styles.scoreStatItem}>
+                            <Text style={styles.scoreStatValue}>{minutes}m {seconds}s</Text>
+                            <Text style={styles.scoreStatLabel}>Time</Text>
+                        </View>
                     </View>
-                    <View
-                        style={{
-                            marginTop: SPACING[3],
-                            paddingTop: SPACING[3],
-                            borderTopWidth: 1,
-                            borderTopColor: COLORS.cardBorder,
-                            gap: SPACING[1],
-                        }}
-                    >
-                        <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.textSecondary }}>
-                            • Correct answers: +{baseXP} XP
-                        </Text>
+                </View>
+
+                {/* XP Earned Card */}
+                <View style={styles.xpCard}>
+                    <View style={styles.xpIcon}>
+                        <MaterialIcon name="bolt" size={28} color={COLORS.xpGold} filled />
+                    </View>
+                    <View style={styles.xpContent}>
+                        <Text style={styles.xpValue}>+{totalXP} XP</Text>
+                        <Text style={styles.xpLabel}>XP Earned</Text>
+                    </View>
+                    <View style={styles.xpBreakdown}>
+                        <Text style={styles.xpBreakdownText}>• Correct: +{baseXP} XP</Text>
                         {perfectBonus > 0 && (
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.success }}>
-                                • Perfect score bonus: +{perfectBonus} XP 🎉
+                            <Text style={[styles.xpBreakdownText, { color: COLORS.success }]}>
+                                • Perfect: +{perfectBonus} XP 🎉
                             </Text>
                         )}
-                        <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.textSecondary }}>
-                            • Completion bonus: +{completionXP} XP
-                        </Text>
+                        <Text style={styles.xpBreakdownText}>• Completion: +{completionXP} XP</Text>
                     </View>
-                </Card>
+                </View>
 
-                {/* Performance Breakdown */}
-                <Card style={{ marginBottom: SPACING[4] }}>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.lg,
-                            fontWeight: "700",
-                            color: COLORS.textPrimary,
-                            marginBottom: SPACING[3],
-                        }}
-                    >
-                        📊 Performance Breakdown
-                    </Text>
+                {/* Performance Breakdown Card */}
+                <View style={styles.performanceCard}>
+                    <Text style={styles.sectionTitle}>Performance Breakdown</Text>
 
-                    {/* Progress Bar */}
-                    <View style={{ marginBottom: SPACING[4] }}>
-                        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: SPACING[1] }}>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary }}>
-                                Your Score
-                            </Text>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: "600", color: COLORS.textPrimary }}>
-                                {percentage}%
-                            </Text>
+                    {/* Progress bar */}
+                    <View style={styles.progressSection}>
+                        <View style={styles.progressHeader}>
+                            <Text style={styles.progressLabel}>Your Score</Text>
+                            <Text style={styles.progressValue}>{percentage}%</Text>
                         </View>
-                        <View
-                            style={{
-                                height: 12,
-                                backgroundColor: COLORS.cardBorder,
-                                borderRadius: 6,
-                                overflow: "hidden",
-                            }}
-                        >
+                        <View style={styles.progressBar}>
                             <View
-                                style={{
-                                    height: "100%",
-                                    width: `${percentage}%`,
-                                    backgroundColor: result.color,
-                                    borderRadius: 6,
-                                }}
+                                style={[
+                                    styles.progressFill,
+                                    { width: `${percentage}%`, backgroundColor: result.color },
+                                ]}
                             />
                         </View>
-                        {/* Markers */}
-                        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
-                            <Text style={{ fontSize: 10, color: COLORS.textTertiary }}>0%</Text>
-                            <Text style={{ fontSize: 10, color: COLORS.textTertiary }}>50%</Text>
-                            <Text style={{ fontSize: 10, color: COLORS.textTertiary }}>100%</Text>
+                        <View style={styles.progressMarkers}>
+                            <Text style={styles.progressMarker}>0%</Text>
+                            <Text style={styles.progressMarker}>50%</Text>
+                            <Text style={styles.progressMarker}>100%</Text>
                         </View>
                     </View>
 
-                    {/* Stats */}
-                    <View style={{ flexDirection: "row", gap: SPACING[3] }}>
-                        <View style={{ flex: 1, alignItems: "center", padding: SPACING[3], backgroundColor: COLORS.successLight, borderRadius: 8 }}>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.xl, fontWeight: "800", color: COLORS.success }}>
+                    {/* Question stats */}
+                    <View style={styles.questionStats}>
+                        <View style={[styles.questionStatItem, { backgroundColor: COLORS.successLight }]}>
+                            <Text style={[styles.questionStatValue, { color: COLORS.success }]}>
                                 {correct}/{total}
                             </Text>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.success }}>
-                                Questions Right
+                            <Text style={[styles.questionStatLabel, { color: COLORS.success }]}>
+                                Correct
                             </Text>
                         </View>
-                        <View style={{ flex: 1, alignItems: "center", padding: SPACING[3], backgroundColor: COLORS.errorLight, borderRadius: 8 }}>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.xl, fontWeight: "800", color: COLORS.error }}>
+                        <View style={[styles.questionStatItem, { backgroundColor: COLORS.errorLight }]}>
+                            <Text style={[styles.questionStatValue, { color: COLORS.error }]}>
                                 {total - correct}
                             </Text>
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.error }}>
-                                Questions Wrong
+                            <Text style={[styles.questionStatLabel, { color: COLORS.error }]}>
+                                Wrong
                             </Text>
                         </View>
                     </View>
-                </Card>
+                </View>
 
-                {/* Tips */}
+                {/* Tips card */}
                 {percentage < 60 && (
-                    <Card style={{ marginBottom: SPACING[4], backgroundColor: COLORS.infoLight }}>
-                        <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-                            <Text style={{ fontSize: 24, marginRight: SPACING[2] }}>💡</Text>
-                            <View style={{ flex: 1 }}>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.base,
-                                        fontWeight: "700",
-                                        color: COLORS.info,
-                                        marginBottom: 4,
-                                    }}
-                                >
-                                    How to Improve
-                                </Text>
-                                <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary, lineHeight: 20 }}>
-                                    Focus on understanding concepts rather than memorizing. Review explanations for wrong answers and practice similar questions.
-                                </Text>
-                            </View>
+                    <View style={styles.tipsCard}>
+                        <View style={styles.tipsHeader}>
+                            <MaterialIcon name="lightbulb" size={22} color={COLORS.warning} />
+                            <Text style={styles.tipsTitle}>How to Improve</Text>
                         </View>
-                    </Card>
+                        <Text style={styles.tipsText}>
+                            Focus on understanding concepts rather than memorizing. Review explanations for wrong answers and practice similar questions.
+                        </Text>
+                    </View>
                 )}
 
                 {/* Actions */}
-                <View style={{ gap: SPACING[3] }}>
+                <View style={styles.actions}>
                     <Button
-                        title="📝 Review Answers"
+                        title="Review Answers"
                         variant="outline"
+                        fullWidth
+                        size="lg"
                         onPress={() =>
                             router.push({
                                 pathname: "/test/analysis" as any,
@@ -267,12 +188,16 @@ export default function TestResultScreen() {
                         }
                     />
                     <Button
-                        title="🔄 Take Another Test"
+                        title="Take Another Test"
+                        fullWidth
+                        size="lg"
                         onPress={() => router.back()}
                     />
                     <Button
-                        title="🏠 Back to Home"
-                        variant="secondary"
+                        title="Back to Home"
+                        variant="outline"
+                        fullWidth
+                        size="lg"
                         onPress={() => router.replace("/(tabs)" as any)}
                     />
                 </View>
@@ -281,44 +206,232 @@ export default function TestResultScreen() {
     );
 }
 
-function ScoreCircle({
-    value,
-    label,
-    color,
-    suffix,
-}: {
-    value: number;
-    label: string;
-    color: string;
-    suffix: string;
-}) {
-    return (
-        <View style={{ alignItems: "center" }}>
-            <View
-                style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
-                    borderWidth: 4,
-                    borderColor: color,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: SPACING[2],
-                }}
-            >
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize["2xl"],
-                        fontWeight: "800",
-                        color: color,
-                    }}
-                >
-                    {value}{suffix}
-                </Text>
-            </View>
-            <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary }}>
-                {label}
-            </Text>
-        </View>
-    );
-}
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    scrollContent: {
+        padding: SPACING[5],
+    },
+    header: {
+        alignItems: "center",
+        marginBottom: SPACING[5],
+        marginTop: SPACING[2],
+    },
+    headline: {
+        fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+        fontSize: TYPOGRAPHY.fontSize["3xl"],
+        fontWeight: "800",
+        textAlign: "center",
+        marginTop: SPACING[3],
+    },
+    subheadline: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.onSurfaceVariant,
+        textAlign: "center",
+        marginTop: SPACING[1],
+    },
+    scoreCard: {
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["3xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        padding: SPACING[5],
+        marginBottom: SPACING[4],
+        alignItems: "center",
+    },
+    scoreCircle: {
+        width: 120,
+        height: 120,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: SPACING[4],
+    },
+    scoreCircleInner: {
+        position: "absolute",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    scorePercent: {
+        fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+        fontSize: TYPOGRAPHY.fontSize["2xl"],
+        fontWeight: "800",
+    },
+    scoreStats: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[5],
+    },
+    scoreStatItem: {
+        alignItems: "center",
+    },
+    scoreStatValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.xl,
+        color: COLORS.onSurface,
+        fontWeight: "800",
+    },
+    scoreStatLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+        marginTop: 2,
+    },
+    scoreDivider: {
+        width: 1,
+        height: 32,
+        backgroundColor: COLORS.outlineVariant,
+    },
+    xpCard: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[3],
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["2xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        padding: SPACING[4],
+        marginBottom: SPACING[4],
+    },
+    xpIcon: {
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        backgroundColor: COLORS.warningLight,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    xpContent: {
+        flex: 1,
+    },
+    xpValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+        fontSize: TYPOGRAPHY.fontSize["2xl"],
+        color: COLORS.xpGold,
+        fontWeight: "800",
+    },
+    xpLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+    },
+    xpBreakdown: {
+        alignItems: "flex-start",
+    },
+    xpBreakdownText: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        color: COLORS.onSurfaceVariant,
+        lineHeight: 18,
+    },
+    performanceCard: {
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["2xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        padding: SPACING[5],
+        marginBottom: SPACING[4],
+    },
+    sectionTitle: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurface,
+        fontWeight: "700",
+        marginBottom: SPACING[4],
+    },
+    progressSection: {
+        marginBottom: SPACING[4],
+    },
+    progressHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: SPACING[2],
+    },
+    progressLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        fontWeight: "600",
+    },
+    progressValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurface,
+        fontWeight: "700",
+    },
+    progressBar: {
+        height: 10,
+        backgroundColor: COLORS.surfaceVariant,
+        borderRadius: BORDER_RADIUS.full,
+        overflow: "hidden",
+    },
+    progressFill: {
+        height: "100%",
+        borderRadius: BORDER_RADIUS.full,
+    },
+    progressMarkers: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 4,
+    },
+    progressMarker: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: 10,
+        color: COLORS.onSurfaceVariant,
+    },
+    questionStats: {
+        flexDirection: "row",
+        gap: SPACING[3],
+    },
+    questionStatItem: {
+        flex: 1,
+        alignItems: "center",
+        padding: SPACING[3],
+        borderRadius: BORDER_RADIUS.lg,
+    },
+    questionStatValue: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.xl,
+        fontWeight: "800",
+    },
+    questionStatLabel: {
+        fontFamily: TYPOGRAPHY.fontFamily.medium,
+        fontSize: TYPOGRAPHY.fontSize.xs,
+        fontWeight: "600",
+        marginTop: 2,
+    },
+    tipsCard: {
+        backgroundColor: COLORS.surfaceContainerLowest,
+        borderRadius: BORDER_RADIUS["2xl"],
+        borderWidth: 1,
+        borderColor: COLORS.outlineVariant,
+        padding: SPACING[4],
+        marginBottom: SPACING[4],
+    },
+    tipsHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[2],
+        marginBottom: SPACING[2],
+    },
+    tipsTitle: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize.base,
+        color: COLORS.warning,
+        fontWeight: "700",
+    },
+    tipsText: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+        color: COLORS.onSurfaceVariant,
+        lineHeight: 22,
+    },
+    actions: {
+        gap: SPACING[3],
+        marginTop: SPACING[2],
+    },
+});

@@ -1,12 +1,13 @@
+// Forgot Password Screen — Stitch-aligned password reset screen.
 import { useState } from "react";
-import { View, Text, Pressable, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Pressable, Alert, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "../../components/ui/Button";
-import { Input } from "../../components/ui/Input";
-import { MascotDisplay } from "../../components/shared/MascotDisplay";
-import { resetPassword } from "../../lib/supabase";
-import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { MascotDisplay } from "@/components/shared/MascotDisplay";
+import { resetPassword } from "@/lib/supabase";
+import { COLORS, SPACING, TYPOGRAPHY } from "@/constants";
 
 export default function ForgotPasswordScreen() {
     const router = useRouter();
@@ -44,45 +45,24 @@ export default function ForgotPasswordScreen() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
             <KeyboardAvoidingView
-                style={{ flex: 1 }}
+                style={styles.flex}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
                 <ScrollView
-                    contentContainerStyle={{
-                        flexGrow: 1,
-                        paddingHorizontal: SPACING[6],
-                    }}
+                    contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Mascot */}
-                    <View style={{ alignItems: "center", marginTop: SPACING[8], marginBottom: SPACING[4] }}>
+                    <View style={styles.mascotWrap}>
                         <MascotDisplay expression="thinking" size={100} />
                     </View>
 
                     {/* Header */}
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                            fontWeight: "800",
-                            color: COLORS.textPrimary,
-                            textAlign: "center",
-                            marginBottom: SPACING[2],
-                        }}
-                    >
-                        Forgot Password?
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.base,
-                            color: COLORS.textSecondary,
-                            textAlign: "center",
-                            marginBottom: SPACING[6],
-                            paddingHorizontal: SPACING[4],
-                        }}
-                    >
+                    <Text style={styles.title}>Forgot Password?</Text>
+                    <Text style={styles.subtitle}>
                         Enter your email and we'll send you reset instructions.
                     </Text>
 
@@ -101,7 +81,7 @@ export default function ForgotPasswordScreen() {
                     />
 
                     {/* Reset Button */}
-                    <View style={{ marginTop: SPACING[6] }}>
+                    <View style={styles.resetBtnWrap}>
                         <Button
                             title="Send Reset Link"
                             onPress={handleReset}
@@ -112,24 +92,13 @@ export default function ForgotPasswordScreen() {
                     </View>
 
                     {/* Spacer */}
-                    <View style={{ height: SPACING[6] }} />
+                    <View style={styles.spacer} />
 
                     {/* Back to Sign In */}
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            paddingBottom: SPACING[6],
-                        }}
-                    >
-                        <Text style={{ color: COLORS.textSecondary }}>
-                            Remember your password?{" "}
-                        </Text>
+                    <View style={styles.backRow}>
+                        <Text style={styles.backLabel}>Remember your password? </Text>
                         <Pressable onPress={() => router.back()}>
-                            <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
-                                Sign In
-                            </Text>
+                            <Text style={styles.backLink}>Sign In</Text>
                         </Pressable>
                     </View>
                 </ScrollView>
@@ -137,3 +106,57 @@ export default function ForgotPasswordScreen() {
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    flex: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        paddingHorizontal: SPACING[6],
+    },
+    mascotWrap: {
+        alignItems: "center",
+        marginTop: SPACING[8],
+        marginBottom: SPACING[4],
+    },
+    title: {
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+        fontSize: TYPOGRAPHY.fontSize["2xl"],
+        color: COLORS.onSurface,
+        textAlign: "center",
+        marginBottom: SPACING[2],
+    },
+    subtitle: {
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+        fontSize: TYPOGRAPHY.fontSize.lg,
+        color: COLORS.onSurfaceVariant,
+        textAlign: "center",
+        marginBottom: SPACING[6],
+        paddingHorizontal: SPACING[4],
+    },
+    resetBtnWrap: {
+        marginTop: SPACING[6],
+    },
+    spacer: {
+        height: SPACING[6],
+    },
+    backRow: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingBottom: SPACING[6],
+    },
+    backLabel: {
+        color: COLORS.onSurfaceVariant,
+        fontFamily: TYPOGRAPHY.fontFamily.regular,
+    },
+    backLink: {
+        color: COLORS.primary,
+        fontFamily: TYPOGRAPHY.fontFamily.bold,
+    },
+});

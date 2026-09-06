@@ -1,285 +1,354 @@
-// Papers Screen - Previous year papers fetched from Supabase
-import { View, Text, ScrollView, Pressable, Alert } from "react-native";
-import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Image, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect, useCallback } from "react";
-import { Card } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
-import { MascotDisplay } from "../../components/shared/MascotDisplay";
-import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
-import { EmptyState } from "../../components/ui/EmptyState";
-import { useAppStore } from "../../store/useAppStore";
-import { fetchPapers } from "../../lib/supabase";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
-import type { Paper } from "../../types";
+import { router } from "expo-router";
+import { COLORS } from "@/constants";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { MascotDisplay } from "@/components/shared/MascotDisplay";
+import {
+    difficultyLabel,
+    fetchMyPaperAttemptSummaries,
+    fetchPaperSectionStats,
+    fetchPapersPage,
+    fetchStandardIdForClass,
+    getCachedPaperCatalogue,
+    setCachedPaperCatalogue,
+} from "@/lib/papers";
+import { Paper, PaperAttemptSummary, PaperSectionStat } from "@/types";
+import { useAppStore } from "@/store/useAppStore";
+import { trackEvent, EVENTS } from "@/lib/analytics";
+import { t, setLanguage } from "@/lib/i18n";
+
+const PAGE_SIZE = 20;
 
 export default function PapersScreen() {
-    const router = useRouter();
-    const { user } = useAppStore();
-    const targetClass = user?.target_class || "6";
-    const standardId = targetClass === "9" ? 2 : 1;
-
-    const [papers, setPapers] = useState<Paper[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedFilter, setSelectedFilter] = useState("All");
-
-    const loadPapers = useCallback(async () => {
-        setLoading(true);
-        try {
-            const { data, error } = await fetchPapers(standardId);
-            if (!error && data) {
-                setPapers(data);
-            } else {
-                setPapers([]);
-            }
-        } catch (e) {
-            console.error("Failed to load papers:", e);
-            setPapers([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [standardId]);
+    const { user, onboardingData, streak, preferences } = useAppStore();
+    const targetClass = user?.target_class || onboardingData.targetClass || "6";
+    const cadetName = user?.full_name || t("papers.cadetFallback");
 
     useEffect(() => {
-        loadPapers();
-    }, [loadPapers]);
+        const lang = preferences?.preferredLanguage === "hi" ? "hi" : "en";
+        setLanguage(lang);
+    }, [preferences?.preferredLanguage]);
 
-    const filters = ["All", "Class 6", "Class 9", "Recent"];
-    const filteredPapers = papers.filter((paper) => {
-        if (selectedFilter === "All") return true;
-        if (selectedFilter === "Class 6") return paper.standard_id === 1;
-        if (selectedFilter === "Class 9") return paper.standard_id === 2;
-        if (selectedFilter === "Recent") return paper.year >= 2023;
-        return true;
-    });
+    const [papers, setPapers] = useState<Paper[]>([]);
+    const [summaries, setSummaries] = useState<Record<string, PaperAttemptSummary>>({});
+    const [sectionStats, setSectionStats] = useState<Record<string, PaperSectionStat[]>>({});
+    const [activeFilter, setActiveFilter] = useState("All");
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [standardId, setStandardId] = useState<number | null>(null);
 
-    if (loading) {
-        return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
-                <LoadingSpinner message="Loading papers..." />
-            </SafeAreaView>
-        );
-    }
+    const summaryMap = useMemo(() => summaries, [summaries]);
+
+    const loadPage = useCallback(
+        async (opts?: { refresh?: boolean; append?: boolean }) => {
+            const isRefresh = !!opts?.refresh;
+            const append = !!opts?.append;
+            if (isRefresh) setRefreshing(true);
+            else if (append) setLoadingMore(true);
+            else setLoading(true);
+            setError(null);
+
+            try {
+                const sid = standardId ?? (await fetchStandardIdForClass(targetClass));
+                if (sid == null) throw new Error("Standard not found");
+                setStandardId(sid);
+
+                if (!append && !isRefresh) {
+                    const cached = await getCachedPaperCatalogue(sid);
+                    if (cached?.length) {
+                        setPapers(cached);
+                        setLoading(false);
+                    }
+                }
+
+                const from = append ? papers.length : 0;
+                const to = from + PAGE_SIZE - 1;
+                const { data, error: queryError } = await fetchPapersPage(sid, { from, to });
+                if (queryError) throw queryError;
+
+                const page = (data || []) as Paper[];
+                setHasMore(page.length === PAGE_SIZE);
+                const nextPapers = append ? [...papers, ...page] : page;
+                setPapers(nextPapers);
+                await setCachedPaperCatalogue(sid, nextPapers);
+
+                const ids = nextPapers.map((p) => p.id);
+                const [{ data: attemptSummaries }, { data: stats }] = await Promise.all([
+                    fetchMyPaperAttemptSummaries(sid),
+                    fetchPaperSectionStats(ids),
+                ]);
+
+                const map: Record<string, PaperAttemptSummary> = {};
+                (attemptSummaries || []).forEach((s) => {
+                    map[s.paper_id] = s;
+                });
+                setSummaries(map);
+
+                const byPaper: Record<string, PaperSectionStat[]> = {};
+                (stats || []).forEach((row) => {
+                    byPaper[row.paper_id] = byPaper[row.paper_id] || [];
+                    byPaper[row.paper_id].push(row);
+                });
+                setSectionStats(byPaper);
+            } catch (cause) {
+                console.error("Failed to load papers:", cause);
+                if (!papers.length) {
+                    setError(t("papers.listLoadFailed"));
+                }
+            } finally {
+                setLoading(false);
+                setRefreshing(false);
+                setLoadingMore(false);
+            }
+        },
+        [papers, standardId, targetClass]
+    );
+
+    useEffect(() => {
+        loadPage();
+        trackEvent(EVENTS.PAPERS_LIST_VIEWED, { targetClass });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [targetClass]);
+
+    const yearFilters = Array.from(new Set(papers.map((paper) => String(paper.year))));
+    const filters = ["All", "Recent", ...yearFilters];
+    const visiblePapers =
+        activeFilter === "Recent"
+            ? papers.slice(0, 3)
+            : activeFilter !== "All"
+              ? papers.filter((paper) => String(paper.year) === activeFilter)
+              : papers;
+    const latestPaper = papers[0];
+    const yearsCovered = new Set(papers.map((paper) => paper.year)).size;
+
+    const statusFor = (paperId: string) => {
+        const s = summaryMap[paperId];
+        if (!s) return { label: t("papers.statusUnattempted"), tone: "neutral" as const };
+        if (s.status === "in_progress") return { label: t("papers.statusInProgress"), tone: "warn" as const };
+        if (s.status === "submitted") {
+            return {
+                label: `${t("papers.score")} ${s.total_score ?? 0}/${s.max_score ?? "—"}`,
+                tone: "ok" as const,
+            };
+        }
+        return { label: t("papers.statusAttempted"), tone: "neutral" as const };
+    };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[5] }}
+                className="flex-1"
+                contentContainerClassName="px-4 pb-10"
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => loadPage({ refresh: true })}
+                        tintColor={COLORS.primary}
+                    />
+                }
             >
-                {/* Header */}
-                <View style={{ marginBottom: SPACING[5] }}>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                            fontWeight: "800",
-                            color: COLORS.textPrimary,
-                        }}
-                    >
-                        Previous Year Papers
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.base,
-                            color: COLORS.textSecondary,
-                            marginTop: SPACING[1],
-                        }}
-                    >
-                        Practice with real AISSEE papers
-                    </Text>
+                <View className="mt-3 mb-4 flex-row items-center">
+                    <View className="mr-3 h-12 w-12 overflow-hidden rounded-full bg-primary-fixed">
+                        {user?.avatar_url ? (
+                            <Image source={{ uri: user.avatar_url }} className="h-12 w-12" />
+                        ) : (
+                            <View className="h-12 w-12 items-center justify-center">
+                                <MaterialIcon name="person" size={28} color={COLORS.primary} />
+                            </View>
+                        )}
+                    </View>
+                    <View className="flex-1">
+                        <Text className="text-base font-extrabold text-onSurface">{cadetName}</Text>
+                        <Text className="text-sm text-onSurfaceVariant">
+                            {t("papers.headerSubtitle", { class: targetClass })}
+                            {streak ? ` · 🔥 ${streak}` : ""}
+                        </Text>
+                    </View>
+                    <Pressable className="p-2" accessibilityLabel={t("papers.notifications")}>
+                        <MaterialIcon name="notifications" size={24} color={COLORS.onSurfaceVariant} />
+                    </Pressable>
                 </View>
 
-                {/* Pro Feature Banner */}
-                <Card
-                    variant="elevated"
-                    style={{
-                        backgroundColor: COLORS.primaryLight,
-                        marginBottom: SPACING[4],
-                    }}
-                >
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Text style={{ fontSize: 32, marginRight: SPACING[3] }}>📋</Text>
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.base,
-                                    fontWeight: "700",
-                                    color: COLORS.onPrimaryFixed,
-                                }}
-                            >
-                                Pro Feature
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    color: COLORS.textSecondary,
-                                    marginTop: SPACING[1],
-                                }}
-                            >
-                                Access all previous year papers with detailed solutions
-                            </Text>
-                        </View>
+                <View className="mb-5">
+                    <Text className="text-2xl font-extrabold text-onSurface">{t("papers.title")}</Text>
+                    <Text className="mt-1 text-base text-onSurfaceVariant">{t("papers.subtitle")}</Text>
+                </View>
+
+                <Card variant="elevated" padding="none" style={{ backgroundColor: COLORS.primary }}>
+                    <View className="items-center p-4">
+                        <Text className="text-xl font-extrabold text-white">{t("papers.missionTitle")}</Text>
+                        <Text className="mt-2 text-center text-base text-white">{t("papers.missionBody")}</Text>
+                        <Button
+                            title={t("papers.startLatest")}
+                            size="sm"
+                            onPress={() => latestPaper && router.push(`/papers/${latestPaper.id}`)}
+                            disabled={!latestPaper}
+                            iconRight="arrow_forward"
+                            style={{ marginTop: 16 }}
+                        />
+                        <MascotDisplay expression="studying" size={116} showBackground />
                     </View>
                 </Card>
 
-                {/* Filter Tabs */}
-                <View style={{ flexDirection: "row", gap: SPACING[2], marginBottom: SPACING[4] }}>
+                <View className="mb-4 flex-row gap-2">
+                    <View className="flex-1 rounded-2xl bg-primary p-3">
+                        <Text className="text-center text-xl font-extrabold text-white">{papers.length}</Text>
+                        <Text className="text-center text-xs text-white">{t("papers.available")}</Text>
+                    </View>
+                    <View className="flex-1 rounded-2xl bg-surface-container-high p-3">
+                        <Text className="text-center text-xl font-extrabold text-onSurface">{yearsCovered}</Text>
+                        <Text className="text-center text-xs text-onSurfaceVariant">{t("papers.yearsCovered")}</Text>
+                    </View>
+                </View>
+
+                <View className="mb-4 flex-row gap-2">
                     {filters.map((filter) => (
                         <Pressable
                             key={filter}
-                            onPress={() => setSelectedFilter(filter)}
-                            style={{
-                                paddingHorizontal: SPACING[4],
-                                paddingVertical: SPACING[2],
-                                borderRadius: BORDER_RADIUS.full,
-                                backgroundColor:
-                                    selectedFilter === filter ? COLORS.primary : COLORS.surfaceContainer,
+                            onPress={() => {
+                                setActiveFilter(filter);
+                                trackEvent(EVENTS.PAPER_FILTER_SELECTED, { filter });
                             }}
+                            className={`rounded-full border px-4 py-2 ${
+                                activeFilter === filter
+                                    ? "border-primary bg-primary"
+                                    : "border-outline-variant bg-surface-container-low"
+                            }`}
                         >
                             <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    fontWeight: "600",
-                                    color: selectedFilter === filter ? COLORS.onPrimary : COLORS.textPrimary,
-                                }}
+                                className={`text-sm font-semibold ${
+                                    activeFilter === filter ? "text-white" : "text-onSurfaceVariant"
+                                }`}
                             >
-                                {filter}
+                                {filter === "All" ? t("papers.filterClass", { class: targetClass }) : filter === "Recent" ? t("papers.filterRecent") : filter}
                             </Text>
                         </Pressable>
                     ))}
                 </View>
 
-                {/* Papers List */}
-                {filteredPapers.length === 0 ? (
+                {loading && !papers.length ? (
+                    <LoadingSpinner message={t("papers.loadingList")} />
+                ) : error && !papers.length ? (
                     <EmptyState
-                        title="No Papers Available"
-                        description="We're working on adding previous year papers. Check back soon!"
+                        title={t("papers.unableToLoad")}
+                        description={error}
+                        actionLabel={t("common.retry")}
+                        onAction={() => loadPage()}
+                        mascot="sad"
+                    />
+                ) : visiblePapers.length === 0 ? (
+                    <EmptyState
+                        title={t("papers.emptyTitle")}
+                        description={t("papers.emptyBody", { class: targetClass })}
                         mascot="thinking"
                     />
                 ) : (
-                    filteredPapers.map((paper) => (
-                        <Pressable
-                            key={paper.id}
-                            onPress={() =>
-                                router.push({
-                                    pathname: "/papers/[paperId]" as any,
-                                    params: {
-                                        paperId: paper.id,
-                                        year: paper.year.toString(),
-                                        title: paper.title,
-                                        totalMarks: (paper.total_marks || 0).toString(),
-                                        duration: (paper.duration_minutes || 0).toString(),
-                                    },
-                                })
-                            }
-                        >
-                            <Card variant="elevated" style={{ marginBottom: SPACING[3] }}>
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                    {/* Year Badge */}
-                                    <View
-                                        style={{
-                                            width: 56,
-                                            height: 56,
-                                            borderRadius: 12,
-                                            backgroundColor: COLORS.surfaceContainer,
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginRight: SPACING[4],
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                                fontWeight: "700",
-                                                color: COLORS.textPrimary,
-                                            }}
-                                        >
-                                            {paper.year}
-                                        </Text>
-                                    </View>
+                    visiblePapers.map((paper) => {
+                        const level = difficultyLabel(paper.difficulty, paper.year);
+                        const status = statusFor(paper.id);
+                        const sections = (sectionStats[paper.id] || []).slice(0, 3);
+                        const cta =
+                            summaryMap[paper.id]?.status === "in_progress"
+                                ? t("papers.resume")
+                                : summaryMap[paper.id]?.status === "submitted"
+                                  ? t("papers.viewOrRetry")
+                                  : t("papers.startPaper");
 
-                                    {/* Paper Info */}
-                                    <View style={{ flex: 1 }}>
-                                        <Text
-                                            style={{
-                                                fontSize: TYPOGRAPHY.fontSize.base,
-                                                fontWeight: "700",
-                                                color: COLORS.textPrimary,
-                                            }}
-                                        >
+                        return (
+                            <Card key={paper.id} variant="elevated" padding="none" style={{ marginBottom: 12 }}>
+                                <Pressable onPress={() => router.push(`/papers/${paper.id}`)} className="flex-row items-center p-4">
+                                    <View className="mr-3 rounded-xl bg-primary-fixed p-3">
+                                        <MaterialIcon name="assignment" size={24} color={COLORS.primary} />
+                                    </View>
+                                    <View className="flex-1">
+                                        <Text className="text-base font-bold text-onSurface" numberOfLines={1}>
                                             {paper.title}
                                         </Text>
-                                        <View style={{ flexDirection: "row", gap: SPACING[3], marginTop: SPACING[2] }}>
-                                            {paper.total_marks && (
-                                                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                                    <Text style={{ fontSize: 12 }}>🏆</Text>
-                                                    <Text
-                                                        style={{
-                                                            fontSize: TYPOGRAPHY.fontSize.xs,
-                                                            color: COLORS.textSecondary,
-                                                            marginLeft: 4,
-                                                        }}
-                                                    >
-                                                        {paper.total_marks} marks
-                                                    </Text>
-                                                </View>
-                                            )}
-                                            {paper.duration_minutes && (
-                                                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                                    <Text style={{ fontSize: 12 }}>⏱️</Text>
-                                                    <Text
-                                                        style={{
-                                                            fontSize: TYPOGRAPHY.fontSize.xs,
-                                                            color: COLORS.textSecondary,
-                                                            marginLeft: 4,
-                                                        }}
-                                                    >
-                                                        {paper.duration_minutes}m
-                                                    </Text>
-                                                </View>
-                                            )}
-                                        </View>
+                                        <Text className="mt-1 text-sm text-onSurfaceVariant">
+                                            AISSEE {paper.year} • Class {targetClass}
+                                        </Text>
+                                        <Text
+                                            className={`mt-1 text-xs font-bold ${
+                                                status.tone === "ok"
+                                                    ? "text-success"
+                                                    : status.tone === "warn"
+                                                      ? "text-warning"
+                                                      : "text-onSurfaceVariant"
+                                            }`}
+                                        >
+                                            {status.label}
+                                        </Text>
                                     </View>
+                                    <MaterialIcon name="chevron_right" size={22} color={COLORS.onSurfaceVariant} />
+                                </Pressable>
 
-                                    {/* Arrow */}
-                                    <Text style={{ color: COLORS.primary, fontSize: 18 }}>→</Text>
+                                {sections.length > 0 && (
+                                    <View className="flex-row flex-wrap gap-2 px-4 pb-2">
+                                        {sections.map((s) => (
+                                            <View key={s.section} className="rounded-full bg-surface-container-high px-2 py-1">
+                                                <Text className="text-[10px] font-semibold text-onSurfaceVariant">
+                                                    {s.section} · {s.question_count}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                )}
+
+                                <View className="mt-1 flex-row items-center border-t border-outline-variant px-4 pt-3 pb-1">
+                                    <MaterialIcon name="schedule" size={16} color={COLORS.onSurfaceVariant} />
+                                    <Text className="ml-1 text-xs text-onSurfaceVariant">
+                                        {paper.duration_minutes || 180} {t("papers.mins")}
+                                    </Text>
+                                    <MaterialIcon name="stars" size={16} color={COLORS.onSurfaceVariant} />
+                                    <Text className="ml-1 text-xs text-onSurfaceVariant">
+                                        {paper.total_marks || "-"} {t("papers.marks")}
+                                    </Text>
+                                    <View
+                                        className={`ml-auto rounded-full px-3 py-1 ${
+                                            level.toLowerCase() === "easy" ? "bg-success-light" : "bg-warning-light"
+                                        }`}
+                                    >
+                                        <Text
+                                            className={`text-xs font-bold ${
+                                                level.toLowerCase() === "easy" ? "text-success" : "text-warning"
+                                            }`}
+                                        >
+                                            {level}
+                                        </Text>
+                                    </View>
                                 </View>
+
+                                <Button
+                                    title={cta}
+                                    size="sm"
+                                    fullWidth
+                                    onPress={() => router.push(`/papers/${paper.id}`)}
+                                    style={{ margin: 12 }}
+                                />
                             </Card>
-                        </Pressable>
-                    ))
+                        );
+                    })
                 )}
 
-                {/* Info Card */}
-                <Card
-                    style={{
-                        marginTop: SPACING[4],
-                        backgroundColor: COLORS.surfaceMuted,
-                        alignItems: "center",
-                    }}
-                >
-                    <Text style={{ fontSize: 32, marginBottom: SPACING[2] }}>💡</Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.base,
-                            color: COLORS.textPrimary,
-                            textAlign: "center",
-                            fontWeight: "600",
-                        }}
-                    >
-                        Tip
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.sm,
-                            color: COLORS.textSecondary,
-                            textAlign: "center",
-                            marginTop: SPACING[1],
-                            lineHeight: 20,
-                        }}
-                    >
-                        Solving previous year papers helps you understand the actual exam pattern and difficulty level.
-                    </Text>
-                </Card>
+                {hasMore && visiblePapers.length > 0 && activeFilter === "All" ? (
+                    <Button
+                        title={loadingMore ? t("common.loading") : t("papers.loadMore")}
+                        variant="outline"
+                        onPress={() => loadPage({ append: true })}
+                        disabled={loadingMore}
+                        fullWidth
+                    />
+                ) : null}
             </ScrollView>
         </SafeAreaView>
     );

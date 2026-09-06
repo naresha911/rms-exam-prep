@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AISSEE Cadet - Home Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-container": "#ffdad6",
+                      "surface": "#f9f9ff",
+                      "background": "#f9f9ff",
+                      "on-tertiary-fixed": "#341100",
+                      "surface-variant": "#d8e3fb",
+                      "secondary-container": "#2170e4",
+                      "inverse-on-surface": "#ecf1ff",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "gradient-end": "#A855F7",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed": "#001a42",
+                      "on-secondary": "#ffffff",
+                      "outline": "#767586",
+                      "primary": "#4648d4",
+                      "surface-dim": "#cfdaf2",
+                      "tertiary-fixed-dim": "#ffb690",
+                      "on-surface": "#111c2d",
+                      "surface-container-highest": "#d8e3fb",
+                      "tertiary": "#994100",
+                      "surface-muted": "#F8FAFC",
+                      "surface-container-lowest": "#ffffff",
+                      "weakness-red": "#EF4444",
+                      "error": "#ba1a1a",
+                      "on-background": "#111c2d",
+                      "warning-amber": "#F59E0B",
+                      "on-secondary-container": "#fefcff",
+                      "primary-fixed": "#e1e0ff",
+                      "on-tertiary-fixed-variant": "#783200",
+                      "surface-container-high": "#dee8ff",
+                      "on-primary-fixed": "#07006c",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "secondary": "#0058be",
+                      "on-primary-container": "#fffbff",
+                      "surface-tint": "#494bd6",
+                      "secondary-fixed": "#d8e2ff",
+                      "inverse-primary": "#c0c1ff",
+                      "surface-container-low": "#f0f3ff",
+                      "on-surface-variant": "#464554",
+                      "on-tertiary-container": "#fffbff",
+                      "on-error": "#ffffff",
+                      "primary-container": "#6063ee",
+                      "on-primary": "#ffffff",
+                      "success-green": "#22C55E",
+                      "tertiary-container": "#c05400",
+                      "outline-variant": "#c7c4d7",
+                      "gradient-start": "#6366F1",
+                      "on-secondary-fixed-variant": "#004395",
+                      "inverse-surface": "#263143",
+                      "surface-bright": "#f9f9ff",
+                      "tertiary-fixed": "#ffdbca",
+                      "surface-container": "#e7eeff",
+                      "primary-fixed-dim": "#c0c1ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "touch-target": "48px",
+                      "stack-lg": "24px",
+                      "margin-mobile": "16px",
+                      "base": "8px",
+                      "stack-md": "16px",
+                      "margin-desktop": "32px",
+                      "stack-sm": "8px"
+              },
+              "fontFamily": {
+                      "label-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "label-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+          .material-symbols-outlined {
+              font-variation-settings: 'FILL' 1;
+          }
+          .soft-shadow {
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          }
+          .tactile-button {
+              border-bottom-width: 4px;
+              border-bottom-color: #2f2ebe; /* on-primary-fixed-variant approx */
+          }
+          .tactile-button:active {
+              border-bottom-width: 0px;
+              transform: translateY(4px);
+              margin-bottom: 4px;
+          }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md pb-24 md:pb-0 pt-16 md:pt-20">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-on-surface flex justify-between items-center px-margin-mobile h-touch-target">
+<div class="flex items-center gap-3">
+<a class="w-10 h-10 rounded-full overflow-hidden bg-primary-container flex items-center justify-center shrink-0 border-2 border-primary block" href="{{DATA:SCREEN:SCREEN_22}}">
+<img alt="Cadet Profile" class="w-full h-full object-cover" data-alt="A cheerful, highly stylized 3D avatar of an Indian student cadet in a crisp AISSEE uniform, rendered in a vibrant, playful light-mode aesthetic against a solid light blue background. The character has an expressive, confident smile, fitting a gamified learning platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAw-dsbvb6Ls7Gs-sKzjzAASuAm-0yrQD_aLaF0Ww7x9Wyi2dye2jt8-tNs6wOYry76z9P0ZvRtSD3IwF3e-Ci0XbNbpIIhSpSl3uI8Do8be_QikBdzT4yL-9g_bYfkcU4M7OWW2ByJUqo2_yjlM9gVY9NBIuUADz5JoaPs6_AJUEqZYTiIlBYUHssYJwk94e-LV_DGnWel-52Nl63Yhtiez9iB_Ctx1HdcGV2DO_eIfq1kP9Ra7EPN"/>
+</a>
+<div class="font-headline-md text-primary dark:text-primary-fixed tracking-tight">AISSEE <span class="font-bold text-primary">Cadet</span></div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 font-label-lg text-label-lg font-bold text-warning-amber bg-warning-amber/10 px-3 py-1.5 rounded-full">
+<span class="">7</span>
+<span class="">🔥</span>
+</div>
+<div class="text-on-surface-variant hover:bg-surface-variant p-2 rounded-full cursor-pointer transition-transform duration-150 active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications" data-weight="fill">notifications</span>
+</div>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg space-y-stack-lg">
+<!-- Daily Goal Card -->
+<section class="bg-surface-container-low rounded-3xl p-stack-lg border border-outline-variant/30 relative overflow-hidden soft-shadow">
+<div class="absolute right-0 top-0 w-32 h-32 opacity-20 pointer-events-none">
+<img alt="Treasure Chest" class="w-full h-full object-contain" data-alt="A stylized, 3D rendered golden treasure chest slightly glowing, rendered in a vibrant, playful light-mode aesthetic, floating gently against a subtle light background. It feels like a high-value reward in an educational game." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBKMjNESWVk09oDLSdV41HgZDd_8lfHHwt4khKqhAjpfC7Y_q8VfMaZyjXRJ6ZktIJKFeu7NgIu5tLYRPzDjdI2lv02Rq0Qq5O3gJNRj4TLIOpwo7F2W_VJV0EmRmj2nDux5iSRaCE4zR_jb0I53F-VbSvuW3MViX2N-i7N457Cz0usgboLbN7mF7ofs_QzVgn3rmNSZcNNxQkGdvpybvueyXrpvgcGAb_ExLaIREosrrMVhipDkJ4"/>
+</div>
+<div class="relative z-10">
+<h2 class="font-label-lg text-label-lg text-on-surface-variant mb-2">Daily goal</h2>
+<div class="flex items-end gap-2 mb-4">
+<span class="font-display-lg text-display-lg text-on-surface">15</span>
+<span class="font-label-lg text-label-lg text-outline mb-2">/ 20 XP</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-warning-amber to-warning-amber/80 rounded-full transition-all duration-1000 ease-out" style="width: 75%;"></div>
+</div>
+</div>
+</section>
+<!-- Continue Learning Module -->
+<section class="bg-primary rounded-3xl p-stack-lg relative overflow-hidden text-on-primary soft-shadow">
+<div class="absolute right-stack-lg bottom-0 w-40 h-40 pointer-events-none transform translate-y-4">
+<img alt="Math Mastery Island" class="w-full h-full object-contain" data-alt="A vibrant 3D illustration of stylized mathematical symbols, geometric shapes, and a protractor hovering over a small green island, rendered in a playful, tactile light-mode aesthetic against a solid background, symbolizing math mastery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBKMjNESWVk09oDLSdV41HgZDd_8lfHHwt4khKqhAjpfC7Y_q8VfMaZyjXRJ6ZktIJKFeu7NgIu5tLYRPzDjdI2lv02Rq0Qq5O3gJNRj4TLIOpwo7F2W_VJV0EmRmj2nDux5iSRaCE4zR_jb0I53F-VbSvuW3MViX2N-i7N457Cz0usgboLbN7mF7ofs_QzVgn3rmNSZcNNxQkGdvpybvueyXrpvgcGAb_ExLaIREosrrMVhipDkJ4"/>
+</div>
+<div class="relative z-10 max-w-[60%]">
+<div class="font-label-sm text-label-sm text-on-primary/80 uppercase tracking-wider mb-2">Continue learning</div>
+<h2 class="font-headline-lg text-headline-lg-mobile font-bold mb-1">Mathematics</h2>
+<p class="font-body-md text-on-primary/90 mb-6">Unit 3: Fractions</p>
+<a class="bg-on-primary text-primary font-label-lg text-label-lg px-6 py-3 rounded-full hover:bg-surface-container-low transition-colors tactile-button shadow-sm inline-block text-center" href="{{DATA:SCREEN:SCREEN_39}}">
+                    Continue
+                </a>
+</div>
+</section>
+<!-- Today's Plan -->
+<section>
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="font-headline-md text-headline-md-mobile text-on-surface font-bold">Today's plan</h2>
+<a class="font-label-lg text-label-lg text-primary hover:underline" href="#">View all</a>
+</div>
+<div class="bg-surface-container-lowest rounded-3xl border border-outline-variant/30 p-stack-md flex flex-col gap-2 soft-shadow">
+<!-- Task 1 (Completed) -->
+<div class="flex items-center gap-4 p-3 rounded-2xl bg-surface-muted border border-transparent">
+<div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
+<span class="material-symbols-outlined" data-icon="menu_book" data-weight="fill">menu_book</span>
+</div>
+<div class="flex-1">
+<h3 class="font-label-lg text-label-lg text-on-surface font-bold">Practice Set 1</h3>
+<p class="font-body-sm text-on-surface-variant text-sm">Fractions &amp; Decimals</p>
+</div>
+<div class="w-8 h-8 rounded-full bg-success-green flex items-center justify-center text-on-primary shrink-0">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill">check</span>
+</div>
+</div>
+<div class="h-px bg-outline-variant/20 mx-4"></div>
+<!-- Task 2 (Pending) -->
+<div class="flex items-center gap-4 p-3 rounded-2xl hover:bg-surface-muted transition-colors border border-transparent cursor-pointer">
+<div class="w-12 h-12 rounded-xl bg-secondary-container/20 flex items-center justify-center text-secondary-container shrink-0">
+<span class="material-symbols-outlined" data-icon="smart_toy" data-weight="fill">smart_toy</span>
+</div>
+<div class="flex-1">
+<h3 class="font-label-lg text-label-lg text-on-surface font-bold">AI Mock Test</h3>
+<p class="font-body-sm text-on-surface-variant text-sm">General Knowledge</p>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center shrink-0">
+</div>
+</div>
+<div class="h-px bg-outline-variant/20 mx-4"></div>
+<!-- Task 3 (Pending) -->
+<div class="flex items-center gap-4 p-3 rounded-2xl hover:bg-surface-muted transition-colors border border-transparent cursor-pointer">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center text-tertiary-container shrink-0">
+<span class="material-symbols-outlined" data-icon="psychology" data-weight="fill">psychology</span>
+</div>
+<div class="flex-1">
+<h3 class="font-label-lg text-label-lg text-on-surface font-bold">Intelligence Quiz</h3>
+<p class="font-body-sm text-on-surface-variant text-sm">15 Questions</p>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center shrink-0">
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-on-surface border-t border-outline-variant dark:border-outline shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 w-12 h-12 hover:bg-surface-container-high transition-colors scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill">home</span>
+<span class="font-label-sm text-label-sm sr-only">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors" href="{{DATA:SCREEN:SCREEN_24}}">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label-sm text-label-sm mt-1 text-[10px]">Practice</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors" href="{{DATA:SCREEN:SCREEN_8}}">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-label-sm text-label-sm mt-1 text-[10px]">Mock Tests</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm mt-1 text-[10px]">AI Tutor</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-colors" href="{{DATA:SCREEN:SCREEN_22}}">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-1 text-[10px]">Profile</span>
+</a>
+</nav>
+<!-- Desktop Navigation Cluster (Hidden on Mobile) -->
+<nav class="hidden md:flex fixed top-0 right-margin-desktop h-touch-target items-center gap-2 z-[60]">
+<a class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-container text-on-primary-container hover:bg-surface-variant transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill">home</span>
+<span class="font-label-lg text-label-lg font-bold">Home</span>
+</a>
+<a class="flex items-center gap-2 px-4 py-2 rounded-full text-on-surface-variant hover:bg-surface-variant transition-colors" href="{{DATA:SCREEN:SCREEN_24}}">
+<span class="font-label-lg text-label-lg">Practice</span>
+</a>
+<a class="flex items-center gap-2 px-4 py-2 rounded-full text-on-surface-variant hover:bg-surface-variant transition-colors" href="{{DATA:SCREEN:SCREEN_8}}">
+<span class="font-label-lg text-label-lg">Mock Tests</span>
+</a>
+<a class="flex items-center gap-2 px-4 py-2 rounded-full text-on-surface-variant hover:bg-surface-variant transition-colors" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="font-label-lg text-label-lg">AI Tutor</span>
+</a>
+<a class="flex items-center gap-2 px-4 py-2 rounded-full text-on-surface-variant hover:bg-surface-variant transition-colors" href="{{DATA:SCREEN:SCREEN_22}}">
+<span class="font-label-lg text-label-lg">Profile</span>
+</a>
+</nav>
+</body></html>

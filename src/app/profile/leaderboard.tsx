@@ -38,11 +38,11 @@ export default function LeaderboardScreen() {
     const getRankColor = (rank: number) => {
         switch (rank) {
             case 1:
-                return "#FFD700"; // Gold
+                return COLORS.gold;
             case 2:
-                return "#C0C0C0"; // Silver
+                return COLORS.silver;
             case 3:
-                return "#CD7F32"; // Bronze
+                return COLORS.bronze;
             default:
                 return COLORS.textSecondary;
         }
@@ -97,7 +97,7 @@ export default function LeaderboardScreen() {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 borderWidth: 3,
-                                borderColor: "#C0C0C0",
+                                borderColor: COLORS.silver,
                             }}
                         >
                             <Text style={{ fontSize: 28 }}>🥈</Text>
@@ -125,7 +125,7 @@ export default function LeaderboardScreen() {
                             style={{
                                 width: 70,
                                 height: 50,
-                                backgroundColor: "#C0C0C0",
+                                backgroundColor: COLORS.silver,
                                 borderTopLeftRadius: 8,
                                 borderTopRightRadius: 8,
                                 marginTop: SPACING[2],
@@ -158,7 +158,7 @@ export default function LeaderboardScreen() {
                             style={{
                                 width: 90,
                                 height: 80,
-                                backgroundColor: "#FFD700",
+                                backgroundColor: COLORS.gold,
                                 borderTopLeftRadius: 8,
                                 borderTopRightRadius: 8,
                                 marginTop: SPACING[2],
@@ -177,7 +177,7 @@ export default function LeaderboardScreen() {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 borderWidth: 3,
-                                borderColor: "#CD7F32",
+                                borderColor: COLORS.bronze,
                             }}
                         >
                             <Text style={{ fontSize: 22 }}>🥉</Text>
@@ -205,7 +205,7 @@ export default function LeaderboardScreen() {
                             style={{
                                 width: 60,
                                 height: 35,
-                                backgroundColor: "#CD7F32",
+                                backgroundColor: COLORS.bronze,
                                 borderTopLeftRadius: 8,
                                 borderTopRightRadius: 8,
                                 marginTop: SPACING[2],
