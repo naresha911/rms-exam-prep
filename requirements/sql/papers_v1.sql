@@ -282,6 +282,45 @@ $$;
 revoke all on function get_paper_session_questions(uuid) from public;
 grant execute on function get_paper_session_questions(uuid) to authenticated;
 
+-- Ensure auth.users always has a matching profiles row (paper_attempts FK).
+create or replace function ensure_student_profile()
+returns profiles
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_row profiles%rowtype;
+  v_name text;
+begin
+  if v_uid is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  select * into v_row from profiles where id = v_uid;
+  if found then
+    return v_row;
+  end if;
+
+  select nullif(raw_user_meta_data->>'full_name', '')
+  into v_name
+  from auth.users
+  where id = v_uid;
+
+  insert into profiles (id, role, full_name)
+  values (v_uid, 'student', v_name)
+  on conflict (id) do update
+    set updated_at = now()
+  returning * into v_row;
+
+  return v_row;
+end;
+$$;
+
+revoke all on function ensure_student_profile() from public;
+grant execute on function ensure_student_profile() to authenticated;
+
 -- Start or resume in-progress attempt
 create or replace function start_paper_attempt(p_paper_id uuid)
 returns jsonb
@@ -299,6 +338,9 @@ begin
   if v_uid is null then
     raise exception 'Not authenticated';
   end if;
+
+  -- paper_attempts.student_id references profiles(id)
+  perform ensure_student_profile();
 
   if not exists (
     select 1 from papers where id = p_paper_id and is_published = true

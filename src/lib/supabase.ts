@@ -87,11 +87,14 @@ export const updatePassword = async (newPassword: string) => {
     return { data, error };
 };
 
-// Save onboarding data to user metadata (persists across sessions)
+// Save onboarding / profile-setup data to user metadata (persists across sessions)
 export const saveOnboardingData = async (metadata: {
     target_class?: string;
     current_class?: string;
     goal?: string;
+    current_school?: string;
+    dream_school?: string;
+    preferred_language?: string;
 }) => {
     const { data, error } = await supabase.auth.updateUser({
         data: metadata,
@@ -478,6 +481,55 @@ export const fetchProfile = async (userId: string) => {
         .select('*')
         .eq('id', userId)
         .single();
+
+    return { data, error };
+};
+
+/**
+ * Ensure the signed-in auth user has a row in `profiles`
+ * (required by FKs such as paper_attempts.student_id).
+ * Prefers the security-definer RPC; falls back to a direct upsert.
+ */
+export const ensureStudentProfile = async (hints?: {
+    full_name?: string | null;
+}) => {
+    const { data: rpcData, error: rpcError } = await supabase.rpc('ensure_student_profile');
+    if (!rpcError && rpcData) {
+        return { data: rpcData, error: null };
+    }
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+        return { data: null, error: userError || { message: 'Not authenticated' } };
+    }
+
+    const existing = await fetchProfile(user.id);
+    if (existing.data) return existing;
+
+    const fullName =
+        hints?.full_name ??
+        (typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : null);
+
+    const { data, error } = await supabase
+        .from('profiles')
+        .upsert(
+            {
+                id: user.id,
+                role: 'student',
+                full_name: fullName,
+                updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'id' }
+        )
+        .select()
+        .single();
+
+    if (error && rpcError) {
+        console.warn('ensureStudentProfile RPC unavailable:', rpcError.message);
+    }
 
     return { data, error };
 };

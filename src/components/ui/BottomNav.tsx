@@ -21,7 +21,7 @@ const NAV_ITEMS: NavItem[] = [
     { name: "practice", label: "Practice", icon: "menu_book", href: "/(tabs)/practice" },
     { name: "tests", label: "Mock Tests", icon: "assignment", href: "/(tabs)/tests" },
     { name: "ai", label: "AI Tutor", icon: "smart_toy", href: "/(tabs)/ai" },
-    { name: "profile", label: "Profile", icon: "person", href: "/(tabs)/profile" },
+    { name: "profile", label: "Profile", icon: "person", href: "/(tabs)/me" },
 ];
 
 interface BottomNavProps {

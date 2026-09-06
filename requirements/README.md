@@ -8,6 +8,7 @@ Index of product, design, schema, and feature docs under `requirements/`.
 | [`Design.md`](Design.md) | Design tokens (Cadet Quest colors, typography, spacing). Implemented in `src/constants`. |
 | [`Initial_Migration.txt`](Initial_Migration.txt) | Canonical Supabase schema for greenfield / reference. |
 | [`sql/papers_v1.sql`](sql/papers_v1.sql) | Incremental SQL for existing projects: paper attempts, RLS, RPCs, storage policies. Run once in Supabase SQL Editor. |
+| [`sql/ensure_student_profile.sql`](sql/ensure_student_profile.sql) | Fixes missing `profiles` rows for auth users (FK errors on paper attempts). Safe to re-run. |
 | [`previous-papers.md`](previous-papers.md) | **Current** Previous Year Papers product + tech spec (aligned with codebase). |
 | [`papers-sprints.md`](papers-sprints.md) | Sprint tracker for papers implementation. |
 | [`papers-verification.md`](papers-verification.md) | Live Supabase + device verification checklist after deploying `papers_v1.sql`. |

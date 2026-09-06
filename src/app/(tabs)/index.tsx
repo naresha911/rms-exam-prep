@@ -104,7 +104,7 @@ export default function HomeScreen() {
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <View style={styles.headerInner}>
           <Pressable
-            onPress={() => router.push("/(tabs)/profile")}
+            onPress={() => router.push("/(tabs)/me")}
             style={styles.profileButton}
             accessibilityRole="button"
             accessibilityLabel="Open profile"

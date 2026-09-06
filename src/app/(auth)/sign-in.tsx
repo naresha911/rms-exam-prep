@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { MascotDisplay } from "@/components/shared/MascotDisplay";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useAppStore } from "@/store/useAppStore";
-import { signIn } from "@/lib/supabase";
+import { signIn, ensureStudentProfile, fetchProfile } from "@/lib/supabase";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
 
 export default function SignInScreen() {
@@ -37,17 +37,22 @@ export default function SignInScreen() {
             if (error) {
                 Alert.alert("Sign In Failed", error.message);
             } else if (data?.user) {
+                await ensureStudentProfile({
+                    full_name: data.user.user_metadata?.full_name || null,
+                });
+                const { data: profile } = await fetchProfile(data.user.id);
+                const metadata = data.user.user_metadata || {};
                 setUser({
                     id: data.user.id,
-                    role: "student",
-                    full_name: data.user.user_metadata?.full_name || null,
-                    phone: null,
-                    avatar_url: null,
-                    school_id: null,
-                    created_at: data.user.created_at,
-                    updated_at: data.user.updated_at || new Date().toISOString(),
-                    target_class: "6",
-                    current_class: "5",
+                    role: (profile?.role as "student") || "student",
+                    full_name: profile?.full_name || metadata.full_name || null,
+                    phone: profile?.phone || null,
+                    avatar_url: profile?.avatar_url || null,
+                    school_id: profile?.school_id || null,
+                    created_at: profile?.created_at || data.user.created_at,
+                    updated_at: profile?.updated_at || data.user.updated_at || new Date().toISOString(),
+                    target_class: (metadata.target_class as "6" | "9") || "6",
+                    current_class: (metadata.current_class as "5" | "8" | "other") || "5",
                     daily_goal: 20,
                     xp: 0,
                     level: 1,

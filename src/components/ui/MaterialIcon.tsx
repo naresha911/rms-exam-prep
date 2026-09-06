@@ -156,7 +156,9 @@ export type MaterialIconName =
     | "bolt_outlined"
     | "trending_up_outlined"
     | "history_edu"
-    | "schedule_outlined";
+    | "schedule_outlined"
+    | "badge"
+    | "account_balance";
 
 interface MaterialIconProps {
     name: MaterialIconName;
@@ -307,6 +309,8 @@ const ICON_PATHS: Record<MaterialIconName, string> = {
     trending_up_outlined: "M3.5 17.5 9 12l4 4 7-7-1.41-1.41L13 13.17l-4-4-7 7Z",
     history_edu: "M9 4v1.5A2.5 2.5 0 0 1 6.5 8 1.5 1.5 0 0 0 5 9.5V13a3 3 0 0 0 3 3h1v-2H8a1 1 0 0 1-1-1V9.5a4 4 0 0 0 4-4V4h2v1.5a4 4 0 0 0 4 4V13h-3v-2.07c1.25-.36 2.2-1.43 2.2-2.78 0-1.58-1.27-2.86-2.85-2.86-.5 0-.97.13-1.39.36A4.92 4.92 0 0 0 14 7.6 4.92 4.92 0 0 0 12.79 8 1.5 1.5 0 0 0 11 7c-1.58 0-2.85 1.28-2.85 2.86 0 1.35.95 2.42 2.2 2.78V15h-2a1 1 0 0 1-1-1V9.5a3 3 0 0 0 3-3V4h-1.35Z",
     schedule_outlined: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2ZM12 20a8 8 0 1 1 8-8 8 8 0 0 1-8 8Zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67Z",
+    badge: "M20 7h-5V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-9-3h2v3h-2Zm5 14H8v-1.25c0-1.67 3.33-2.5 4-2.5s4 .83 4 2.5Zm-4-4.5A1.75 1.75 0 1 1 13.75 12 1.75 1.75 0 0 1 12 13.5Z",
+    account_balance: "M4 10v7h3v-7Zm6.5 0v7h3v-7ZM2 19v2h20v-2ZM16 10v7h3v-7ZM12 1 2 6v2h20V6Z",
 };
 
 // These paths are complete filled Material Symbols silhouettes. The even-odd

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { MascotDisplay } from "@/components/shared/MascotDisplay";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useAppStore } from "@/store/useAppStore";
-import { signUp, saveOnboardingData } from "@/lib/supabase";
+import { signUp, saveOnboardingData, ensureStudentProfile } from "@/lib/supabase";
 import { trackEvent, identifyUser, EVENTS } from "@/lib/analytics";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
 
@@ -61,6 +61,7 @@ export default function SignUpScreen() {
                 ]);
                 return;
             }
+            await ensureStudentProfile({ full_name: fullName });
             setUser({
                 id: data.user.id, role: "student", full_name: fullName, phone: null,
                 avatar_url: null, school_id: null, created_at: data.user.created_at,

@@ -523,5 +523,15 @@ export const SUPPORTED_LANGUAGES = [
     { code: 'pa', name: 'Punjabi' },
 ];
 
+/** Optional dream-school choices for Profile Setup (static list; not DB-backed yet). */
+export const DREAM_SAINIK_SCHOOLS = [
+    'Sainik School Kunjpura, Haryana',
+    'Sainik School Ghorakhal, Uttarakhand',
+    'Sainik School Kapurthala, Punjab',
+    'Sainik School Korukonda, Andhra Pradesh',
+    'Sainik School Kazhakootam, Kerala',
+    'Rashtriya Military School (RMS) Chail',
+] as const;
+
 // Disclaimer
 export const DISCLAIMER = 'This is an independent educational application for AISSEE preparation and is not affiliated with or endorsed by the National Testing Agency, Sainik Schools Society, Ministry of Defence or Government of India.';

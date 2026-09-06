@@ -10,7 +10,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { View } from 'react-native';
 import { COLORS } from '../constants';
 import { useAppStore } from '../store/useAppStore';
-import { supabase, fetchProfile } from '../lib/supabase';
+import { supabase, fetchProfile, ensureStudentProfile } from '../lib/supabase';
 import { initAnalytics, identifyUser, trackScreen } from '../lib/analytics';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import {
@@ -66,8 +66,14 @@ export default function RootLayout() {
                 } = await supabase.auth.getSession();
 
                 if (session?.user) {
-                    // Fetch user profile from Supabase
-                    const { data: profile } = await fetchProfile(session.user.id);
+                    // Fetch user profile from Supabase (create if missing)
+                    let { data: profile } = await fetchProfile(session.user.id);
+                    if (!profile) {
+                        const ensured = await ensureStudentProfile({
+                            full_name: session.user.user_metadata?.full_name || null,
+                        });
+                        profile = ensured.data;
+                    }
                     if (profile) {
                         // Read onboarding data from user metadata (persisted during signup)
                         const metadata = session.user.user_metadata || {};
@@ -120,7 +126,13 @@ export default function RootLayout() {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
-                const { data: profile } = await fetchProfile(session.user.id);
+                let { data: profile } = await fetchProfile(session.user.id);
+                if (!profile) {
+                    const ensured = await ensureStudentProfile({
+                        full_name: session.user.user_metadata?.full_name || null,
+                    });
+                    profile = ensured.data;
+                }
                 if (profile) {
                     const metadata = session.user.user_metadata || {};
                     const store = useAppStore.getState();

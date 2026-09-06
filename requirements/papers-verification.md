@@ -50,5 +50,6 @@ As a signed-in student:
 ## Notes
 
 - If RPCs are missing, re-run `papers_v1.sql`.
+- If `start_paper_attempt` fails with `paper_attempts_student_id_fkey`, run [`sql/ensure_student_profile.sql`](sql/ensure_student_profile.sql) (auth user has no `profiles` row).
 - If standards lookup returns empty, seed `standards` with names containing `6` / `9` (e.g. `6th`, `9th`).
 - Server-side scoring covers `mcq_single`, `true_false`, `assertion_reason` only in v1.

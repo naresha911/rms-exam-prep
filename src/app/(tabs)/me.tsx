@@ -1,4 +1,5 @@
 // Profile Screen — Stitch-aligned user profile hub.
+// Tab route is `me` (not `profile`) to avoid clashing with `/profile/*` stack screens.
 // Per Stitch: avatar header with streak/XP, stats row, My Learning list,
 // Settings list, sign-out button.
 import { View, Text, ScrollView, Pressable, Alert, StyleSheet } from "react-native";

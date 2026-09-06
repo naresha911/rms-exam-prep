@@ -1,6 +1,6 @@
 // Previous Year Papers — API, scoring helpers, offline cache
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from './supabase';
+import { ensureStudentProfile, supabase } from './supabase';
 import {
     Difficulty,
     Paper,
@@ -244,6 +244,9 @@ export async function getPaperSessionQuestions(paperId: string) {
 }
 
 export async function startPaperAttempt(paperId: string) {
+    // paper_attempts.student_id FK → profiles.id
+    await ensureStudentProfile();
+
     const { data, error } = await supabase.rpc('start_paper_attempt', {
         p_paper_id: paperId,
     });
