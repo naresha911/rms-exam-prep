@@ -1,8 +1,24 @@
 // Supabase Client Configuration
 import { createClient } from '@supabase/supabase-js';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Linking from 'expo-linking';
 
-export const AUTH_CALLBACK_URL = Linking.createURL('auth/callback', { scheme: 'sainikprep' });
+/**
+ * Deep-link used as emailRedirectTo / auth callback.
+ *
+ * - Dev/production builds: stable custom scheme (must be on Supabase Redirect URLs).
+ * - Expo Go: Linking.createURL() emits exp://<LAN-IP>:8081/--/auth/callback and
+ *   ignores scheme: 'sainikprep'. If that exact IP is not allowlisted, Supabase
+ *   falls back to Site URL (http://localhost:3000) — the Gmail bug you saw.
+ *
+ * Supabase Redirect URLs should include:
+ *   sainikprep://auth/callback
+ *   exp://192.168.*.*:8081/--/auth/callback   (Expo Go LAN wildcard)
+ */
+export const AUTH_CALLBACK_URL =
+    Constants.executionEnvironment === ExecutionEnvironment.StoreClient
+        ? Linking.createURL('auth/callback')
+        : 'sainikprep://auth/callback';
 
 // Types for Supabase responses
 export interface SupabaseResponse<T> {
@@ -35,15 +51,20 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
 
 // Auth helpers
 export const signUp = async (email: string, password: string, fullName?: string, metadata?: Record<string, string>) => {
+    const options: { emailRedirectTo: string; data?: Record<string, string> } = {
+        emailRedirectTo: AUTH_CALLBACK_URL,
+    };
+    if (fullName || metadata) {
+        options.data = {
+            ...(metadata || {}),
+            ...(fullName ? { full_name: fullName } : {}),
+        };
+    }
+
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: fullName || metadata
-            ? {
-                data: { ...(metadata || {}), ...(fullName ? { full_name: fullName } : {}) },
-                emailRedirectTo: AUTH_CALLBACK_URL,
-            }
-            : { emailRedirectTo: AUTH_CALLBACK_URL },
+        options,
     });
     return { data, error };
 };
