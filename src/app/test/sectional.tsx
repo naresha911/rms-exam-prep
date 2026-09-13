@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, EXAM_STRUCTURE } from "../../constants";
+import { COLORS, SPACING, TYPOGRAPHY, getExamStructureForStandard, normalizeStudentStandard } from "../../constants";
 
 const SECTION_ICONS: Record<string, string> = {
     'Language': '📖',
@@ -19,7 +19,8 @@ const SECTION_ICONS: Record<string, string> = {
 export default function SectionalTestsScreen() {
     const router = useRouter();
     const { user } = useAppStore();
-    const examInfo = user?.target_class === "9" ? EXAM_STRUCTURE.class9 : EXAM_STRUCTURE.class6;
+    const examInfo = getExamStructureForStandard(user?.target_class);
+    const targetClass = normalizeStudentStandard(user?.target_class);
 
     const handleStartSection = (sectionName: string, questions: number, marks: number) => {
         Alert.alert(
@@ -32,7 +33,7 @@ export default function SectionalTestsScreen() {
                     onPress: () => {
                         router.push({
                             pathname: "/test/session",
-                            params: { type: "sectional", section: sectionName, class: user?.target_class || "6" }
+                            params: { type: "sectional", section: sectionName, class: targetClass }
                         });
                     },
                 },
@@ -185,7 +186,7 @@ export default function SectionalTestsScreen() {
                                     onPress: () => {
                                         router.push({
                                             pathname: "/test/session",
-                                            params: { type: "speed", class: user?.target_class || "6" }
+                                            params: { type: "speed", class: targetClass }
                                         });
                                     },
                                 },

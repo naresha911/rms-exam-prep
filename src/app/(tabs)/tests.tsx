@@ -3,13 +3,13 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, EXAM_STRUCTURE } from "../../constants";
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, getExamStructureForStandard, normalizeStudentStandard } from "../../constants";
 
 export default function TestsScreen() {
     const router = useRouter();
     const { user } = useAppStore();
-    const examInfo = user?.target_class === "9" ? EXAM_STRUCTURE.class9 : EXAM_STRUCTURE.class6;
-    const targetClass = user?.target_class || "6";
+    const examInfo = getExamStructureForStandard(user?.target_class);
+    const targetClass = normalizeStudentStandard(user?.target_class);
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>

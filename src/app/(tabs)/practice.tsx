@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SUBJECTS } from "../../constants";
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, getSubjectsForStandard, normalizeStudentStandard } from "../../constants";
 
 const PRACTICE_MODES = [
     {
@@ -52,7 +52,8 @@ export default function PracticeScreen() {
     const router = useRouter();
     const { user } = useAppStore();
 
-    const subjects = user?.target_class === "9" ? SUBJECTS.class9 : SUBJECTS.class6;
+    const subjects = getSubjectsForStandard(user?.target_class);
+    const studentStandard = normalizeStudentStandard(user?.target_class);
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -114,7 +115,7 @@ export default function PracticeScreen() {
                             <View style={styles.subjectContent}>
                                 <Text style={styles.subjectName}>{subject.name}</Text>
                                 <Text style={styles.subjectSubtitle}>
-                                    {subject.code} • AISSEE Class {user?.target_class || "6"}
+                                    {subject.code} • Class {studentStandard}
                                 </Text>
                             </View>
                             <View style={styles.subjectArrow}>

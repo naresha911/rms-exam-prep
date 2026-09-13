@@ -10,7 +10,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { QuestionRenderer, testQuestionToRenderItem } from "../../components/questions";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, EXAM_STRUCTURE } from "../../constants";
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, getExamStructureForStandard, getStandardIdFallback, normalizeStudentStandard } from "../../constants";
 import { fetchPracticeQuestions, fetchPaperDetails } from "../../lib/supabase";
 import { trackEvent, trackTestSubmitted, EVENTS } from "../../lib/analytics";
 
@@ -36,8 +36,8 @@ export default function TestSessionScreen() {
     const params = useLocalSearchParams();
     const testType = params.type as string;
     const sectionName = params.section as string;
-    const targetClass = params.class as string;
-    const examInfo = targetClass === "9" ? EXAM_STRUCTURE.class9 : EXAM_STRUCTURE.class6;
+    const targetClass = normalizeStudentStandard(params.class as string);
+    const examInfo = getExamStructureForStandard(targetClass);
 
     // Test configuration
     const [questions, setQuestions] = useState<TestQuestion[]>([]);
@@ -117,7 +117,7 @@ export default function TestSessionScreen() {
                 }));
                 setQuestions(transformed);
             } else {
-                const standardId = targetClass === '9' ? 2 : 1;
+                const standardId = getStandardIdFallback(targetClass);
                 const questionCount = testType === 'speed' ? 10 : examInfo.totalQuestions;
                 const { data, error } = await fetchPracticeQuestions(undefined, undefined, standardId, undefined, questionCount);
                 if (data && data.length > 0 && !error) {

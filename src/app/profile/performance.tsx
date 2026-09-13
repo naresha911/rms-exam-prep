@@ -9,7 +9,7 @@ import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAppStore } from "../../store/useAppStore";
 import { fetchTopicStats } from "../../lib/supabase";
-import { COLORS, SPACING, TYPOGRAPHY, EXAM_STRUCTURE, SUBJECTS } from "../../constants";
+import { COLORS, SPACING, TYPOGRAPHY, getExamStructureForStandard, getSubjectsForStandard, normalizeStudentStandard } from "../../constants";
 import { useState, useEffect, useCallback } from "react";
 
 const { width } = Dimensions.get("window");
@@ -27,9 +27,9 @@ interface SubjectStats {
 export default function PerformanceScreen() {
     const router = useRouter();
     const { user, dailyProgress, xp, level, streak } = useAppStore();
-    const targetClass = user?.target_class || "6";
-    const examInfo = targetClass === "9" ? EXAM_STRUCTURE.class9 : EXAM_STRUCTURE.class6;
-    const subjects = targetClass === "9" ? SUBJECTS.class9 : SUBJECTS.class6;
+    const targetClass = normalizeStudentStandard(user?.target_class);
+    const examInfo = getExamStructureForStandard(targetClass);
+    const subjects = getSubjectsForStandard(targetClass);
 
     const [subjectStats, setSubjectStats] = useState<SubjectStats[]>([]);
     const [loading, setLoading] = useState(true);

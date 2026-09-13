@@ -111,7 +111,6 @@ export const updatePassword = async (newPassword: string) => {
 // Save onboarding / profile-setup data to user metadata (persists across sessions)
 export const saveOnboardingData = async (metadata: {
     target_class?: string;
-    current_class?: string;
     goal?: string;
     current_school?: string;
     dream_school?: string;

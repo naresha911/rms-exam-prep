@@ -369,9 +369,9 @@ export const LEVEL_NAMES = [
     'Sage',
 ];
 
-// AISSEE Exam Structure
+// AISSEE Exam Structure keyed by student standard (5 / 8)
 export const EXAM_STRUCTURE = {
-    class6: {
+    class5: {
         totalQuestions: 125,
         totalMarks: 300,
         durationMinutes: 150,
@@ -382,7 +382,7 @@ export const EXAM_STRUCTURE = {
             { name: 'General Knowledge', questions: 25, marks: 50 },
         ],
     },
-    class9: {
+    class8: {
         totalQuestions: 150,
         totalMarks: 400,
         durationMinutes: 180,
@@ -396,15 +396,15 @@ export const EXAM_STRUCTURE = {
     },
 };
 
-// Subjects by class
+// Subjects by student standard (5 / 8)
 export const SUBJECTS = {
-    class6: [
+    class5: [
         { id: 1, name: 'Mathematics', code: 'MAT', icon: 'calculator' },
         { id: 2, name: 'Language', code: 'LNG', icon: 'book' },
         { id: 3, name: 'Intelligence', code: 'INT', icon: 'brain' },
         { id: 4, name: 'General Knowledge', code: 'GK', icon: 'globe' },
     ],
-    class9: [
+    class8: [
         { id: 1, name: 'Mathematics', code: 'MAT', icon: 'calculator' },
         { id: 5, name: 'English', code: 'ENG', icon: 'book-open' },
         { id: 3, name: 'Intelligence', code: 'INT', icon: 'brain' },
@@ -412,6 +412,29 @@ export const SUBJECTS = {
         { id: 7, name: 'Social Science', code: 'SSC', icon: 'landmark' },
     ],
 };
+
+/** Normalize legacy 6/9 values and any raw input to DB standards 5/8. */
+export function normalizeStudentStandard(value: string | null | undefined): '5' | '8' {
+    if (value === '8' || value === '9') return '8';
+    return '5';
+}
+
+export function getExamStructureForStandard(standard: string | null | undefined) {
+    return normalizeStudentStandard(standard) === '8'
+        ? EXAM_STRUCTURE.class8
+        : EXAM_STRUCTURE.class5;
+}
+
+export function getSubjectsForStandard(standard: string | null | undefined) {
+    return normalizeStudentStandard(standard) === '8'
+        ? SUBJECTS.class8
+        : SUBJECTS.class5;
+}
+
+/** Fallback standards table ids when name lookup fails (1 = Class 5, 2 = Class 8). */
+export function getStandardIdFallback(standard: string | null | undefined): number {
+    return normalizeStudentStandard(standard) === '8' ? 2 : 1;
+}
 
 // Practice question counts
 export const PRACTICE_COUNTS = [5, 10, 20, 50];
@@ -442,8 +465,7 @@ export const BADGES = [
 // Onboarding screens
 export const ONBOARDING_SCREENS = [
     { id: 'welcome', title: 'Welcome' },
-    { id: 'target', title: 'Select Target' },
-    { id: 'current', title: 'Current Class' },
+    { id: 'target', title: 'Select Class' },
     { id: 'goal', title: 'Your Goal' },
 ];
 

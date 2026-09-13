@@ -39,8 +39,7 @@ export default function SignUpScreen() {
         const fullName = name.trim();
         const normalizedEmail = email.trim().toLowerCase();
         const metadata = {
-            target_class: onboardingData.targetClass || "6",
-            current_class: onboardingData.currentClass || "5",
+            target_class: onboardingData.targetClass || "5",
             goal: onboardingData.goal || "crack_aissee",
         };
         setLoading(true);
@@ -65,8 +64,8 @@ export default function SignUpScreen() {
             setUser({
                 id: data.user.id, role: "student", full_name: fullName, phone: null,
                 avatar_url: null, school_id: null, created_at: data.user.created_at,
-                updated_at: new Date().toISOString(), target_class: metadata.target_class as "6" | "9",
-                current_class: metadata.current_class as "5" | "8" | "other", daily_goal: 20,
+                updated_at: new Date().toISOString(), target_class: (metadata.target_class as "5" | "8"),
+                daily_goal: 20,
                 xp: 0, level: 1, streak: 0, preparation_start_date: new Date().toISOString(), preferred_language: "en",
             });
             setAuthenticated(true);

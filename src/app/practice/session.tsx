@@ -14,7 +14,7 @@ import { QuestionRenderer } from "../../components/questions";
 import { fetchPracticeQuestions, toggleBookmark, reportQuestion } from "../../lib/supabase";
 import { PracticeQuestion } from "../../types";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS, SUBJECTS } from "../../constants";
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS, SUBJECTS, getStandardIdFallback } from "../../constants";
 import { trackEvent, trackPracticeCompletion, EVENTS } from "../../lib/analytics";
 
 export default function PracticeSessionScreen() {
@@ -41,7 +41,7 @@ export default function PracticeSessionScreen() {
     const topicIdNum = topicId ? parseInt(topicId, 10) : undefined;
 
     // Get subject name for header
-    const allSubjects = [...SUBJECTS.class6, ...SUBJECTS.class9];
+    const allSubjects = [...SUBJECTS.class5, ...SUBJECTS.class8];
     const subject = allSubjects.find((s) => s.id === subjectIdNum);
     const subjectName = subject?.name || "Practice";
 
@@ -56,7 +56,7 @@ export default function PracticeSessionScreen() {
             const { data, error } = await fetchPracticeQuestions(
                 subjectIdNum,
                 topicIdNum,
-                user?.target_class === "9" ? 2 : 1,
+                getStandardIdFallback(user?.target_class),
                 undefined,
                 questionCount
             );

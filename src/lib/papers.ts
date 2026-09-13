@@ -2,6 +2,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ensureStudentProfile, supabase } from './supabase';
 import {
+    getStandardIdFallback,
+    normalizeStudentStandard,
+} from '../constants';
+import {
     Difficulty,
     Paper,
     PaperAttempt,
@@ -188,21 +192,22 @@ export function previewPaperScore(
 }
 
 export async function fetchStandardIdForClass(targetClass: string): Promise<number | null> {
-    const name = targetClass === '9' ? '9th' : '6th';
+    const standard = normalizeStudentStandard(targetClass);
+    const name = standard === '8' ? '8th' : '5th';
     const { data, error } = await supabase
         .from('standards')
         .select('id, name')
-        .ilike('name', `%${name.replace('th', '')}%`)
+        .ilike('name', `%${standard}%`)
         .limit(5);
 
     if (error || !data?.length) {
         // Fallback for environments that still use 1/2
-        return targetClass === '9' ? 2 : 1;
+        return getStandardIdFallback(standard);
     }
 
     const exact =
         (data as Standard[]).find((s) => s.name.toLowerCase() === name) ||
-        (data as Standard[]).find((s) => s.name.includes(targetClass)) ||
+        (data as Standard[]).find((s) => s.name.includes(standard)) ||
         data[0];
     return exact.id;
 }

@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { MascotDisplay } from "@/components/shared/MascotDisplay";
 
 // Mock data — replace with Supabase fetch
-const STUDENT = { name: "Rahul Kumar", class: "Class 6", overallProgress: 68 };
+const STUDENT = { name: "Rahul Kumar", class: "Class 5", overallProgress: 68 };
 const STATS = [
     { label: "Questions", value: "847", icon: "quiz" as const },
     { label: "Accuracy", value: "72%", icon: "trending_up" as const },

@@ -1,5 +1,5 @@
 // Onboarding Layout — shared progress indicator header for all onboarding steps.
-// Per Stitch: sticky header with back arrow + 3-segment progress indicator.
+// Per Stitch: sticky header with back arrow + 2-segment progress indicator.
 
 import { Stack } from "expo-router";
 import { View, Pressable, StyleSheet, Platform } from "react-native";
@@ -11,11 +11,10 @@ export default function OnboardingLayout() {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Determine active step (1=target, 2=current, 3=goal)
+    // Determine active step (1=target-class, 2=goal)
     const getActiveStep = (): number => {
         if (pathname.includes("target-class")) return 1;
-        if (pathname.includes("current-class")) return 2;
-        if (pathname.includes("goal")) return 3;
+        if (pathname.includes("goal")) return 2;
         return 0;
     };
 
@@ -26,14 +25,12 @@ export default function OnboardingLayout() {
             router.push("/(onboarding)/welcome");
         } else if (activeStep === 2) {
             router.push("/(onboarding)/target-class");
-        } else if (activeStep === 3) {
-            router.push("/(onboarding)/current-class");
         }
     };
 
     return (
         <>
-            {/* Progress header is for steps 1–3 only — welcome has no stepper */}
+            {/* Progress header is for steps 1–2 only — welcome has no stepper */}
             {activeStep > 0 && (
                 <View style={styles.progressHeader}>
                     <Pressable
@@ -59,12 +56,6 @@ export default function OnboardingLayout() {
                             style={[
                                 styles.segmentShort,
                                 activeStep >= 2 ? styles.segmentActive : styles.segmentInactive,
-                            ]}
-                        />
-                        <View
-                            style={[
-                                styles.segmentShort,
-                                activeStep >= 3 ? styles.segmentActive : styles.segmentInactive,
                             ]}
                         />
                     </View>

@@ -18,7 +18,7 @@ import {
     loadLocalPaperSession,
 } from "@/lib/papers";
 import { useAppStore } from "@/store/useAppStore";
-import { COLORS, EXAM_STRUCTURE } from "@/constants";
+import { COLORS, getExamStructureForStandard, normalizeStudentStandard } from "@/constants";
 import { PaperAttemptSummary, PaperWithQuestions } from "@/types";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { t } from "@/lib/i18n";
@@ -27,8 +27,8 @@ export default function PaperDetailScreen() {
     const router = useRouter();
     const { paperId } = useLocalSearchParams<{ paperId: string }>();
     const { user, onboardingData } = useAppStore();
-    const targetClass = user?.target_class || onboardingData.targetClass || "6";
-    const examInfo = targetClass === "9" ? EXAM_STRUCTURE.class9 : EXAM_STRUCTURE.class6;
+    const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
+    const examInfo = getExamStructureForStandard(targetClass);
 
     const [paper, setPaper] = useState<PaperWithQuestions | null>(null);
     const [summary, setSummary] = useState<PaperAttemptSummary | null>(null);

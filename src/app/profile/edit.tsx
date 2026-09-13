@@ -28,14 +28,15 @@ import {
     TYPOGRAPHY,
     BORDER_RADIUS,
     DREAM_SAINIK_SCHOOLS,
+    normalizeStudentStandard,
 } from "@/constants";
 
-type TargetClass = "6" | "9";
+type TargetClass = "5" | "8";
 type ExamMedium = "en" | "hi";
 
 const TARGET_CLASS_OPTIONS: { value: TargetClass; label: string }[] = [
-    { value: "6", label: "Class 6 (VI)" },
-    { value: "9", label: "Class 9 (IX)" },
+    { value: "5", label: "Class 5 (V)" },
+    { value: "8", label: "Class 8 (VIII)" },
 ];
 
 export default function ProfileSetupScreen() {
@@ -46,9 +47,9 @@ export default function ProfileSetupScreen() {
 
     const [fullName, setFullName] = useState(user?.full_name || "");
     const [targetClass, setTargetClass] = useState<TargetClass | "">(
-        (user?.target_class as TargetClass) ||
-            (onboardingData.targetClass as TargetClass) ||
-            ""
+        user?.target_class || onboardingData.targetClass
+            ? normalizeStudentStandard(user?.target_class || onboardingData.targetClass)
+            : ""
     );
     const [currentSchool, setCurrentSchool] = useState("");
     const [dreamSchool, setDreamSchool] = useState("");
@@ -76,8 +77,8 @@ export default function ProfileSetupScreen() {
                 if (typeof meta.dream_school === "string" && meta.dream_school) {
                     setDreamSchool(meta.dream_school);
                 }
-                if (meta.target_class === "6" || meta.target_class === "9") {
-                    setTargetClass(meta.target_class);
+                if (meta.target_class) {
+                    setTargetClass(normalizeStudentStandard(String(meta.target_class)));
                 }
                 if (meta.preferred_language === "hi" || meta.preferred_language === "en") {
                     setExamMedium(meta.preferred_language);

@@ -5,7 +5,7 @@ import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { MaterialIcon, MaterialIconName } from "../../components/ui/MaterialIcon";
 import { useAppStore } from "../../store/useAppStore";
 import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from "react-native-svg";
-import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from "../../constants";
+import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY, normalizeStudentStandard } from "../../constants";
 
 interface StudyCardProps {
   icon: MaterialIconName;
@@ -85,7 +85,7 @@ export default function HomeScreen() {
   const profileName = user?.full_name?.trim() || "Aarav";
   const firstName = profileName.replace(/^Cadet\s+/i, "").split(" ")[0];
   const displayName = /^Cadet\s/i.test(profileName) ? profileName : `Cadet ${profileName}`;
-  const targetClass = user?.target_class || onboardingData.targetClass || "6";
+  const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
   const resumeTitle = lastPracticeActivity?.topicName || "Fractions & Decimals";
   const resumeSubject = lastPracticeActivity?.subjectName || "Mathematics";
   const resumeProgress = lastPracticeActivity?.progress ?? 65;
@@ -123,7 +123,7 @@ export default function HomeScreen() {
                 {displayName}
               </Text>
               <Text style={styles.headerClass} numberOfLines={1} maxFontSizeMultiplier={1.15}>
-                AISSEE Class {targetClass}
+                Class {targetClass}
               </Text>
             </View>
           </Pressable>

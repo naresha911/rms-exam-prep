@@ -9,7 +9,7 @@ import { MascotDisplay } from "@/components/shared/MascotDisplay";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useAppStore } from "@/store/useAppStore";
 import { signIn, ensureStudentProfile, fetchProfile } from "@/lib/supabase";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, normalizeStudentStandard } from "@/constants";
 
 export default function SignInScreen() {
     const router = useRouter();
@@ -51,8 +51,7 @@ export default function SignInScreen() {
                     school_id: profile?.school_id || null,
                     created_at: profile?.created_at || data.user.created_at,
                     updated_at: profile?.updated_at || data.user.updated_at || new Date().toISOString(),
-                    target_class: (metadata.target_class as "6" | "9") || "6",
-                    current_class: (metadata.current_class as "5" | "8" | "other") || "5",
+                    target_class: normalizeStudentStandard(metadata.target_class as string),
                     daily_goal: 20,
                     xp: 0,
                     level: 1,

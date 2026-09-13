@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { COLORS, SPACING } from "@/constants";
+import { COLORS, SPACING, normalizeStudentStandard } from "@/constants";
 import { TopAppBar } from "@/components/ui/TopAppBar";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -55,7 +55,7 @@ function statusLabel(status: PaperListStatus): string {
 
 export default function PapersScreen() {
     const { user, onboardingData, streak, preferences } = useAppStore();
-    const targetClass = user?.target_class || onboardingData.targetClass || "6";
+    const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
 
     useEffect(() => {
         const lang = preferences?.preferredLanguage === "hi" ? "hi" : "en";

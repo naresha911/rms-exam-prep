@@ -53,10 +53,12 @@ export interface Profile {
     updated_at: string;
 }
 
+/** Student standard stored in DB / user metadata (Class 5 or Class 8). */
+export type StudentStandard = '5' | '8';
+
 // Student-specific profile extension
 export interface StudentProfile extends Profile {
-    target_class: '6' | '9';
-    current_class: '5' | '8' | 'other';
+    target_class: StudentStandard;
     daily_goal: number;
     xp: number;
     level: number;
@@ -65,7 +67,7 @@ export interface StudentProfile extends Profile {
     preferred_language: string;
 }
 
-// Standard (Class 6, Class 9)
+// Standard (Class 5, Class 8)
 export interface Standard {
     id: number;
     name: string;
@@ -331,8 +333,7 @@ export interface QuestionReport {
 
 // Onboarding flow types
 export interface OnboardingData {
-    targetClass: '6' | '9' | null;
-    currentClass: '5' | '8' | 'other' | null;
+    targetClass: StudentStandard | null;
     goal: 'crack_aissee' | 'improve_score' | 'practice_daily' | 'prepare_mock' | null;
 }
 

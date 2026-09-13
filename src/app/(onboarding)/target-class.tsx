@@ -1,4 +1,4 @@
-// Target Class Selection Screen — Step 1 of 3.
+// Target Class Selection Screen — Step 1 of 2.
 // Per Stitch: progress header, mascot, BentoSelectCard options, sticky CTA.
 
 import { View, Text, StyleSheet, Platform } from "react-native";
@@ -9,18 +9,19 @@ import { BentoSelectCard } from "../../components/ui/BentoSelectCard";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { useAppStore } from "../../store/useAppStore";
 import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
+import type { StudentStandard } from "../../types";
 
 export default function TargetClassScreen() {
     const router = useRouter();
     const { onboardingData, setOnboardingData } = useAppStore();
 
-    const handleSelect = (targetClass: "6" | "9") => {
+    const handleSelect = (targetClass: StudentStandard) => {
         setOnboardingData({ targetClass });
     };
 
     const handleContinue = () => {
         if (onboardingData.targetClass) {
-            router.push("/(onboarding)/current-class");
+            router.push("/(onboarding)/goal");
         }
     };
 
@@ -45,7 +46,7 @@ export default function TargetClassScreen() {
                         Which class are you preparing for?
                     </Text>
                     <Text style={styles.questionSubtitle}>
-                        Choose your target admission class.
+                        Choose the class you are studying in.
                     </Text>
                 </View>
 
@@ -54,18 +55,18 @@ export default function TargetClassScreen() {
                     <BentoSelectCard
                         icon="school"
                         iconColor={COLORS.primary}
-                        title="Class 6"
-                        subtitle="Admission to VI"
-                        selected={onboardingData.targetClass === "6"}
-                        onPress={() => handleSelect("6")}
+                        title="Class 5"
+                        subtitle="Preparing for AISSEE Class 6"
+                        selected={onboardingData.targetClass === "5"}
+                        onPress={() => handleSelect("5")}
                     />
                     <BentoSelectCard
                         icon="menu_book"
                         iconColor={COLORS.secondary}
-                        title="Class 9"
-                        subtitle="Admission to IX"
-                        selected={onboardingData.targetClass === "9"}
-                        onPress={() => handleSelect("9")}
+                        title="Class 8"
+                        subtitle="Preparing for AISSEE Class 9"
+                        selected={onboardingData.targetClass === "8"}
+                        onPress={() => handleSelect("8")}
                     />
                 </View>
             </View>

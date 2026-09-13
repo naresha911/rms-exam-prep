@@ -110,7 +110,6 @@ interface AppState {
 // Default values
 const defaultOnboardingData: OnboardingData = {
     targetClass: null,
-    currentClass: null,
     goal: null,
 };
 

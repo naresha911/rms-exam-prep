@@ -7,13 +7,13 @@ import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, EXAM_STRUCTURE } from "../../constants";
+import { COLORS, SPACING, TYPOGRAPHY, getExamStructureForStandard, normalizeStudentStandard } from "../../constants";
 
 export default function FullMockTestScreen() {
     const router = useRouter();
     const { user } = useAppStore();
-    const examInfo = user?.target_class === "9" ? EXAM_STRUCTURE.class9 : EXAM_STRUCTURE.class6;
-    const targetClass = user?.target_class || "6";
+    const examInfo = getExamStructureForStandard(user?.target_class);
+    const targetClass = normalizeStudentStandard(user?.target_class);
     const [loading, setLoading] = useState(false);
 
     const handleStartTest = () => {
@@ -81,7 +81,7 @@ export default function FullMockTestScreen() {
                         marginBottom: SPACING[2],
                     }}
                 >
-                    AISSEE Class {targetClass}
+                    Class {targetClass}
                 </Text>
                 <Text
                     style={{

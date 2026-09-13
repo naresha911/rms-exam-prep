@@ -1,4 +1,4 @@
-// Goal Selection Screen — Step 3 of 3.
+// Goal Selection Screen — Step 2 of 2.
 // Per Stitch: progress header, BentoSelectCard options with icons, sticky CTA.
 
 import { View, Text, StyleSheet, Platform } from "react-native";

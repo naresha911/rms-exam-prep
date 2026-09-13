@@ -26,8 +26,8 @@ export default function SubjectTopicsScreen() {
         try {
             // Get subject info from constants
             const allSubjects = [
-                ...SUBJECTS.class6,
-                ...SUBJECTS.class9,
+                ...SUBJECTS.class5,
+                ...SUBJECTS.class8,
             ];
             const subj = allSubjects.find((s) => s.id === subjectIdNum);
             if (subj) {

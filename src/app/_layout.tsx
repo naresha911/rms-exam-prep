@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { View } from 'react-native';
-import { COLORS } from '../constants';
+import { COLORS, normalizeStudentStandard } from '../constants';
 import { useAppStore } from '../store/useAppStore';
 import { supabase, fetchProfile, ensureStudentProfile } from '../lib/supabase';
 import { initAnalytics, identifyUser, trackScreen } from '../lib/analytics';
@@ -78,8 +78,9 @@ export default function RootLayout() {
                         // Read onboarding data from user metadata (persisted during signup)
                         const metadata = session.user.user_metadata || {};
                         const store = useAppStore.getState();
-                        const targetClass = (metadata.target_class as string) || store.onboardingData.targetClass || '6';
-                        const currentClass = (metadata.current_class as string) || store.onboardingData.currentClass || '5';
+                        const targetClass = normalizeStudentStandard(
+                            (metadata.target_class as string) || store.onboardingData.targetClass
+                        );
                         setUser({
                             id: profile.id,
                             role: profile.role,
@@ -89,8 +90,7 @@ export default function RootLayout() {
                             school_id: profile.school_id,
                             created_at: profile.created_at,
                             updated_at: profile.updated_at,
-                            target_class: targetClass as '6' | '9',
-                            current_class: currentClass as '5' | '8' | 'other',
+                            target_class: targetClass,
                             daily_goal: store.preferences.dailyGoal,
                             xp: store.xp,
                             level: store.level,
@@ -100,14 +100,13 @@ export default function RootLayout() {
                         });
                         // Sync onboarding data to store
                         store.setOnboardingData({
-                            targetClass: targetClass as '6' | '9',
-                            currentClass: currentClass as '5' | '8' | 'other',
+                            targetClass,
                         });
                     }
                     setAuthenticated(true);
                     // Identify user in analytics
                     identifyUser(session.user.id, {
-                        target_class: session.user.user_metadata?.target_class || '6',
+                        target_class: normalizeStudentStandard(session.user.user_metadata?.target_class),
                     });
                     trackScreen('Home');
                 }
@@ -136,8 +135,9 @@ export default function RootLayout() {
                 if (profile) {
                     const metadata = session.user.user_metadata || {};
                     const store = useAppStore.getState();
-                    const targetClass = (metadata.target_class as string) || store.onboardingData.targetClass || '6';
-                    const currentClass = (metadata.current_class as string) || store.onboardingData.currentClass || '5';
+                    const targetClass = normalizeStudentStandard(
+                        (metadata.target_class as string) || store.onboardingData.targetClass
+                    );
                     setUser({
                         id: profile.id,
                         role: profile.role,
@@ -147,8 +147,7 @@ export default function RootLayout() {
                         school_id: profile.school_id,
                         created_at: profile.created_at,
                         updated_at: profile.updated_at,
-                        target_class: targetClass as '6' | '9',
-                        current_class: currentClass as '5' | '8' | 'other',
+                        target_class: targetClass,
                         daily_goal: store.preferences.dailyGoal,
                         xp: store.xp,
                         level: store.level,
@@ -157,8 +156,7 @@ export default function RootLayout() {
                         preferred_language: store.preferences.preferredLanguage,
                     });
                     store.setOnboardingData({
-                        targetClass: targetClass as '6' | '9',
-                        currentClass: currentClass as '5' | '8' | 'other',
+                        targetClass,
                     });
                 }
                 setAuthenticated(true);

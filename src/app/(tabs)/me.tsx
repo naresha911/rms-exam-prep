@@ -58,7 +58,7 @@ export default function ProfileScreen() {
                         {user?.full_name || "Student"}
                     </Text>
                     <Text style={styles.userSubtitle}>
-                        {user?.target_class ? `AISSEE Class ${user.target_class}` : "AISSEE Prep"}
+                        {user?.target_class ? `Class ${user.target_class}` : "AISSEE Prep"}
                     </Text>
                     <View style={styles.badges}>
                         <StreakDisplay streak={streak} size="sm" />
