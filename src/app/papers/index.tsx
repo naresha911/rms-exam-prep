@@ -82,7 +82,11 @@ export default function PapersScreen() {
             setError(null);
 
             try {
-                const sid = standardId ?? (await fetchStandardIdForClass(targetClass));
+                // Always re-resolve on initial/refresh so a stale wrong id (e.g. old
+                // fallback 1) cannot stick after a code or standards change.
+                const sid = append && standardId != null
+                    ? standardId
+                    : await fetchStandardIdForClass(targetClass);
                 if (sid == null) throw new Error("Standard not found");
                 setStandardId(sid);
 

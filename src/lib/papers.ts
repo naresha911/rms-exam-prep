@@ -193,23 +193,37 @@ export function previewPaperScore(
 
 export async function fetchStandardIdForClass(targetClass: string): Promise<number | null> {
     const standard = normalizeStudentStandard(targetClass);
-    const name = standard === '8' ? '8th' : '5th';
-    const { data, error } = await supabase
-        .from('standards')
-        .select('id, name')
-        .ilike('name', `%${standard}%`)
-        .limit(5);
+    // Student standard 5 → AISSEE Class 6; standard 8 → AISSEE Class 9.
+    // DBs may name rows 5th/8th or legacy 6th/9th.
+    const preferredNames =
+        standard === '8'
+            ? ['8th', '8', 'class 8', '9th', '9', 'class 9']
+            : ['5th', '5', 'class 5', '6th', '6', 'class 6'];
+
+    const { data, error } = await supabase.from('standards').select('id, name');
 
     if (error || !data?.length) {
-        // Fallback for environments that still use 1/2
         return getStandardIdFallback(standard);
     }
 
-    const exact =
-        (data as Standard[]).find((s) => s.name.toLowerCase() === name) ||
-        (data as Standard[]).find((s) => s.name.includes(standard)) ||
-        data[0];
-    return exact.id;
+    const rows = data as Standard[];
+    const standardNum = Number(standard);
+
+    // Prefer row whose id matches student standard (e.g. id 5 for Class 5).
+    const byId = rows.find((s) => s.id === standardNum);
+    if (byId) return byId.id;
+
+    const lower = (name: string) => name.trim().toLowerCase();
+    for (const candidate of preferredNames) {
+        const exact = rows.find((s) => lower(s.name) === candidate);
+        if (exact) return exact.id;
+    }
+    for (const candidate of preferredNames) {
+        const partial = rows.find((s) => lower(s.name).includes(candidate));
+        if (partial) return partial.id;
+    }
+
+    return getStandardIdFallback(standard);
 }
 
 export async function fetchPapersPage(
