@@ -146,16 +146,31 @@ export interface Test {
     description: string | null;
     standard_id: number;
     stream_id: number | null;
-    creation_mode: TestCreationMode;
-    total_marks: number;
-    duration_minutes: number;
+    creation_mode?: TestCreationMode | null;
+    total_marks: number | null;
+    duration_minutes: number | null;
     section_timing: boolean;
     negative_marking: boolean;
     allow_pause: boolean;
-    max_attempts: number;
+    max_attempts: number | null;
     is_published: boolean;
     created_by: string | null;
     created_at: string;
+    question_count?: number;
+}
+
+export interface TestAttemptSummary {
+    test_id: string;
+    attempt_id: string;
+    status: TestStatus;
+    total_score: number | null;
+    max_score: number | null;
+    attempt_number: number;
+    started_at: string;
+    submitted_at: string | null;
+    time_spent_seconds: number | null;
+    is_paused: boolean;
+    pause_data: Record<string, unknown> | null;
 }
 
 // Test Section
@@ -168,6 +183,10 @@ export interface TestSection {
     time_limit_seconds: number | null;
     default_marks: number;
     default_negative_marks: number;
+}
+
+export interface TestWithSections extends Test {
+    test_sections: TestSection[];
 }
 
 // Paper (Previous Year)

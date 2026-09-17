@@ -1,5 +1,5 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { MaterialIcon, MaterialIconName } from "../../components/ui/MaterialIcon";
@@ -205,7 +205,7 @@ export default function HomeScreen() {
           <ActionButton
             label="Enter Live Test"
             variant="amber"
-            onPress={() => router.push("/test/full-mock")}
+            onPress={() => router.push("/test" as Href)}
           />
         </View>
 
@@ -262,7 +262,7 @@ export default function HomeScreen() {
             actionBackground={COLORS.primaryFixed}
             actionColor={COLORS.primary}
             actionBorderColor="rgba(70,72,212,0.20)"
-            onPress={() => router.push("/test/full-mock")}
+            onPress={() => router.push("/test" as Href)}
           />
           <StudyCard
             icon="history_edu"

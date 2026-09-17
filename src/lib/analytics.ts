@@ -111,9 +111,12 @@ export const EVENTS = {
     QUESTION_REPORTED: 'question_reported',
 
     // Mock Tests
+    TESTS_LIST_VIEWED: 'tests_list_viewed',
+    TEST_OPENED: 'test_opened',
     TEST_STARTED: 'test_started',
     TEST_SUBMITTED: 'test_submitted',
     TEST_ABANDONED: 'test_abandoned',
+    TEST_RESULT_VIEWED: 'test_result_viewed',
 
     // Previous Year Papers
     PAPERS_LIST_VIEWED: 'papers_list_viewed',

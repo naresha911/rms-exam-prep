@@ -12,6 +12,8 @@ import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { QuestionRenderer, testQuestionToRenderItem } from "../../components/questions";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, getExamStructureForStandard, getStandardIdFallback, normalizeStudentStandard } from "../../constants";
 import { fetchPracticeQuestions, fetchPaperDetails } from "../../lib/supabase";
+import { completeTestAttempt, getTestSessionQuestions, startTestAttempt } from "../../lib/tests";
+import { useAppStore } from "../../store/useAppStore";
 import { trackEvent, trackTestSubmitted, EVENTS } from "../../lib/analytics";
 
 interface TestQuestion {
@@ -36,8 +38,10 @@ export default function TestSessionScreen() {
     const params = useLocalSearchParams();
     const testType = params.type as string;
     const sectionName = params.section as string;
+    const selectedTestId = (params.testId as string) || "";
     const targetClass = normalizeStudentStandard(params.class as string);
     const examInfo = getExamStructureForStandard(targetClass);
+    const preferredLanguage = useAppStore((s) => s.preferences?.preferredLanguage) || "en";
 
     // Test configuration
     const [questions, setQuestions] = useState<TestQuestion[]>([]);
@@ -45,6 +49,7 @@ export default function TestSessionScreen() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [flagged, setFlagged] = useState<Set<string>>(new Set());
+    const attemptIdRef = useRef<string | null>(null);
 
     // Timer
     const [timeRemaining, setTimeRemaining] = useState(() => {
@@ -63,8 +68,9 @@ export default function TestSessionScreen() {
 
     useEffect(() => {
         loadQuestions();
-        trackEvent(EVENTS.TEST_STARTED, { testType, targetClass });
-    }, [loading]);
+        trackEvent(EVENTS.TEST_STARTED, { testType, targetClass, testId: selectedTestId || null });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedTestId, testType, targetClass, sectionName]);
 
     useEffect(() => {
         if (loading) return;
@@ -94,7 +100,19 @@ export default function TestSessionScreen() {
     const loadQuestions = async () => {
         setLoading(true);
         try {
-            if (testType === "paper") {
+            if (selectedTestId) {
+                const { test, questions: sessionQuestions, error } = await getTestSessionQuestions(
+                    selectedTestId,
+                    preferredLanguage
+                );
+                if (error) throw error;
+                const duration = test?.duration_minutes || examInfo.durationMinutes;
+                setPaperDuration(duration);
+                setTimeRemaining(duration * 60);
+                setQuestions(sessionQuestions);
+                const started = await startTestAttempt(selectedTestId);
+                if (started.data?.id) attemptIdRef.current = started.data.id;
+            } else if (testType === "paper") {
                 const { data, error } = await fetchPaperDetails(params.paperId as string);
                 if (error || !data) throw error || new Error("Paper not found");
                 setPaperDuration(data.duration_minutes || examInfo.durationMinutes);
@@ -227,6 +245,15 @@ export default function TestSessionScreen() {
             accuracy,
             durationSeconds,
         });
+
+        if (attemptIdRef.current) {
+            completeTestAttempt({
+                attemptId: attemptIdRef.current,
+                totalScore: correct,
+                maxScore: total,
+                timeSpentSeconds: durationSeconds,
+            }).catch((cause) => console.warn("Failed to persist mock attempt:", cause));
+        }
 
         router.replace({
             pathname: "/test/result",

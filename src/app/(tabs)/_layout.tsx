@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, useRouter, type Href } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS, TYPOGRAPHY } from "../../constants";
@@ -47,7 +47,16 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ focused }) => <TabIcon icon="home" focused={focused} /> }} />
       <Tabs.Screen name="practice" options={{ title: "Learn", tabBarIcon: ({ focused }) => <TabIcon icon="menu_book" focused={focused} /> }} />
-      <Tabs.Screen name="tests" options={{ title: "Mock Tests", tabBarIcon: ({ focused }) => <TabIcon icon="assignment" focused={focused} /> }} />
+      <Tabs.Screen
+        name="tests"
+        options={{ title: "Mock Tests", tabBarIcon: ({ focused }) => <TabIcon icon="assignment" focused={focused} /> }}
+        listeners={{
+          tabPress: (event) => {
+            event.preventDefault();
+            router.push("/test" as Href);
+          },
+        }}
+      />
       <Tabs.Screen
         name="ai"
         options={{ title: "Papers", tabBarIcon: ({ focused }) => <TabIcon icon="history_edu" focused={focused} /> }}
