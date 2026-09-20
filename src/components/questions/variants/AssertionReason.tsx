@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { QuestionCardShell } from '../QuestionCardShell';
 import { OptionStack } from '../OptionStack';
 import { StemText } from '../StemText';
+import { LatexText } from '../LatexText';
 import { shellFromShared } from '../shellHelpers';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../../constants';
 import type { SharedQuestionProps } from '../types';
@@ -43,20 +44,32 @@ export const AssertionReason: React.FC<SharedQuestionProps> = (props) => {
                     <View style={[styles.chip, styles.chipA]}>
                         <Text style={styles.chipAText}>A</Text>
                     </View>
-                    <Text style={styles.blockText}>
-                        <Text style={styles.blockLabel}>Assertion (A): </Text>
-                        {assertion}
-                    </Text>
+                    <View style={styles.blockCopy}>
+                        <Text style={styles.blockLabel}>Assertion (A)</Text>
+                        <LatexText
+                            content={assertion}
+                            color={COLORS.onSurface}
+                            fontSize={14}
+                            fontFamily={TYPOGRAPHY.fontFamily.medium}
+                            lineHeight={20}
+                        />
+                    </View>
                 </View>
                 {!!reason && (
                     <View style={styles.block}>
                         <View style={[styles.chip, styles.chipR]}>
                             <Text style={styles.chipRText}>R</Text>
                         </View>
-                        <Text style={styles.blockText}>
-                            <Text style={styles.blockLabel}>Reason (R): </Text>
-                            {reason}
-                        </Text>
+                    <View style={styles.blockCopy}>
+                        <Text style={styles.blockLabel}>Reason (R)</Text>
+                        <LatexText
+                            content={reason}
+                            color={COLORS.onSurface}
+                            fontSize={14}
+                            fontFamily={TYPOGRAPHY.fontFamily.medium}
+                            lineHeight={20}
+                        />
+                    </View>
                     </View>
                 )}
             </View>
@@ -112,16 +125,15 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: COLORS.onTertiary,
     },
-    blockText: {
+    blockCopy: {
         flex: 1,
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: 14,
-        lineHeight: 20,
-        color: COLORS.onSurface,
+        gap: 4,
     },
     blockLabel: {
         fontFamily: TYPOGRAPHY.fontFamily.bold,
         fontWeight: '700',
+        fontSize: 12,
+        color: COLORS.onSurfaceVariant,
     },
 });
 

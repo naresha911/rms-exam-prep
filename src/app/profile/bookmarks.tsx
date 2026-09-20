@@ -11,6 +11,7 @@ import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { useAppStore } from "../../store/useAppStore";
 import { fetchBookmarks, toggleBookmark } from "../../lib/supabase";
 import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
+import { LatexText } from "../../components/questions/LatexText";
 import type { PracticeQuestion, QuestionOption } from "../../types";
 
 interface BookmarkItem {
@@ -81,16 +82,13 @@ export default function BookmarksScreen() {
         return (
             <Card style={{ marginBottom: SPACING[3] }}>
                 {/* Question */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.base,
-                        fontWeight: "600",
-                        color: COLORS.textPrimary,
-                        marginBottom: SPACING[3],
-                    }}
-                >
-                    {questionText}
-                </Text>
+                <LatexText
+                    content={questionText}
+                    color={COLORS.textPrimary}
+                    fontSize={TYPOGRAPHY.fontSize.base}
+                    fontWeight="600"
+                    containerStyle={{ marginBottom: SPACING[3] }}
+                />
 
                 {/* Options */}
                 <View style={{ gap: SPACING[2] }}>
@@ -120,15 +118,12 @@ export default function BookmarksScreen() {
                                 >
                                     {String.fromCharCode(65 + index)}.
                                 </Text>
-                                <Text
-                                    style={{
-                                        flex: 1,
-                                        fontSize: TYPOGRAPHY.fontSize.sm,
-                                        color: isCorrect ? COLORS.success : COLORS.textSecondary,
-                                    }}
-                                >
-                                    {optionText}
-                                </Text>
+                                <LatexText
+                                    content={optionText}
+                                    color={isCorrect ? COLORS.success : COLORS.textSecondary}
+                                    fontSize={TYPOGRAPHY.fontSize.sm}
+                                    containerStyle={{ flex: 1 }}
+                                />
                                 {isCorrect && <Text style={{ fontSize: 16 }}>✓</Text>}
                             </View>
                         );
@@ -153,17 +148,14 @@ export default function BookmarksScreen() {
                                 marginBottom: 4,
                             }}
                         >
-                            💡 Explanation
+                            💡 Solution
                         </Text>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                color: COLORS.textSecondary,
-                                lineHeight: 20,
-                            }}
-                        >
-                            {explanation}
-                        </Text>
+                    <LatexText
+                        content={explanation}
+                        color={COLORS.textSecondary}
+                        fontSize={TYPOGRAPHY.fontSize.sm}
+                        lineHeight={20}
+                    />
                     </View>
                 )}
 

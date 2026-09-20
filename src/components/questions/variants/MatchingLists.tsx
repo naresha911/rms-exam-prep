@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { QuestionCardShell } from '../QuestionCardShell';
 import { OptionStack } from '../OptionStack';
 import { StemText } from '../StemText';
+import { LatexText } from '../LatexText';
 import { shellFromShared } from '../shellHelpers';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../../constants';
 import type { SharedQuestionProps, MatchingListItem } from '../types';
@@ -23,9 +24,12 @@ function MiniCard({ item }: { item: MatchingListItem }) {
     return (
         <View style={styles.miniCard}>
             <Text style={styles.miniKey}>{item.key}</Text>
-            <Text style={styles.miniText} numberOfLines={2}>
-                {item.text}
-            </Text>
+            <LatexText
+                content={item.text}
+                color={COLORS.onSurface}
+                fontSize={12}
+                fontFamily={TYPOGRAPHY.fontFamily.medium}
+            />
         </View>
     );
 }

@@ -39,6 +39,8 @@ export { OptionStack } from './OptionStack';
 export { FigureOptionTile } from './FigureOptionTile';
 export { StemText } from './StemText';
 export { QuestionRenderer } from './QuestionRenderer';
+export { QuestionAssist } from './QuestionAssist';
+export { LatexText } from './LatexText';
 
 export { McqTextGrid } from './variants/McqTextGrid';
 export { McqTextStack } from './variants/McqTextStack';

@@ -176,7 +176,7 @@ export const fetchPracticeQuestions = async (
         .from('questions')
         .select(`
       *,
-      question_translations (question_text, explanation),
+      question_translations (*),
       question_options (id, option_key, is_correct, display_order, option_translations (option_text))
     `)
         .eq('is_active', true)
@@ -209,7 +209,7 @@ export const fetchQuestionDetails = async (questionId: string) => {
         .from('questions')
         .select(`
       *,
-      question_translations (question_text, explanation, explanation_diagram_path),
+      question_translations (*),
       question_options (
         id, option_key, is_correct, display_order,
         option_translations (option_text, option_image_path)
@@ -247,7 +247,7 @@ export const fetchTestDetails = async (testId: string) => {
         *,
         questions (
           *,
-          question_translations (question_text, explanation),
+          question_translations (*),
           question_options (
             id, option_key, is_correct, display_order,
             option_translations (option_text)
@@ -370,9 +370,9 @@ export const fetchPaperDetails = async (paperId: string) => {
                 section, question_order, marks, negative_marks,
                 questions (
                     *,
-                    question_translations (question_text, explanation),
+                    question_translations (*),
                     question_options (
-                        id, option_key, display_order,
+                        id, option_key, is_correct, display_order,
                         option_translations (option_text, option_image_path)
                     )
                 )
@@ -401,7 +401,7 @@ export const fetchBookmarks = async (studentId: string) => {
       *,
       questions (
         *,
-        question_translations (question_text, explanation),
+        question_translations (*),
         question_options (
           id, option_key, is_correct,
           option_translations (option_text)
@@ -584,7 +584,7 @@ export const fetchMistakes = async (studentId: string) => {
       *,
       questions (
         *,
-        question_translations (question_text, explanation),
+        question_translations (*),
         question_options (
           id, option_key, is_correct,
           option_translations (option_text)

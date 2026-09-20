@@ -118,7 +118,7 @@ export interface SharedQuestionProps {
     mode: QuestionUiMode;
     selectionMode: SelectionMode;
     selectedValue: string | null;
-    /** Practice/review: show correct/incorrect. Exam never reveals. */
+    /** Practice/review: show correct/incorrect. Exam also reveals after Show Solution. */
     revealed?: boolean;
     /** Browse: prior solve status for preview */
     solveStatus?: QuestionSolveStatus;

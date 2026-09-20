@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import { MaterialIcon } from '../ui/MaterialIcon';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants';
+import { LatexText } from './LatexText';
 import type { QuestionOption } from '../../types';
 import type { OptionUiState, QuestionUiMode, SelectionMode } from './types';
 import { deriveOptionState, shouldShowCorrectCheck } from './optionState';
@@ -52,7 +53,7 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
         browseRevealed,
     });
     const disabledReveal =
-        (mode === 'practice' && revealed) || (mode === 'browse' && browseRevealed);
+        (mode === 'browse' && browseRevealed) || (mode !== 'browse' && !!revealed);
     const showCheck = shouldShowCorrectCheck(option, mode, revealed, browseRevealed);
     const uri = option.option_image_path;
 
@@ -100,9 +101,14 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
             {uri ? (
                 <Image source={{ uri }} style={styles.image} resizeMode="contain" />
             ) : (
-                <Text style={styles.fallbackText} numberOfLines={3}>
-                    {option.option_text || ''}
-                </Text>
+                <View style={styles.fallbackWrap}>
+                    <LatexText
+                        content={option.option_text || ''}
+                        color={COLORS.onSurface}
+                        fontSize={12}
+                        fontFamily={TYPOGRAPHY.fontFamily.medium}
+                    />
+                </View>
             )}
             {showCheck && (
                 <View style={styles.check}>
@@ -140,11 +146,9 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 56,
     },
-    fallbackText: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: 13,
-        color: COLORS.onSurface,
-        textAlign: 'center',
+    fallbackWrap: {
+        width: '100%',
+        alignItems: 'center',
     },
     check: {
         position: 'absolute',

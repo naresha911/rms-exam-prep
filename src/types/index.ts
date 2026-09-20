@@ -118,6 +118,7 @@ export interface Question {
     updated_at: string;
     // Joined fields
     question_text?: string;
+    hint?: string | null;
     explanation?: string;
     explanation_diagram_path?: string | null;
 }
@@ -254,7 +255,7 @@ export interface PaperAttemptAnswer {
     updated_at?: string;
 }
 
-/** Session question payload from get_paper_session_questions (no is_correct). */
+/** Session question payload from get_paper_session_questions. */
 export interface PaperSessionQuestion {
     question_id: string;
     section: string | null;
@@ -265,13 +266,16 @@ export interface PaperSessionQuestion {
     has_diagram: boolean;
     diagram_path: string | null;
     question_text: string;
+    hint?: string | null;
     explanation?: string;
+    explanation_diagram_path?: string | null;
     options: {
         id: string;
         option_key: string;
         display_order: number | null;
         option_text: string;
         option_image_path?: string | null;
+        is_correct?: boolean;
     }[];
     supported: boolean;
 }

@@ -9,6 +9,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { useAppStore } from "../../store/useAppStore";
 import { fetchMistakes } from "../../lib/supabase";
 import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
+import { LatexText } from "../../components/questions/LatexText";
 import type { AttemptAnswer, QuestionOption, PracticeQuestion } from "../../types";
 
 interface MistakeItem extends AttemptAnswer {
@@ -138,16 +139,13 @@ export default function MistakesScreen() {
                 </View>
 
                 {/* Question */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.base,
-                        fontWeight: "600",
-                        color: COLORS.textPrimary,
-                        marginBottom: SPACING[3],
-                    }}
-                >
-                    {questionText}
-                </Text>
+                <LatexText
+                    content={questionText}
+                    color={COLORS.textPrimary}
+                    fontSize={TYPOGRAPHY.fontSize.base}
+                    fontWeight="600"
+                    containerStyle={{ marginBottom: SPACING[3] }}
+                />
 
                 {/* Your Answer vs Correct Answer */}
                 <View style={{ gap: SPACING[2] }}>
@@ -256,15 +254,12 @@ export default function MistakesScreen() {
                         >
                             💡 Why is this the correct answer?
                         </Text>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                color: COLORS.textSecondary,
-                                lineHeight: 20,
-                            }}
-                        >
-                            {explanation}
-                        </Text>
+                    <LatexText
+                        content={explanation}
+                        color={COLORS.textSecondary}
+                        fontSize={TYPOGRAPHY.fontSize.sm}
+                        lineHeight={20}
+                    />
                     </View>
                 )}
 

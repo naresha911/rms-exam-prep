@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { MascotDisplay } from '../shared/MascotDisplay';
+import { LatexText } from '../questions/LatexText';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants';
 
 interface ExplanationCardProps {
@@ -71,11 +72,14 @@ export const ExplanationCard: React.FC<ExplanationCardProps> = ({
                         }}
                     />
                     <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: '700', color: COLORS.textSecondary, marginBottom: SPACING[1] }}>
-                        📖 Explanation
+                        📖 Solution
                     </Text>
-                    <Text style={{ fontSize: TYPOGRAPHY.fontSize.base, color: COLORS.textPrimary, lineHeight: 24 }}>
-                        {explanation}
-                    </Text>
+                    <LatexText
+                        content={explanation}
+                        color={COLORS.textPrimary}
+                        fontSize={TYPOGRAPHY.fontSize.base}
+                        lineHeight={24}
+                    />
                 </>
             ) : (
                 <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary, fontStyle: 'italic' }}>

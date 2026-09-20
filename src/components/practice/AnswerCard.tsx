@@ -7,6 +7,7 @@ import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
 import { MaterialIcon } from "../ui/MaterialIcon";
+import { LatexText } from "../questions/LatexText";
 
 export type AnswerState = "default" | "selected" | "correct" | "incorrect";
 
@@ -84,7 +85,16 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({
             </View>
 
             {/* Answer text */}
-            <Text style={[styles.text, { color: s.textColor }]}>{text}</Text>
+            <View style={styles.textWrap}>
+                <LatexText
+                    content={text}
+                    color={s.textColor}
+                    fontSize={TYPOGRAPHY.fontSize.lg}
+                    fontFamily="PlusJakartaSans_500Medium"
+                    fontWeight="500"
+                    lineHeight={TYPOGRAPHY.fontSize.lg * 1.3}
+                />
+            </View>
 
             {/* Check icon (correct state) */}
             {showCheck && (
@@ -119,12 +129,8 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.fontSize.base,
         fontWeight: "700",
     },
-    text: {
+    textWrap: {
         flex: 1,
-        fontFamily: "PlusJakartaSans_500Medium",
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        lineHeight: TYPOGRAPHY.fontSize.lg * 1.3,
-        fontWeight: "500",
     },
     checkIcon: {
         marginLeft: "auto",

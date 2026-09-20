@@ -6,6 +6,7 @@ import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
+import { LatexText } from "../../components/questions/LatexText";
 
 interface QuestionResult {
     index: number;
@@ -139,18 +140,14 @@ export default function TestAnalysisScreen() {
                                 </View>
 
                                 {/* Question Text */}
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.base,
-                                        fontWeight: "600",
-                                        color: COLORS.textPrimary,
-                                        marginBottom: SPACING[2],
-                                        lineHeight: 22,
-                                    }}
-                                    numberOfLines={3}
-                                >
-                                    {q.questionText}
-                                </Text>
+                                <LatexText
+                                    content={q.questionText}
+                                    color={COLORS.textPrimary}
+                                    fontSize={TYPOGRAPHY.fontSize.base}
+                                    fontWeight="600"
+                                    lineHeight={22}
+                                    containerStyle={{ marginBottom: SPACING[2] }}
+                                />
 
                                 {/* Answers */}
                                 {q.selectedAnswer && (
@@ -222,17 +219,14 @@ export default function TestAnalysisScreen() {
                                                 marginBottom: 4,
                                             }}
                                         >
-                                            💡 Explanation
+                                            💡 Solution
                                         </Text>
-                                        <Text
-                                            style={{
-                                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                                color: COLORS.textSecondary,
-                                                lineHeight: 20,
-                                            }}
-                                        >
-                                            {q.explanation}
-                                        </Text>
+                                    <LatexText
+                                        content={q.explanation}
+                                        color={COLORS.textSecondary}
+                                        fontSize={TYPOGRAPHY.fontSize.sm}
+                                        lineHeight={20}
+                                    />
                                     </View>
                                 )}
                             </Card>

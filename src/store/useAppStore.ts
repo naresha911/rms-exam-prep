@@ -18,6 +18,8 @@ interface UserPreferences {
     dailyGoal: number;
     preferredLanguage: string;
     darkMode: boolean;
+    /** After answering, automatically open the worked solution. Default on. */
+    autoShowSolution: boolean;
 }
 
 interface AppState {
@@ -127,6 +129,7 @@ const defaultPreferences: UserPreferences = {
     dailyGoal: 20,
     preferredLanguage: 'en',
     darkMode: false,
+    autoShowSolution: true,
 };
 
 // Calculate level from XP
@@ -426,11 +429,25 @@ export const useAppStore = create<AppState>()(
                 preferences: state.preferences,
                 lastPracticeActivity: state.lastPracticeActivity,
             }),
+            merge: (persistedState, currentState) => {
+                const persisted = (persistedState || {}) as Partial<AppState>;
+                return {
+                    ...currentState,
+                    ...persisted,
+                    preferences: {
+                        ...defaultPreferences,
+                        ...(persisted.preferences || {}),
+                    },
+                };
+            },
         }
     )
 );
 
 // Export type for convenience
 export type AppStore = typeof useAppStore;
+
+export const isAutoShowSolution = (prefs?: UserPreferences | null) =>
+    prefs?.autoShowSolution !== false;
 
 export default useAppStore;

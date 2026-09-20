@@ -12,6 +12,7 @@ import { COLORS, normalizeStudentStandard } from '../constants';
 import { useAppStore } from '../store/useAppStore';
 import { supabase, fetchProfile, ensureStudentProfile } from '../lib/supabase';
 import { initAnalytics, identifyUser, trackScreen } from '../lib/analytics';
+import { initMathJax } from '../lib/mathjax';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import {
     PlusJakartaSans_400Regular,
@@ -23,6 +24,7 @@ import {
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync().catch(() => { });
+initMathJax();
 
 export default function RootLayout() {
     const { setUser, setAuthenticated, setLoading } = useAppStore();

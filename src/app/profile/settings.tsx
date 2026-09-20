@@ -5,9 +5,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
-import { useAppStore } from "../../store/useAppStore";
+import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
 import { COLORS, SPACING, TYPOGRAPHY, SUPPORTED_LANGUAGES } from "../../constants";
 import { signOut } from "../../lib/supabase";
+import { t } from "../../lib/i18n";
 
 export default function SettingsScreen() {
     const router = useRouter();
@@ -18,6 +19,7 @@ export default function SettingsScreen() {
     const [vibrationEnabled, setVibrationEnabled] = useState(true); // vibration preference not in store
     const [notificationsEnabled, setNotificationsEnabled] = useState(preferences?.notifications ?? true);
     const [darkMode, setDarkMode] = useState(preferences?.darkMode ?? false);
+    const [autoShowSolution, setAutoShowSolution] = useState(isAutoShowSolution(preferences));
     const [selectedLanguage, setSelectedLanguage] = useState(
         preferences?.preferredLanguage || SUPPORTED_LANGUAGES[0].code
     );
@@ -224,6 +226,17 @@ export default function SettingsScreen() {
                     Experience
                 </Text>
                 <Card style={{ marginBottom: SPACING[5] }}>
+                    {renderSettingRow(
+                        "📖",
+                        t("settings.autoShowSolution"),
+                        t("settings.autoShowSolutionHint"),
+                        <Switch
+                            value={autoShowSolution}
+                            onValueChange={(val) => handleToggle("autoShowSolution", val, setAutoShowSolution)}
+                            trackColor={{ false: COLORS.cardBorder, true: COLORS.primaryLight }}
+                            thumbColor={autoShowSolution ? COLORS.primary : COLORS.backgroundTertiary}
+                        />
+                    )}
                     {renderSettingRow(
                         "🔊",
                         "Sound Effects",

@@ -19,14 +19,14 @@ const RENDER_DEFAULTS = {
 
 /**
  * Map paper session payload → QuestionRenderItem for QuestionRenderer.
- * Exam payloads omit is_correct; leave false so practice-style reveal never fires in exam mode.
+ * is_correct is included so Show Solution can highlight the right option.
  */
 export function paperQuestionToRenderItem(q: PaperSessionQuestion): QuestionRenderItem {
     const options: QuestionOption[] = (q.options ?? []).map((o) => ({
         id: o.id,
         question_id: q.question_id,
         option_key: o.option_key,
-        is_correct: false,
+        is_correct: !!o.is_correct,
         display_order: o.display_order,
         option_text: o.option_text,
         option_image_path: o.option_image_path ?? null,
@@ -41,7 +41,9 @@ export function paperQuestionToRenderItem(q: PaperSessionQuestion): QuestionRend
         marks: q.marks,
         negative_marks: q.negative_marks,
         question_text: q.question_text,
+        hint: q.hint,
         explanation: q.explanation,
+        explanation_diagram_path: q.explanation_diagram_path,
         options,
     };
 }
@@ -65,7 +67,9 @@ export interface MinimalTestQuestion {
         is_correct?: boolean;
         display_order?: number | null;
     }[];
+    hint?: string | null;
     explanation?: string;
+    explanation_diagram_path?: string | null;
 }
 
 /** Map mock/sectional/speed test question → QuestionRenderItem. */
@@ -92,7 +96,9 @@ export function testQuestionToRenderItem(q: MinimalTestQuestion): QuestionRender
         tags: q.tags ?? [],
         source: q.source ?? null,
         question_text: q.question_text,
+        hint: q.hint,
         explanation: q.explanation,
+        explanation_diagram_path: q.explanation_diagram_path,
         options,
     };
 }

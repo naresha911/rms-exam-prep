@@ -49,7 +49,7 @@ export const OptionStack: React.FC<OptionStackProps> = ({
                 const state = (rawState === 'disabled' ? 'default' : rawState) as AnswerState;
                 const interactive = mode !== 'browse' || !!onSelect;
                 const disabledReveal =
-                    (mode === 'practice' && revealed) || (mode === 'browse' && browseRevealed);
+                    (mode === 'browse' && browseRevealed) || (mode !== 'browse' && !!revealed);
                 const isSelected = selectedValue === value;
                 const showCheck = shouldShowCorrectCheck(option, mode, revealed, browseRevealed);
 

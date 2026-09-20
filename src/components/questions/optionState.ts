@@ -30,11 +30,13 @@ export function deriveOptionState({
     const value = getOptionValue(option, selectionMode);
     const isSelected = selectedValue != null && selectedValue === value;
     const showCorrectness =
-        mode === 'practice'
-            ? revealed
-            : mode === 'browse'
-              ? browseRevealed
-              : false; // exam
+        mode === 'browse' ? browseRevealed : !!revealed;
+
+    if (showCorrectness) {
+        if (option.is_correct) return 'correct';
+        if (isSelected) return 'incorrect';
+        return 'disabled';
+    }
 
     if (showCorrectness) {
         if (option.is_correct) return 'correct';
@@ -53,7 +55,6 @@ export function shouldShowCorrectCheck(
     browseRevealed?: boolean
 ): boolean {
     if (!option.is_correct) return false;
-    if (mode === 'exam') return false;
-    if (mode === 'practice') return !!revealed;
-    return !!browseRevealed;
+    if (mode === 'browse') return !!browseRevealed;
+    return !!revealed;
 }

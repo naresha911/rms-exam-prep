@@ -16,9 +16,9 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientProgressBar } from "@/components/shared/GradientProgressBar";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { QuestionRenderer, paperQuestionToRenderItem } from "@/components/questions";
+import { QuestionRenderer, QuestionAssist, paperQuestionToRenderItem } from "@/components/questions";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, isAutoShowSolution } from "@/store/useAppStore";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import {
     clearLocalPaperSession,
@@ -42,6 +42,7 @@ export default function PaperSessionScreen() {
     const { paperId } = useLocalSearchParams<{ paperId: string; attemptId?: string }>();
     const { preferences } = useAppStore();
     const preferredLanguage = preferences?.preferredLanguage || "en";
+    const autoShowSolution = isAutoShowSolution(preferences);
 
     const [paper, setPaper] = useState<Paper | null>(null);
     const [questions, setQuestions] = useState<PaperSessionQuestion[]>([]);
@@ -56,6 +57,7 @@ export default function PaperSessionScreen() {
     const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
     const [warnings, setWarnings] = useState<PaperValidationIssue[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [revealedById, setRevealedById] = useState<Record<string, boolean>>({});
 
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const questionStartedAt = useRef<number>(Date.now());
@@ -366,9 +368,16 @@ export default function PaperSessionScreen() {
     const handleSelect = (optionId: string) => {
         const q = questions[currentIndex];
         if (!q?.supported) return;
+        if (revealedById[q.question_id]) return;
         setAnswers((prev) => ({ ...prev, [q.question_id]: optionId }));
         persistAnswer(q.question_id, optionId, flagged);
     };
+
+    const handleRevealCurrent = useCallback(() => {
+        const q = questions[currentIndex];
+        if (!q) return;
+        setRevealedById((prev) => (prev[q.question_id] ? prev : { ...prev, [q.question_id]: true }));
+    }, [currentIndex, questions]);
 
     const handleToggleFlag = () => {
         const q = questions[currentIndex];
@@ -468,7 +477,7 @@ export default function PaperSessionScreen() {
                         mode="exam"
                         selectionMode="option_id"
                         selectedValue={selected ?? null}
-                        revealed={false}
+                        revealed={!!revealedById[current.question_id]}
                         onSelect={(optionId) => {
                             if (!current.supported) return;
                             handleSelect(optionId);
@@ -477,6 +486,21 @@ export default function PaperSessionScreen() {
                         showBookmark={false}
                         showFooter={false}
                         debugSource="PaperSession"
+                    />
+                    <QuestionAssist
+                        key={current.question_id}
+                        hint={current.hint}
+                        solution={current.explanation}
+                        solutionDiagramUri={current.explanation_diagram_path}
+                        answered={!!selected}
+                        revealed={!!revealedById[current.question_id]}
+                        isCorrect={
+                            !!selected &&
+                            current.options.some((o) => o.is_correct && o.id === selected)
+                        }
+                        correctOptionLabel={current.options.find((o) => o.is_correct)?.option_key?.toUpperCase()}
+                        autoShowSolution={autoShowSolution}
+                        onReveal={handleRevealCurrent}
                     />
                     {!current.supported && (
                         <Text style={styles.unsupported}>{t("papers.unsupportedType")}</Text>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../../constants';
+import { LatexText } from '../LatexText';
 import type {
     ComprehensionGroupData,
     QuestionUiMode,
@@ -78,7 +79,13 @@ export const ComprehensionGroup: React.FC<ComprehensionGroupProps> = ({
         <View style={styles.wrap}>
             <View style={styles.passagePanel}>
                 <Text style={styles.passageLabel}>Passage</Text>
-                <Text style={styles.passageBody}>{group.shared_text}</Text>
+                <LatexText
+                    content={group.shared_text}
+                    color={COLORS.onSurface}
+                    fontSize={14}
+                    fontFamily={TYPOGRAPHY.fontFamily.medium}
+                    lineHeight={22}
+                />
                 {group.shared_image_path ? (
                     <Image
                         source={{ uri: group.shared_image_path }}

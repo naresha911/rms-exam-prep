@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { QuestionCardShell } from '../QuestionCardShell';
 import { OptionGrid } from '../OptionGrid';
 import { StemText } from '../StemText';
+import { LatexText } from '../LatexText';
 import { shellFromShared } from '../shellHelpers';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../../constants';
 import type { SharedQuestionProps, FractionNode } from '../types';
@@ -39,9 +40,13 @@ export const McqEquation: React.FC<SharedQuestionProps> = (props) => {
                         <Text style={styles.unknown}>?</Text>
                     </View>
                 ) : (
-                    <Text style={styles.equationText}>
-                        {eq?.text || props.question.question_text || ''}
-                    </Text>
+                    <LatexText
+                        content={eq?.text || props.question.question_text || ''}
+                        color={COLORS.onSurface}
+                        fontSize={18}
+                        fontFamily={TYPOGRAPHY.fontFamily.bold}
+                        fontWeight="700"
+                    />
                 )}
             </View>
             <OptionGrid

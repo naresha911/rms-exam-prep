@@ -6,14 +6,13 @@ import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../components/ui/Button";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
-import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
-import { QuestionRenderer } from "../../components/questions";
+import { QuestionRenderer, QuestionAssist } from "../../components/questions";
 import { fetchPracticeQuestions, toggleBookmark, reportQuestion } from "../../lib/supabase";
 import { PracticeQuestion } from "../../types";
-import { useAppStore } from "../../store/useAppStore";
+import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS, SUBJECTS, getStandardIdFallback } from "../../constants";
 import { trackEvent, trackPracticeCompletion, EVENTS } from "../../lib/analytics";
 
@@ -24,7 +23,7 @@ export default function PracticeSessionScreen() {
         topicId?: string;
         count: string;
     }>();
-    const { user, addXP, updateDailyProgress, updateStreak, checkDailyGoal, unlockBadge, setLastPracticeActivity } = useAppStore();
+    const { user, addXP, updateDailyProgress, updateStreak, checkDailyGoal, unlockBadge, setLastPracticeActivity, preferences } = useAppStore();
 
     const [loading, setLoading] = useState(true);
     const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -70,7 +69,9 @@ export default function PracticeSessionScreen() {
                 const transformedQuestions: PracticeQuestion[] = data.map((q: any) => ({
                     ...q,
                     question_text: q.question_translations?.[0]?.question_text || "",
+                    hint: q.question_translations?.[0]?.hint || null,
                     explanation: q.question_translations?.[0]?.explanation || "",
+                    explanation_diagram_path: q.question_translations?.[0]?.explanation_diagram_path || null,
                     options: (q.question_options || []).map((opt: any) => ({
                         ...opt,
                         option_text: opt.option_translations?.[0]?.option_text || "",
@@ -289,35 +290,17 @@ export default function PracticeSessionScreen() {
                     />
                 </View>
 
-                {/* Inline feedback + explanation — Stitch: colored card with mascot */}
-                {showFeedback && (
-                    <View style={[styles.feedbackCard, isCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect]}>
-                        <View style={styles.feedbackHeader}>
-                            <MascotDisplay
-                                expression={isCorrect ? "celebrating" : "encouraging"}
-                                size={64}
-                            />
-                            <View style={styles.feedbackHeaderText}>
-                                <Text style={[styles.feedbackHeadline, isCorrect ? styles.textSuccess : styles.textWarning]}>
-                                    {isCorrect ? "Excellent! 🎉" : "Almost there! 💪"}
-                                </Text>
-                                <Text style={styles.feedbackSubtext}>
-                                    {isCorrect
-                                        ? "That's the right answer!"
-                                        : "The correct answer is shown above."}
-                                </Text>
-                            </View>
-                        </View>
-
-                        {currentQuestion.explanation && (
-                            <>
-                                <View style={styles.feedbackDivider} />
-                                <Text style={styles.explanationLabel}>📖 Explanation</Text>
-                                <Text style={styles.explanationText}>{currentQuestion.explanation}</Text>
-                            </>
-                        )}
-                    </View>
-                )}
+                <QuestionAssist
+                    key={currentQuestion.id}
+                    hint={currentQuestion.hint}
+                    solution={currentQuestion.explanation}
+                    solutionDiagramUri={currentQuestion.explanation_diagram_path}
+                    answered={showFeedback}
+                    revealed={showFeedback}
+                    isCorrect={isCorrect}
+                    correctOptionLabel={currentQuestion.options.find((opt) => opt.is_correct)?.option_key?.toUpperCase()}
+                    autoShowSolution={isAutoShowSolution(preferences)}
+                />
 
                 {/* Bottom padding for sticky CTA */}
                 <View style={styles.bottomPadding} />
@@ -412,64 +395,6 @@ const styles = StyleSheet.create({
     optionsContainer: {
         gap: SPACING[3],
         marginBottom: SPACING[4],
-    },
-    feedbackCard: {
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 2,
-        padding: SPACING[4],
-        marginTop: SPACING[3],
-    },
-    feedbackCorrect: {
-        backgroundColor: COLORS.successLight,
-        borderColor: COLORS.success,
-    },
-    feedbackIncorrect: {
-        backgroundColor: COLORS.warningLight,
-        borderColor: COLORS.warning,
-    },
-    feedbackHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[4],
-    },
-    feedbackHeaderText: {
-        flex: 1,
-    },
-    feedbackHeadline: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.xl,
-        fontWeight: "800",
-    },
-    textSuccess: {
-        color: COLORS.successText,
-    },
-    textWarning: {
-        color: COLORS.warningText,
-    },
-    feedbackSubtext: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurfaceVariant,
-        marginTop: 2,
-    },
-    feedbackDivider: {
-        height: 1,
-        backgroundColor: COLORS.outline,
-        opacity: 0.3,
-        marginVertical: SPACING[3],
-    },
-    explanationLabel: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurfaceVariant,
-        fontWeight: "700",
-        marginBottom: SPACING[1],
-    },
-    explanationText: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        lineHeight: 24,
     },
     bottomPadding: {
         height: SPACING[6],

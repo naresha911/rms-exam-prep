@@ -35,7 +35,7 @@ export type PaperValidationIssue = {
     blocking: boolean;
 };
 
-type TranslationRow = { language_code: string; question_text?: string | null; explanation?: string | null };
+type TranslationRow = { language_code: string; question_text?: string | null; hint?: string | null; explanation?: string | null; explanation_diagram_path?: string | null };
 type OptionTranslationRow = {
     language_code: string;
     option_text?: string | null;
@@ -142,6 +142,7 @@ export function mapSessionPayload(
                 display_order: opt.display_order ?? null,
                 option_text: ot?.option_text || '',
                 option_image_path: ot?.option_image_path ?? null,
+                is_correct: !!opt.is_correct,
             };
         });
         const questionType = entry.question_type as QuestionType;
@@ -155,6 +156,9 @@ export function mapSessionPayload(
             has_diagram: !!entry.has_diagram,
             diagram_path: entry.diagram_path ?? null,
             question_text: picked?.question_text || 'Question text unavailable',
+            hint: picked?.hint || null,
+            explanation: picked?.explanation || undefined,
+            explanation_diagram_path: picked?.explanation_diagram_path || null,
             options,
             supported: isSupportedPaperQuestionType(questionType),
         };

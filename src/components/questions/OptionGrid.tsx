@@ -48,7 +48,7 @@ export const OptionGrid: React.FC<OptionGridProps> = ({
                 const state = (rawState === 'disabled' ? 'default' : rawState) as AnswerState;
                 const interactive = mode !== 'browse' || !!onSelect;
                 const disabledReveal =
-                    (mode === 'practice' && revealed) || (mode === 'browse' && browseRevealed);
+                    (mode === 'browse' && browseRevealed) || (mode !== 'browse' && !!revealed);
 
                 return (
                     <View key={option.id} style={styles.cell}>

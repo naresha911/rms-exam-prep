@@ -3,17 +3,17 @@
 import { View, Text, ScrollView, Pressable, Alert, BackHandler, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "../../components/ui/Button";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
-import { QuestionRenderer, testQuestionToRenderItem } from "../../components/questions";
+import { QuestionRenderer, QuestionAssist, testQuestionToRenderItem } from "../../components/questions";
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, getExamStructureForStandard, getStandardIdFallback, normalizeStudentStandard } from "../../constants";
 import { fetchPracticeQuestions, fetchPaperDetails } from "../../lib/supabase";
 import { completeTestAttempt, getTestSessionQuestions, startTestAttempt } from "../../lib/tests";
-import { useAppStore } from "../../store/useAppStore";
+import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
 import { trackEvent, trackTestSubmitted, EVENTS } from "../../lib/analytics";
 
 interface TestQuestion {
@@ -30,7 +30,9 @@ interface TestQuestion {
         is_correct: boolean;
         display_order?: number | null;
     }[];
+    hint?: string | null;
     explanation?: string;
+    explanation_diagram_path?: string | null;
 }
 
 export default function TestSessionScreen() {
@@ -42,6 +44,7 @@ export default function TestSessionScreen() {
     const targetClass = normalizeStudentStandard(params.class as string);
     const examInfo = getExamStructureForStandard(targetClass);
     const preferredLanguage = useAppStore((s) => s.preferences?.preferredLanguage) || "en";
+    const autoShowSolution = isAutoShowSolution(useAppStore((s) => s.preferences));
 
     // Test configuration
     const [questions, setQuestions] = useState<TestQuestion[]>([]);
@@ -65,6 +68,7 @@ export default function TestSessionScreen() {
     // UI State
     const [loading, setLoading] = useState(true);
     const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+    const [revealedById, setRevealedById] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         loadQuestions();
@@ -131,7 +135,9 @@ export default function TestSessionScreen() {
                         is_correct: opt.is_correct,
                         display_order: opt.display_order ?? i,
                     })),
+                    hint: q.question_translations?.[0]?.hint || undefined,
                     explanation: q.question_translations?.[0]?.explanation || undefined,
+                    explanation_diagram_path: q.question_translations?.[0]?.explanation_diagram_path || undefined,
                 }));
                 setQuestions(transformed);
             } else {
@@ -153,7 +159,9 @@ export default function TestSessionScreen() {
                             is_correct: opt.is_correct,
                             display_order: opt.display_order ?? i,
                         })),
+                        hint: q.question_translations?.[0]?.hint || undefined,
                         explanation: q.question_translations?.[0]?.explanation || undefined,
+                        explanation_diagram_path: q.question_translations?.[0]?.explanation_diagram_path || undefined,
                     })));
                 } else setQuestions([]);
             }
@@ -178,8 +186,15 @@ export default function TestSessionScreen() {
 
     const handleSelectOption = (optionId: string) => {
         const questionId = questions[currentIndex].id;
+        if (revealedById[questionId]) return;
         setAnswers(prev => ({ ...prev, [questionId]: optionId }));
     };
+
+    const handleRevealCurrent = useCallback(() => {
+        const questionId = questions[currentIndex]?.id;
+        if (!questionId) return;
+        setRevealedById((prev) => (prev[questionId] ? prev : { ...prev, [questionId]: true }));
+    }, [currentIndex, questions]);
 
     const handleToggleFlag = () => {
         const questionId = questions[currentIndex].id;
@@ -382,12 +397,27 @@ export default function TestSessionScreen() {
                         mode="exam"
                         selectionMode="option_id"
                         selectedValue={selectedOptionId ?? null}
-                        revealed={false}
+                        revealed={!!revealedById[currentQuestion.id]}
                         onSelect={handleSelectOption}
                         questionNumber={currentIndex + 1}
                         showBookmark={false}
                         showFooter={false}
                         debugSource="TestSession"
+                    />
+                    <QuestionAssist
+                        key={currentQuestion.id}
+                        hint={currentQuestion.hint}
+                        solution={currentQuestion.explanation}
+                        solutionDiagramUri={currentQuestion.explanation_diagram_path}
+                        answered={!!selectedOptionId}
+                        revealed={!!revealedById[currentQuestion.id]}
+                        isCorrect={
+                            !!selectedOptionId &&
+                            currentQuestion.options.some((o) => o.is_correct && o.id === selectedOptionId)
+                        }
+                        correctOptionLabel={currentQuestion.options.find((o) => o.is_correct)?.option_key?.toUpperCase()}
+                        autoShowSolution={autoShowSolution}
+                        onReveal={handleRevealCurrent}
                     />
                 </View>
 

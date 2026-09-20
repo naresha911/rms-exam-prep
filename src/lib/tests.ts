@@ -144,6 +144,8 @@ export type TestSessionQuestion = {
     marks?: number;
     negative_marks?: number;
     explanation?: string;
+    hint?: string | null;
+    explanation_diagram_path?: string | null;
     options: {
         id: string;
         option_key: string;
@@ -164,7 +166,7 @@ type TestQuestionType =
     | 'short_answer'
     | 'comprehension';
 
-type TranslationRow = { language_code: string; question_text?: string | null; explanation?: string | null };
+type TranslationRow = { language_code: string; question_text?: string | null; hint?: string | null; explanation?: string | null; explanation_diagram_path?: string | null };
 type OptionTranslationRow = {
     language_code: string;
     option_text?: string | null;
@@ -212,7 +214,9 @@ function mapRpcQuestions(payload: any, preferredLanguage: string): {
             has_diagram: !!entry.has_diagram,
             diagram_path: entry.diagram_path ?? null,
             question_text: picked?.question_text || entry.question_text || 'Question text unavailable',
+            hint: picked?.hint || entry.hint || null,
             explanation: picked?.explanation || entry.explanation || undefined,
+            explanation_diagram_path: picked?.explanation_diagram_path || entry.explanation_diagram_path || null,
             options,
         };
     });
@@ -255,7 +259,9 @@ function mapNestedTestDetails(test: any, preferredLanguage: string): TestSession
                 has_diagram: !!q.has_diagram,
                 diagram_path: q.diagram_path ?? null,
                 question_text: picked?.question_text || 'Question text unavailable',
+                hint: picked?.hint || null,
                 explanation: picked?.explanation || undefined,
+                explanation_diagram_path: picked?.explanation_diagram_path || null,
                 options,
             } as TestSessionQuestion;
         })
@@ -277,7 +283,7 @@ export async function getTestSessionQuestions(testId: string, preferredLanguage 
                 question_id, section_id, question_order, marks, negative_marks,
                 questions (
                     *,
-                    question_translations (language_code, question_text, explanation),
+                    question_translations (*),
                     question_options (
                         id, option_key, is_correct, display_order,
                         option_translations (language_code, option_text, option_image_path)

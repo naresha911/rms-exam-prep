@@ -52,6 +52,7 @@ export const useQuestions = (options: UseQuestionsOptions): UseQuestionsResult =
                     ...q,
                     question_text:
                         q.question_translations?.[0]?.question_text ?? 'Question text unavailable',
+                    hint: q.question_translations?.[0]?.hint ?? null,
                     explanation: q.question_translations?.[0]?.explanation ?? null,
                     explanation_diagram_path:
                         q.question_translations?.[0]?.explanation_diagram_path ?? null,
