@@ -9,38 +9,33 @@ import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from "react-native-svg"
 import { BORDER_RADIUS, SHADOWS, SPACING, TYPOGRAPHY, normalizeStudentStandard } from "../../constants";
 import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
 
-type StudyVariant = "chapters" | "mocks" | "papers" | "drill";
+type StudyVariant = "mocks" | "papers" | "drill";
 
 const STUDY_ICON = {
-  chapters: "studyIconChapters",
   mocks: "studyIconMocks",
   papers: "studyIconPapers",
   drill: "studyIconDrill",
 } as const;
 
 const STUDY_ACTION = {
-  chapters: "studyActionChapters",
   mocks: "studyActionMocks",
   papers: "studyActionPapers",
   drill: "studyActionDrill",
 } as const;
 
 const STUDY_ACTION_TEXT = {
-  chapters: "studyActionTextChapters",
   mocks: "studyActionTextMocks",
   papers: "studyActionTextPapers",
   drill: "studyActionTextDrill",
 } as const;
 
 const STUDY_ICON_COLOR = {
-  chapters: "onTertiaryContainer",
   mocks: "onPrimary",
   papers: "onSecondaryContainer",
   drill: "amberText",
 } as const;
 
 const STUDY_ACTION_COLOR = {
-  chapters: "tertiary",
   mocks: "primary",
   papers: "secondary",
   drill: "warningText",
@@ -204,101 +199,6 @@ function createStyles(colors: ColorPalette) {
       overflow: "hidden" as const,
       padding: 4,
     },
-    liveTestCard: {
-      position: "relative" as const,
-      borderRadius: BORDER_RADIUS.xl,
-      borderWidth: 1,
-      borderColor: colors.warning,
-      backgroundColor: colors.warningLight,
-      padding: SPACING[4],
-      gap: 12,
-      overflow: "hidden" as const,
-      ...SHADOWS.sm,
-    },
-    liveCardGlow: {
-      position: "absolute" as const,
-      width: 112,
-      height: 112,
-      borderRadius: 56,
-      right: -32,
-      top: -32,
-      backgroundColor: colors.warning,
-      opacity: 0.12,
-    },
-    liveTopRow: {
-      flexDirection: "row" as const,
-      alignItems: "center" as const,
-      justifyContent: "space-between" as const,
-      gap: 8,
-    },
-    livePill: {
-      flexDirection: "row" as const,
-      alignItems: "center" as const,
-      gap: 6,
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: BORDER_RADIUS.full,
-      backgroundColor: colors.errorLight,
-      borderWidth: 1,
-      borderColor: colors.error,
-    },
-    liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.error },
-    livePillText: {
-      color: colors.error,
-      fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-      fontSize: 10,
-      letterSpacing: 0.7,
-    },
-    rankPill: {
-      flexDirection: "row" as const,
-      alignItems: "center" as const,
-      gap: 4,
-      paddingHorizontal: 9,
-      paddingVertical: 4,
-      borderRadius: BORDER_RADIUS.full,
-      backgroundColor: colors.tertiaryFixed,
-      borderWidth: 1,
-      borderColor: colors.warning,
-    },
-    rankPillText: {
-      color: colors.warningText,
-      fontFamily: TYPOGRAPHY.fontFamily.bold,
-      fontSize: 10,
-    },
-    liveTitle: {
-      color: colors.onSurface,
-      fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-      fontSize: 17,
-      lineHeight: 22,
-    },
-    liveDescription: {
-      color: colors.onSurfaceVariant,
-      fontFamily: TYPOGRAPHY.fontFamily.regular,
-      fontSize: 12,
-      lineHeight: 18,
-    },
-    metaRow: { flexDirection: "row" as const, flexWrap: "wrap" as const, gap: 6 },
-    metaPill: {
-      flexDirection: "row" as const,
-      alignItems: "center" as const,
-      gap: 4,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: BORDER_RADIUS.md,
-      backgroundColor: colors.surfaceContainerLow,
-      borderWidth: 1,
-      borderColor: colors.surfaceContainer,
-    },
-    metaPillHighlighted: {
-      backgroundColor: colors.tertiaryFixed,
-      borderColor: colors.warning,
-    },
-    metaPillText: {
-      color: colors.onSurfaceVariant,
-      fontFamily: TYPOGRAPHY.fontFamily.semibold,
-      fontSize: 10,
-    },
-    metaPillTextHighlighted: { color: colors.warningText, fontFamily: TYPOGRAPHY.fontFamily.bold },
     actionPressable: { width: "100%" as const },
     actionButton: {
       width: "100%" as const,
@@ -310,10 +210,6 @@ function createStyles(colors: ColorPalette) {
       alignItems: "center" as const,
       justifyContent: "center" as const,
       paddingHorizontal: SPACING[5],
-    },
-    actionButtonAmber: {
-      backgroundColor: colors.warningText,
-      borderBottomColor: colors.onTertiaryFixedVariant,
     },
     actionButtonPrimary: {
       backgroundColor: colors.primary,
@@ -421,7 +317,6 @@ function createStyles(colors: ColorPalette) {
       flexShrink: 0,
       alignSelf: "center" as const,
     },
-    studyIconChapters: { backgroundColor: colors.tertiaryContainer },
     studyIconMocks: { backgroundColor: colors.primary },
     studyIconPapers: { backgroundColor: colors.secondaryContainer },
     studyIconDrill: {
@@ -464,10 +359,6 @@ function createStyles(colors: ColorPalette) {
       flexGrow: 0,
       flexShrink: 0,
     },
-    studyActionChapters: {
-      backgroundColor: colors.surfaceContainer,
-      borderColor: colors.tertiaryFixedDim,
-    },
     studyActionMocks: {
       backgroundColor: colors.primaryFixed,
       borderColor: colors.primaryFixedDim,
@@ -487,7 +378,6 @@ function createStyles(colors: ColorPalette) {
       includeFontPadding: false,
       marginRight: 4,
     },
-    studyActionTextChapters: { color: colors.tertiary },
     studyActionTextMocks: { color: colors.primary },
     studyActionTextPapers: { color: colors.secondary },
     studyActionTextDrill: { color: colors.warningText },
@@ -537,34 +427,11 @@ function StudyCard({
   );
 }
 
-function MetaPill({
-  icon,
-  color,
-  label,
-  highlighted = false,
-}: {
-  icon: MaterialIconName;
-  color: string;
-  label: string;
-  highlighted?: boolean;
-}) {
-  const styles = useThemedStyles(createStyles);
-
-  return (
-    <View style={[styles.metaPill, highlighted ? styles.metaPillHighlighted : null]}>
-      <MaterialIcon name={icon} size={13} color={color} filled />
-      <Text style={[styles.metaPillText, highlighted ? styles.metaPillTextHighlighted : null]}>{label}</Text>
-    </View>
-  );
-}
-
 function ActionButton({
   label,
-  variant,
   onPress,
 }: {
   label: string;
-  variant: "amber" | "primary";
   onPress: () => void;
 }) {
   const styles = useThemedStyles(createStyles);
@@ -578,12 +445,7 @@ function ActionButton({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <View
-        style={[
-          styles.actionButton,
-          variant === "amber" ? styles.actionButtonAmber : styles.actionButtonPrimary,
-        ]}
-      >
+      <View style={[styles.actionButton, styles.actionButtonPrimary]}>
         <Text style={styles.actionButtonText}>{label}</Text>
         <MaterialIcon name="arrow_forward" size={18} color={colors.onPrimary} />
       </View>
@@ -707,35 +569,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={styles.liveTestCard}>
-          <View style={styles.liveCardGlow} />
-          <View style={styles.liveTopRow}>
-            <View style={styles.livePill}>
-              <View style={styles.liveDot} />
-              <Text style={styles.livePillText}>LIVE ALL-INDIA TEST</Text>
-            </View>
-            <View style={styles.rankPill}>
-              <MaterialIcon name="trending_up" size={13} color={colors.warningText} />
-              <Text style={styles.rankPillText}>Rank Prediction</Text>
-            </View>
-          </View>
-          <Text style={styles.liveTitle}>All-India AISSEE Super Mock #04</Text>
-          <Text style={styles.liveDescription}>
-            Compete nationwide with 4,800+ cadets taking this test live under real exam rules.
-          </Text>
-          <View style={styles.metaRow}>
-            <MetaPill icon="assignment" color={colors.tertiary} label="125 Qs" />
-            <MetaPill icon="military_tech" color={colors.secondary} label="300 Marks" />
-            <MetaPill icon="schedule" color={colors.primary} label="150 Mins" />
-            <MetaPill icon="stars" color={colors.amberText} label="+100 XP & Rank" highlighted />
-          </View>
-          <ActionButton
-            label="Enter Live Test"
-            variant="amber"
-            onPress={() => router.push("/test" as Href)}
-          />
-        </View>
-
         <View style={styles.resumeCard}>
           <View style={styles.resumeAccent} />
           <View style={styles.resumeTopRow}>
@@ -756,7 +589,6 @@ export default function HomeScreen() {
             </View>
             <ActionButton
               label="Continue Mission"
-              variant="primary"
               onPress={continueMission}
             />
           </View>
@@ -767,14 +599,6 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle} maxFontSizeMultiplier={1.15}>Study & Practice</Text>
         </View>
         <View style={styles.studyList}>
-          <StudyCard
-            variant="chapters"
-            icon="auto_stories"
-            title="Learn & Chapters"
-            subtitle="Syllabus, Chapters & Drills"
-            actionLabel="Explore"
-            onPress={() => router.push("/(tabs)/practice")}
-          />
           <StudyCard
             variant="mocks"
             icon="timer"

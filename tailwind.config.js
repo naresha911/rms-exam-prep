@@ -93,7 +93,7 @@ module.exports = {
                 'text-tertiary': '#767586',
             },
             fontFamily: {
-                sans: ["PlusJakartaSans", "sans-serif"],
+                sans: ["Nunito_400Regular", "sans-serif"],
             },
             borderRadius: {
                 sm: '4px',

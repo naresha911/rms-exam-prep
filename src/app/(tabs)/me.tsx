@@ -1,7 +1,5 @@
-// Profile Screen — Stitch-aligned user profile hub.
+// Profile hub — identity, today's progress, study tools, and account.
 // Tab route is `me` (not `profile`) to avoid clashing with `/profile/*` stack screens.
-// Per Stitch: avatar header with streak/XP, stats row, My Learning list,
-// Settings list, sign-out button.
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,6 +13,14 @@ import { layout, useColors, useThemedStyles, type ColorPalette } from "../../the
 import { signOut } from "../../lib/supabase";
 
 type StatVariant = "questions" | "accuracy" | "level";
+type MenuIcon =
+    | "bookmark"
+    | "cancel"
+    | "analytics"
+    | "emoji_events"
+    | "history"
+    | "settings"
+    | "support_agent";
 
 const STAT_ICON = {
     questions: "statIconQuestions",
@@ -30,18 +36,30 @@ function createStyles(colors: ColorPalette) {
         },
         scrollContent: {
             padding: SPACING[5],
+            paddingBottom: SPACING[8],
         },
-        header: {
+        identityCard: {
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS["2xl"],
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            padding: SPACING[4],
+            marginBottom: SPACING[5],
+        },
+        identityTop: {
+            flexDirection: "row" as const,
             alignItems: "center" as const,
-            marginBottom: SPACING[6],
-            paddingTop: SPACING[3],
+        },
+        identityCopy: {
+            flex: 1,
+            minWidth: 0,
+            marginLeft: SPACING[3],
         },
         userName: {
             fontFamily: TYPOGRAPHY.fontFamily.extrabold,
             fontSize: TYPOGRAPHY.fontSize.xl,
             color: colors.onSurface,
             fontWeight: TYPOGRAPHY.fontWeight.extrabold,
-            marginTop: SPACING[3],
         },
         userSubtitle: {
             fontFamily: TYPOGRAPHY.fontFamily.medium,
@@ -50,20 +68,39 @@ function createStyles(colors: ColorPalette) {
             fontWeight: TYPOGRAPHY.fontWeight.medium,
             marginTop: 2,
         },
+        editHint: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.primary,
+            marginTop: 6,
+        },
+        settingsButton: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.surfaceContainerLow,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            marginLeft: SPACING[2],
+        },
         badges: {
             flexDirection: "row" as const,
+            flexWrap: "wrap" as const,
             gap: SPACING[2],
-            marginTop: SPACING[3],
+            marginTop: SPACING[4],
         },
         section: {
             marginBottom: SPACING[5],
         },
         sectionTitle: {
             fontFamily: TYPOGRAPHY.fontFamily.bold,
-            fontSize: TYPOGRAPHY.fontSize.lg,
-            color: colors.onSurface,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
             fontWeight: TYPOGRAPHY.fontWeight.bold,
-            marginBottom: SPACING[3],
+            letterSpacing: 0.8,
+            textTransform: "uppercase" as const,
+            marginBottom: SPACING[2],
+            marginLeft: SPACING[1],
         },
         statsRow: {
             flexDirection: "row" as const,
@@ -101,6 +138,7 @@ function createStyles(colors: ColorPalette) {
             color: colors.onSurfaceVariant,
             fontWeight: TYPOGRAPHY.fontWeight.semibold,
             marginTop: 2,
+            textAlign: "center" as const,
         },
         menuCard: {
             backgroundColor: colors.surfaceContainerLowest,
@@ -112,7 +150,8 @@ function createStyles(colors: ColorPalette) {
         menuItem: {
             flexDirection: "row" as const,
             alignItems: "center" as const,
-            paddingVertical: SPACING[4],
+            minHeight: 64,
+            paddingVertical: SPACING[3],
             paddingHorizontal: SPACING[4],
         },
         menuItemBorder: {
@@ -147,7 +186,7 @@ function createStyles(colors: ColorPalette) {
             marginTop: 2,
         },
         signOutBtn: {
-            marginTop: SPACING[2],
+            marginTop: SPACING[1],
             marginBottom: SPACING[4],
         },
         signOutCard: {
@@ -158,7 +197,8 @@ function createStyles(colors: ColorPalette) {
             borderRadius: BORDER_RADIUS["2xl"],
             borderWidth: 1,
             borderColor: colors.error,
-            paddingVertical: SPACING[4],
+            minHeight: 52,
+            paddingVertical: SPACING[3],
             gap: SPACING[2],
         },
         signOutText: {
@@ -215,7 +255,7 @@ function MenuItem({
     onPress,
     isLast = false,
 }: {
-    icon: "bookmark" | "cancel" | "analytics" | "emoji_events" | "leaderboard" | "history" | "settings" | "edit" | "support_agent";
+    icon: MenuIcon;
     title: string;
     subtitle: string;
     onPress: () => void;
@@ -232,6 +272,8 @@ function MenuItem({
                 !isLast ? styles.menuItemBorder : null,
                 pressed ? styles.menuItemPressed : null,
             ]}
+            accessibilityRole="button"
+            accessibilityLabel={title}
         >
             <View style={styles.menuIconWrap}>
                 <MaterialIcon name={icon} size={22} color={colors.primary} />
@@ -275,24 +317,51 @@ export default function ProfileScreen() {
         : 0;
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={["top"]}>
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={styles.header}>
-                    <Avatar
-                        name={user?.full_name || "Student"}
-                        uri={user?.avatar_url}
-                        size={100}
-                        backgroundColor={colors.primary}
-                    />
-                    <Text style={styles.userName}>
-                        {user?.full_name || "Student"}
-                    </Text>
-                    <Text style={styles.userSubtitle}>
-                        {user?.target_class ? `Class ${user.target_class}` : "AISSEE Prep"}
-                    </Text>
+                <View style={styles.identityCard}>
+                    <View style={styles.identityTop}>
+                        <Pressable
+                            onPress={() => router.push("/profile/edit")}
+                            style={({ pressed }) => [
+                                layout.row,
+                                { flex: 1, minWidth: 0, alignItems: "center" },
+                                pressed ? layout.pressed : null,
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel="Edit profile"
+                        >
+                            <Avatar
+                                name={user?.full_name || "Student"}
+                                uri={user?.avatar_url}
+                                size={72}
+                                backgroundColor={colors.primary}
+                            />
+                            <View style={styles.identityCopy}>
+                                <Text style={styles.userName} numberOfLines={1}>
+                                    {user?.full_name || "Student"}
+                                </Text>
+                                <Text style={styles.userSubtitle} numberOfLines={1}>
+                                    {user?.target_class ? `Class ${user.target_class}` : "AISSEE Prep"}
+                                </Text>
+                                <Text style={styles.editHint}>Edit profile</Text>
+                            </View>
+                        </Pressable>
+                        <Pressable
+                            onPress={() => router.push("/profile/settings")}
+                            style={({ pressed }) => [
+                                styles.settingsButton,
+                                pressed ? layout.pressed : null,
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel="Settings"
+                        >
+                            <MaterialIcon name="settings" size={22} color={colors.onSurface} />
+                        </Pressable>
+                    </View>
                     <View style={styles.badges}>
                         <StreakDisplay streak={streak} size="sm" />
                         <XpDisplay xp={xp} level={level} levelName={levelName} size="sm" />
@@ -300,19 +369,19 @@ export default function ProfileScreen() {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>My Progress</Text>
+                    <Text style={styles.sectionTitle}>Today's progress</Text>
                     <View style={styles.statsRow}>
                         <StatCard
                             icon="quiz"
                             variant="questions"
                             value={dailyProgress.questionsAnswered.toString()}
-                            label="Questions"
+                            label="Answered today"
                         />
                         <StatCard
                             icon="trending_up"
                             variant="accuracy"
                             value={`${accuracy}%`}
-                            label="Accuracy"
+                            label="Accuracy today"
                         />
                         <StatCard
                             icon="workspace_premium"
@@ -324,62 +393,57 @@ export default function ProfileScreen() {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>My Learning</Text>
+                    <Text style={styles.sectionTitle}>Study</Text>
                     <View style={styles.menuCard}>
                         <MenuItem
                             icon="bookmark"
                             title="Bookmarks"
-                            subtitle="Your saved questions"
+                            subtitle="Saved questions to revisit"
                             onPress={() => router.push("/profile/bookmarks")}
                         />
                         <MenuItem
                             icon="cancel"
-                            title="My Mistakes"
-                            subtitle="Review incorrect answers"
+                            title="Mistakes"
+                            subtitle="Questions you got wrong"
                             onPress={() => router.push("/profile/mistakes")}
+                        />
+                        <MenuItem
+                            icon="history"
+                            title="Weak topics"
+                            subtitle="Topics that need more practice"
+                            onPress={() => router.push("/profile/revision")}
                         />
                         <MenuItem
                             icon="analytics"
                             title="Performance"
-                            subtitle="Track your progress and stats"
+                            subtitle="Subject scores and trends"
                             onPress={() => router.push("/profile/performance")}
-                        />
-                        <MenuItem
-                            icon="emoji_events"
-                            title="Achievements"
-                            subtitle="Badges and milestones"
-                            onPress={() => router.push("/profile/achievements")}
-                        />
-                        <MenuItem
-                            icon="leaderboard"
-                            title="Leaderboard"
-                            subtitle="See how you rank"
-                            onPress={() => router.push("/profile/leaderboard")}
-                        />
-                        <MenuItem
-                            icon="history"
-                            title="Revision"
-                            subtitle="Review your mistakes"
-                            onPress={() => router.push("/profile/revision")}
                             isLast
                         />
                     </View>
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Settings</Text>
+                    <Text style={styles.sectionTitle}>Rewards</Text>
+                    <View style={styles.menuCard}>
+                        <MenuItem
+                            icon="emoji_events"
+                            title="Achievements"
+                            subtitle="Badges and milestones"
+                            onPress={() => router.push("/profile/achievements")}
+                            isLast
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Account</Text>
                     <View style={styles.menuCard}>
                         <MenuItem
                             icon="settings"
                             title="Settings"
-                            subtitle="Preferences, notifications, privacy"
+                            subtitle="Language, sound, and notifications"
                             onPress={() => router.push("/profile/settings")}
-                        />
-                        <MenuItem
-                            icon="edit"
-                            title="Edit Profile"
-                            subtitle="Update your information"
-                            onPress={() => router.push("/profile/edit")}
                         />
                         <MenuItem
                             icon="support_agent"
@@ -394,6 +458,8 @@ export default function ProfileScreen() {
                 <Pressable
                     onPress={handleSignOut}
                     style={({ pressed }) => [styles.signOutBtn, pressed ? layout.pressed : null]}
+                    accessibilityRole="button"
+                    accessibilityLabel="Sign out"
                 >
                     <View style={styles.signOutCard}>
                         <MaterialIcon name="logout" size={20} color={colors.error} />

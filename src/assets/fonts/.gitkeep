@@ -1,38 +1,4 @@
 # Fonts Directory
 
-This directory contains custom font files for the AISSEE Preparation app.
-
-## Recommended Font: Plus Jakarta Sans
-Based on the Stitch Design System, we use **Plus Jakarta Sans** across all typography levels for its modern, friendly, and geometric proportions.
-
-## Required Font Weights
-Download from Google Fonts and place here:
-- PlusJakartaSans-Regular.ttf (400)
-- PlusJakartaSans-Medium.ttf (500)
-- PlusJakartaSans-SemiBold.ttf (600)
-- PlusJakartaSans-Bold.ttf (700)
-- PlusJakartaSans-ExtraBold.ttf (800)
-
-## Configuration
-After placing font files, update your `package.json`:
-```json
-"expo": {
-  "fonts": [
-    "./src/assets/fonts/PlusJakartaSans-Regular.ttf",
-    "./src/assets/fonts/PlusJakartaSans-Medium.ttf",
-    "./src/assets/fonts/PlusJakartaSans-SemiBold.ttf",
-    "./src/assets/fonts/PlusJakartaSans-Bold.ttf",
-    "./src/assets/fonts/PlusJakartaSans-ExtraBold.ttf"
-  ]
-}
-```
-
-Then load fonts in `App.tsx`:
-```tsx
-import * as Font from "expo-font";
-await Font.loadAsync({
-  PlusJakartaSans_400Regular: require("./assets/fonts/PlusJakartaSans-Regular.ttf"),
-  PlusJakartaSans_500Medium: require("./assets/fonts/PlusJakartaSans-Medium.ttf"),
-  // etc.
-});
-```
+The app loads Nunito at runtime from `@expo-google-fonts/nunito`
+(400, 500, 600, 700, 800). Family names live in `src/constants/index.ts`.

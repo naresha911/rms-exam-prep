@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Text, View, ViewStyle } from 'react-native';
-import { BORDER_RADIUS } from '../../constants';
+import { BORDER_RADIUS, TYPOGRAPHY } from '../../constants';
 import { layout, useColors, useThemedStyles, type ColorPalette } from '../../theme';
 import { MaterialIcon } from '../ui/MaterialIcon';
 import type { PaperListStatus } from '../../types';
@@ -30,7 +30,7 @@ function createStyles(colors: ColorPalette) {
             borderWidth: 1,
         },
         text: {
-            fontFamily: 'PlusJakartaSans_600SemiBold',
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 10,
             fontWeight: '600' as const,
         },

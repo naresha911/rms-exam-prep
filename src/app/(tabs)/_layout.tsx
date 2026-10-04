@@ -7,7 +7,7 @@ import { useColors, useThemedStyles, type ColorPalette } from "../../theme";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
 
 interface TabIconProps {
-  icon: "home" | "menu_book" | "assignment" | "history_edu" | "person";
+  icon: "home" | "assignment" | "history_edu" | "person";
   focused: boolean;
 }
 
@@ -26,7 +26,7 @@ function createTabStyles(_colors: ColorPalette) {
     label: {
       fontSize: TYPOGRAPHY.fontSize.xs,
       fontWeight: "600" as const,
-      fontFamily: "PlusJakartaSans_600SemiBold",
+      fontFamily: TYPOGRAPHY.fontFamily.semibold,
       marginTop: 0,
     },
   };
@@ -73,7 +73,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ focused }) => <TabIcon icon="home" focused={focused} /> }} />
-      <Tabs.Screen name="practice" options={{ title: "Learn", tabBarIcon: ({ focused }) => <TabIcon icon="menu_book" focused={focused} /> }} />
+      <Tabs.Screen name="practice" options={{ href: null }} />
       <Tabs.Screen
         name="tests"
         options={{ title: "Mock Tests", tabBarIcon: ({ focused }) => <TabIcon icon="assignment" focused={focused} /> }}

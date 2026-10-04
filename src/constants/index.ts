@@ -4,15 +4,15 @@
 export type { Appearance, ColorPalette } from '../theme/palette';
 export { darkColors, lightColors, paletteFor } from '../theme/palette';
 
-// Typography - Plus Jakarta Sans (Stitch Design System)
+// Typography - Nunito (rounded, high x-height; easier for younger readers)
 export const TYPOGRAPHY = {
     // Font Families
     fontFamily: {
-        regular: 'PlusJakartaSans_400Regular',
-        medium: 'PlusJakartaSans_500Medium',
-        semibold: 'PlusJakartaSans_600SemiBold',
-        bold: 'PlusJakartaSans_700Bold',
-        extrabold: 'PlusJakartaSans_800ExtraBold',
+        regular: 'Nunito_400Regular',
+        medium: 'Nunito_500Medium',
+        semibold: 'Nunito_600SemiBold',
+        bold: 'Nunito_700Bold',
+        extrabold: 'Nunito_800ExtraBold',
     },
 
     // Font Sizes
@@ -47,51 +47,51 @@ export const TYPOGRAPHY = {
 
     // Stitch Design System Typography Scale
     displayLg: {
-        fontFamily: 'PlusJakartaSans_800ExtraBold',
+        fontFamily: 'Nunito_800ExtraBold',
         fontSize: 40,
         lineHeight: 48,
         letterSpacing: -0.02,
         fontWeight: '800' as const,
     },
     headlineLg: {
-        fontFamily: 'PlusJakartaSans_700Bold',
+        fontFamily: 'Nunito_700Bold',
         fontSize: 32,
         lineHeight: 40,
         fontWeight: '700' as const,
     },
     headlineLgMobile: {
-        fontFamily: 'PlusJakartaSans_700Bold',
+        fontFamily: 'Nunito_700Bold',
         fontSize: 24,
         lineHeight: 32,
         fontWeight: '700' as const,
     },
     headlineMd: {
-        fontFamily: 'PlusJakartaSans_700Bold',
+        fontFamily: 'Nunito_700Bold',
         fontSize: 24,
         lineHeight: 32,
         fontWeight: '700' as const,
     },
     bodyLg: {
-        fontFamily: 'PlusJakartaSans_500Medium',
+        fontFamily: 'Nunito_500Medium',
         fontSize: 18,
         lineHeight: 28,
         fontWeight: '500' as const,
     },
     bodyMd: {
-        fontFamily: 'PlusJakartaSans_400Regular',
+        fontFamily: 'Nunito_400Regular',
         fontSize: 16,
         lineHeight: 24,
         fontWeight: '400' as const,
     },
     labelLg: {
-        fontFamily: 'PlusJakartaSans_600SemiBold',
+        fontFamily: 'Nunito_600SemiBold',
         fontSize: 16,
         lineHeight: 20,
         letterSpacing: 0.01,
         fontWeight: '600' as const,
     },
     labelSm: {
-        fontFamily: 'PlusJakartaSans_600SemiBold',
+        fontFamily: 'Nunito_600SemiBold',
         fontSize: 12,
         lineHeight: 16,
         fontWeight: '600' as const,

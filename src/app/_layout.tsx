@@ -24,12 +24,12 @@ import { initAnalytics, identifyUser, trackScreen } from '../lib/analytics';
 import { initMathJax } from '../lib/mathjax';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import {
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
-} from '@expo-google-fonts/plus-jakarta-sans';
+    Nunito_400Regular,
+    Nunito_500Medium,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
+} from '@expo-google-fonts/nunito';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync().catch(() => { });
@@ -55,11 +55,11 @@ export default function RootLayout() {
     );
 
     const [fontsLoaded] = useFonts({
-        PlusJakartaSans_400Regular,
-        PlusJakartaSans_500Medium,
-        PlusJakartaSans_600SemiBold,
-        PlusJakartaSans_700Bold,
-        PlusJakartaSans_800ExtraBold,
+        Nunito_400Regular,
+        Nunito_500Medium,
+        Nunito_600SemiBold,
+        Nunito_700Bold,
+        Nunito_800ExtraBold,
     });
 
     // Fallback: if fonts don't load within 5 seconds, proceed anyway
