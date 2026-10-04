@@ -2,10 +2,11 @@
 // Colored circle icon + subject name + bold percentage.
 // Matches stitch_screens/mock_test_result_analysis/code.html lines 238–266.
 
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
-import { MaterialIcon, MaterialIconName } from "../ui/MaterialIcon";
+import React, { useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { SPACING, TYPOGRAPHY } from '../../constants';
+import { layout, useThemedStyles, type ColorPalette } from '../../theme';
+import { MaterialIcon, MaterialIconName } from '../ui/MaterialIcon';
 
 interface SectionPerformanceCardProps {
     icon: MaterialIconName;
@@ -16,6 +17,36 @@ interface SectionPerformanceCardProps {
     style?: any;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            padding: SPACING[4],
+            backgroundColor: colors.surfaceContainerLowest,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            borderRadius: SPACING[3],
+            gap: SPACING[3],
+        },
+        iconWrap: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+        },
+        subject: {
+            flex: 1,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+        percentage: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize['2xl'],
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+    };
+}
+
 export const SectionPerformanceCard: React.FC<SectionPerformanceCardProps> = ({
     icon,
     iconBg,
@@ -24,49 +55,25 @@ export const SectionPerformanceCard: React.FC<SectionPerformanceCardProps> = ({
     percentage,
     style,
 }) => {
+    const styles = useThemedStyles(createStyles);
+    const dynamic = useMemo(
+        () =>
+            StyleSheet.create({
+                iconWrap: { backgroundColor: iconBg },
+                percentage: { color: iconColor },
+            }),
+        [iconBg, iconColor],
+    );
+
     return (
-        <View style={[styles.container, style]}>
-            <View style={[styles.iconWrap, { backgroundColor: iconBg }]}>
+        <View style={[layout.row, styles.container, style]}>
+            <View style={[layout.center, styles.iconWrap, dynamic.iconWrap]}>
                 <MaterialIcon name={icon} size={20} color={iconColor} />
             </View>
             <Text style={styles.subject}>{subject}</Text>
-            <Text style={[styles.percentage, { color: iconColor }]}>
-                {Math.round(percentage)}%
-            </Text>
+            <Text style={[styles.percentage, dynamic.percentage]}>{Math.round(percentage)}%</Text>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: SPACING[4],
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        borderRadius: SPACING[3],
-        gap: SPACING[3],
-    },
-    iconWrap: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    subject: {
-        flex: 1,
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        fontWeight: "600",
-    },
-    percentage: {
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: TYPOGRAPHY.fontSize["2xl"],
-        fontWeight: "700",
-    },
-});
 
 export default SectionPerformanceCard;

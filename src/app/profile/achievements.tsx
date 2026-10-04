@@ -3,7 +3,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, BADGES } from "../../constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, BADGES } from "../../constants";
+import { layout, useThemedStyles, type ColorPalette } from "../../theme";
 
 interface BadgeDef {
     id: string;
@@ -14,10 +15,156 @@ interface BadgeDef {
     earnedDate?: string;
 }
 
-export default function AchievementsScreen() {
-    const { badges, dailyProgress, streak } = useAppStore();
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            backgroundColor: colors.background,
+        },
+        scrollContent: {
+            padding: SPACING[5],
+        },
+        header: {
+            alignItems: "center" as const,
+            marginBottom: SPACING[5],
+        },
+        title: {
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            fontWeight: "800" as const,
+            color: colors.textPrimary,
+            marginTop: SPACING[3],
+        },
+        countRow: {
+            marginTop: SPACING[2],
+            gap: SPACING[2],
+        },
+        earnedPill: {
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[1],
+            backgroundColor: colors.successLight,
+            borderRadius: BORDER_RADIUS.full,
+        },
+        earnedPillText: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontWeight: "700" as const,
+            color: colors.success,
+        },
+        totalText: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.textSecondary,
+        },
+        progressCard: {
+            marginBottom: SPACING[5],
+        },
+        progressInner: {
+            alignItems: "center" as const,
+        },
+        ringOuter: {
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            borderWidth: 12,
+            borderColor: colors.surfaceContainer,
+        },
+        ringInner: {
+            width: 96,
+            height: 96,
+            borderRadius: 48,
+            borderWidth: 12,
+            borderColor: colors.primary,
+            borderTopColor: "transparent" as const,
+            transform: [{ rotate: "45deg" }],
+        },
+        ringLabel: {
+            position: "absolute" as const,
+            alignItems: "center" as const,
+        },
+        ringValue: {
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            fontWeight: "800" as const,
+            color: colors.textPrimary,
+        },
+        progressCaption: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.textSecondary,
+            marginTop: SPACING[3],
+        },
+        sectionTitle: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: "700" as const,
+            color: colors.textPrimary,
+            marginBottom: SPACING[3],
+        },
+        earnedGrid: {
+            flexDirection: "row" as const,
+            flexWrap: "wrap" as const,
+            gap: SPACING[3],
+            marginBottom: SPACING[5],
+        },
+        earnedTile: {
+            width: "31%" as const,
+            aspectRatio: 1,
+        },
+        earnedCard: {
+            height: "100%" as const,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            backgroundColor: colors.successLight,
+        },
+        badgeEmoji: {
+            fontSize: 40,
+        },
+        badgeName: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: "700" as const,
+            color: colors.textPrimary,
+            marginTop: SPACING[1],
+            textAlign: "center" as const,
+        },
+        badgeDate: {
+            fontSize: 10,
+            color: colors.textTertiary,
+            marginTop: 2,
+        },
+        lockedCard: {
+            marginBottom: SPACING[3],
+        },
+        lockedIcon: {
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: colors.surfaceContainer,
+            marginRight: SPACING[4],
+            opacity: 0.6,
+        },
+        lockEmoji: {
+            fontSize: 28,
+        },
+        lockedBody: {
+            flex: 1,
+        },
+        lockedName: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: "700" as const,
+            color: colors.textPrimary,
+        },
+        lockedDescription: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.textSecondary,
+            marginTop: 2,
+        },
+        lockedHint: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.primary,
+            marginTop: SPACING[2],
+            fontWeight: "500" as const,
+        },
+    };
+}
 
-    // Merge badge definitions with store-earned badges
+export default function AchievementsScreen() {
+    const styles = useThemedStyles(createStyles);
+    const { badges } = useAppStore();
+
     const allBadges: BadgeDef[] = BADGES.map((def) => {
         const storeBadge = badges.find((b) => b.id === def.id);
         return {
@@ -33,179 +180,52 @@ export default function AchievementsScreen() {
     const unearnedBadges = allBadges.filter((b) => !b.earned);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <SafeAreaView style={[layout.fill, styles.screen]}>
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[5] }}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
-                <View style={{ alignItems: "center", marginBottom: SPACING[5] }}>
+                <View style={styles.header}>
                     <MascotDisplay expression="victory" size={120} showBackground />
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                            fontWeight: "800",
-                            color: COLORS.textPrimary,
-                            marginTop: SPACING[3],
-                        }}
-                    >
-                        Badges & Achievements
-                    </Text>
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            marginTop: SPACING[2],
-                            gap: SPACING[2],
-                        }}
-                    >
-                        <View
-                            style={{
-                                paddingHorizontal: SPACING[4],
-                                paddingVertical: SPACING[1],
-                                backgroundColor: COLORS.successLight,
-                                borderRadius: BORDER_RADIUS.full,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    fontWeight: "700",
-                                    color: COLORS.success,
-                                }}
-                            >
-                                {earnedBadges.length} Earned
-                            </Text>
+                    <Text style={styles.title}>Badges & Achievements</Text>
+                    <View style={[layout.row, styles.countRow]}>
+                        <View style={styles.earnedPill}>
+                            <Text style={styles.earnedPillText}>{earnedBadges.length} Earned</Text>
                         </View>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                color: COLORS.textSecondary,
-                            }}
-                        >
-                            of {allBadges.length} total
-                        </Text>
+                        <Text style={styles.totalText}>of {allBadges.length} total</Text>
                     </View>
                 </View>
 
-                {/* Progress Ring */}
-                <Card variant="elevated" style={{ marginBottom: SPACING[5] }}>
-                    <View style={{ alignItems: "center" }}>
-                        <View
-                            style={{
-                                width: 120,
-                                height: 120,
-                                borderRadius: 60,
-                                borderWidth: 12,
-                                borderColor: COLORS.surfaceContainer,
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <View
-                                style={{
-                                    width: 96,
-                                    height: 96,
-                                    borderRadius: 48,
-                                    borderWidth: 12,
-                                    borderColor: COLORS.primary,
-                                    borderTopColor: "transparent",
-                                    transform: [{ rotate: "45deg" }],
-                                }}
-                            />
-                            <View
-                                style={{
-                                    position: "absolute",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                        fontWeight: "800",
-                                        color: COLORS.textPrimary,
-                                    }}
-                                >
+                <Card variant="elevated" style={styles.progressCard}>
+                    <View style={styles.progressInner}>
+                        <View style={[layout.center, styles.ringOuter]}>
+                            <View style={styles.ringInner} />
+                            <View style={styles.ringLabel}>
+                                <Text style={styles.ringValue}>
                                     {allBadges.length > 0
                                         ? Math.round((earnedBadges.length / allBadges.length) * 100)
                                         : 0}%
                                 </Text>
                             </View>
                         </View>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.base,
-                                color: COLORS.textSecondary,
-                                marginTop: SPACING[3],
-                            }}
-                        >
-                            Collection Progress
-                        </Text>
+                        <Text style={styles.progressCaption}>Collection Progress</Text>
                     </View>
                 </Card>
 
-                {/* Earned Badges */}
                 {earnedBadges.length > 0 && (
                     <>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.lg,
-                                fontWeight: "700",
-                                color: COLORS.textPrimary,
-                                marginBottom: SPACING[3],
-                            }}
-                        >
-                            Earned Badges
-                        </Text>
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                flexWrap: "wrap",
-                                gap: SPACING[3],
-                                marginBottom: SPACING[5],
-                            }}
-                        >
+                        <Text style={styles.sectionTitle}>Earned Badges</Text>
+                        <View style={styles.earnedGrid}>
                             {earnedBadges.map((badge) => (
-                                <Pressable
-                                    key={badge.id}
-                                    style={{
-                                        width: "31%",
-                                        aspectRatio: 1,
-                                    }}
-                                >
-                                    <Card
-                                        variant="elevated"
-                                        style={{
-                                            height: "100%",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            backgroundColor: COLORS.successLight,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 40 }}>{badge.icon}</Text>
-                                        <Text
-                                            style={{
-                                                fontSize: TYPOGRAPHY.fontSize.xs,
-                                                fontWeight: "700",
-                                                color: COLORS.textPrimary,
-                                                marginTop: SPACING[1],
-                                                textAlign: "center",
-                                            }}
-                                            numberOfLines={2}
-                                        >
+                                <Pressable key={badge.id} style={styles.earnedTile}>
+                                    <Card variant="elevated" style={styles.earnedCard}>
+                                        <Text style={styles.badgeEmoji}>{badge.icon}</Text>
+                                        <Text style={styles.badgeName} numberOfLines={2}>
                                             {badge.name}
                                         </Text>
-                                        {badge.earnedDate && (
-                                            <Text
-                                                style={{
-                                                    fontSize: 10,
-                                                    color: COLORS.textTertiary,
-                                                    marginTop: 2,
-                                                }}
-                                            >
-                                                {badge.earnedDate}
-                                            </Text>
-                                        )}
+                                        {badge.earnedDate ? (
+                                            <Text style={styles.badgeDate}>{badge.earnedDate}</Text>
+                                        ) : null}
                                     </Card>
                                 </Pressable>
                             ))}
@@ -213,72 +233,19 @@ export default function AchievementsScreen() {
                     </>
                 )}
 
-                {/* Locked Badges */}
                 {unearnedBadges.length > 0 && (
                     <>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.lg,
-                                fontWeight: "700",
-                                color: COLORS.textPrimary,
-                                marginBottom: SPACING[3],
-                            }}
-                        >
-                            Badges in Progress
-                        </Text>
+                        <Text style={styles.sectionTitle}>Badges in Progress</Text>
                         {unearnedBadges.map((badge) => (
-                            <Card key={badge.id} variant="elevated" style={{ marginBottom: SPACING[3] }}>
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                    {/* Badge Icon */}
-                                    <View
-                                        style={{
-                                            width: 56,
-                                            height: 56,
-                                            borderRadius: 28,
-                                            backgroundColor: COLORS.surfaceContainer,
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginRight: SPACING[4],
-                                            opacity: 0.6,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 28 }}>🔒</Text>
+                            <Card key={badge.id} variant="elevated" style={styles.lockedCard}>
+                                <View style={layout.row}>
+                                    <View style={[layout.center, styles.lockedIcon]}>
+                                        <Text style={styles.lockEmoji}>🔒</Text>
                                     </View>
-
-                                    {/* Badge Info */}
-                                    <View style={{ flex: 1 }}>
-                                        <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING[2] }}>
-                                            <Text
-                                                style={{
-                                                    fontSize: TYPOGRAPHY.fontSize.base,
-                                                    fontWeight: "700",
-                                                    color: COLORS.textPrimary,
-                                                }}
-                                            >
-                                                {badge.name}
-                                            </Text>
-                                        </View>
-                                        <Text
-                                            style={{
-                                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                                color: COLORS.textSecondary,
-                                                marginTop: 2,
-                                            }}
-                                        >
-                                            {badge.description}
-                                        </Text>
-
-                                        {/* Hint text */}
-                                        <Text
-                                            style={{
-                                                fontSize: TYPOGRAPHY.fontSize.xs,
-                                                color: COLORS.primary,
-                                                marginTop: SPACING[2],
-                                                fontWeight: "500",
-                                            }}
-                                        >
-                                            {getHint(badge.id)}
-                                        </Text>
+                                    <View style={styles.lockedBody}>
+                                        <Text style={styles.lockedName}>{badge.name}</Text>
+                                        <Text style={styles.lockedDescription}>{badge.description}</Text>
+                                        <Text style={styles.lockedHint}>{getHint(badge.id)}</Text>
                                     </View>
                                 </View>
                             </Card>

@@ -1,10 +1,18 @@
 import React from 'react';
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../constants';
+import {
+    layout,
+    optionChrome,
+    useColors,
+    useThemedStyles,
+    type ColorPalette,
+    type OptionVisualState,
+} from '../../theme';
 import { MaterialIcon } from '../ui/MaterialIcon';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants';
 import { LatexText } from './LatexText';
 import type { QuestionOption } from '../../types';
-import type { OptionUiState, QuestionUiMode, SelectionMode } from './types';
+import type { QuestionUiMode, SelectionMode } from './types';
 import { deriveOptionState, shouldShowCorrectCheck } from './optionState';
 import { getOptionValue } from './resolvePresentation';
 
@@ -18,21 +26,99 @@ export interface FigureOptionTileProps {
     onSelect?: (value: string) => void;
 }
 
-const STATE_BORDER: Record<OptionUiState, string> = {
-    default: COLORS.outlineVariant,
-    selected: COLORS.primary,
-    correct: COLORS.success,
-    incorrect: COLORS.error,
-    disabled: COLORS.outlineVariant,
-};
+function createStyles(colors: ColorPalette) {
+    const chrome = optionChrome(colors);
+    const surface = (state: OptionVisualState) => ({
+        backgroundColor: chrome[state].background,
+        borderColor: chrome[state].border,
+    });
+    const letter = (state: OptionVisualState) => ({
+        backgroundColor: chrome[state].letterBackground,
+    });
+    const letterText = (state: OptionVisualState) => ({ color: chrome[state].letterColor });
 
-const STATE_BG: Record<OptionUiState, string> = {
-    default: COLORS.surfaceContainerLow,
-    selected: COLORS.primaryFixed,
-    correct: COLORS.successLight,
-    incorrect: COLORS.errorLight,
-    disabled: COLORS.surfaceContainer,
-};
+    return {
+        tile: {
+            flex: 1,
+            minHeight: 112,
+            borderWidth: 2,
+            borderRadius: BORDER_RADIUS.xl,
+            padding: SPACING[2],
+            alignItems: 'center' as const,
+            gap: SPACING[2],
+        },
+        letter: {
+            alignSelf: 'flex-start' as const,
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            alignItems: 'center' as const,
+            justifyContent: 'center' as const,
+        },
+        letterText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: 12,
+            fontWeight: '700' as const,
+        },
+        plate: {
+            width: '100%' as const,
+            height: 72,
+            borderRadius: BORDER_RADIUS.lg,
+            backgroundColor: colors.figurePlate,
+            alignItems: 'center' as const,
+            justifyContent: 'center' as const,
+            padding: SPACING[1],
+        },
+        image: {
+            width: '100%' as const,
+            height: '100%' as const,
+        },
+        check: {
+            position: 'absolute' as const,
+            top: 8,
+            right: 8,
+        },
+        surfaceDefault: surface('default'),
+        surfaceSelected: surface('selected'),
+        surfaceCorrect: surface('correct'),
+        surfaceIncorrect: surface('incorrect'),
+        surfaceDisabled: surface('disabled'),
+        letterDefault: letter('default'),
+        letterSelected: letter('selected'),
+        letterCorrect: letter('correct'),
+        letterIncorrect: letter('incorrect'),
+        letterDisabled: letter('disabled'),
+        letterTextDefault: letterText('default'),
+        letterTextSelected: letterText('selected'),
+        letterTextCorrect: letterText('correct'),
+        letterTextIncorrect: letterText('incorrect'),
+        letterTextDisabled: letterText('disabled'),
+    };
+}
+
+const SURFACE = {
+    default: 'surfaceDefault',
+    selected: 'surfaceSelected',
+    correct: 'surfaceCorrect',
+    incorrect: 'surfaceIncorrect',
+    disabled: 'surfaceDisabled',
+} as const;
+
+const LETTER = {
+    default: 'letterDefault',
+    selected: 'letterSelected',
+    correct: 'letterCorrect',
+    incorrect: 'letterIncorrect',
+    disabled: 'letterDisabled',
+} as const;
+
+const LETTER_TEXT = {
+    default: 'letterTextDefault',
+    selected: 'letterTextSelected',
+    correct: 'letterTextCorrect',
+    incorrect: 'letterTextIncorrect',
+    disabled: 'letterTextDisabled',
+} as const;
 
 export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
     option,
@@ -43,6 +129,8 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
     browseRevealed,
     onSelect,
 }) => {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const value = getOptionValue(option, selectionMode);
     const state = deriveOptionState({
         option,
@@ -55,106 +143,43 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
     const disabledReveal =
         (mode === 'browse' && browseRevealed) || (mode !== 'browse' && !!revealed);
     const showCheck = shouldShowCorrectCheck(option, mode, revealed, browseRevealed);
-    const uri = option.option_image_path;
 
     return (
         <Pressable
-            onPress={
-                !disabledReveal && onSelect ? () => onSelect(value) : undefined
-            }
+            onPress={!disabledReveal && onSelect ? () => onSelect(value) : undefined}
             style={({ pressed }) => [
                 styles.tile,
-                {
-                    backgroundColor: STATE_BG[state],
-                    borderColor: STATE_BORDER[state],
-                    opacity: pressed && !disabledReveal ? 0.85 : 1,
-                },
+                styles[SURFACE[state]],
+                pressed && !disabledReveal ? layout.pressed : null,
             ]}
             accessibilityRole="button"
             accessibilityState={{ selected: state === 'selected' }}
         >
-            <View
-                style={[
-                    styles.letter,
-                    {
-                        backgroundColor:
-                            state === 'selected' || state === 'correct'
-                                ? COLORS.primary
-                                : COLORS.surfaceContainerHigh,
-                    },
-                ]}
-            >
-                <Text
-                    style={[
-                        styles.letterText,
-                        {
-                            color:
-                                state === 'selected' || state === 'correct'
-                                    ? COLORS.onPrimary
-                                    : COLORS.onSurface,
-                        },
-                    ]}
-                >
+            <View style={[styles.letter, styles[LETTER[state]]]}>
+                <Text style={[styles.letterText, styles[LETTER_TEXT[state]]]}>
                     {option.option_key.toUpperCase()}
                 </Text>
             </View>
-            {uri ? (
-                <Image source={{ uri }} style={styles.image} resizeMode="contain" />
-            ) : (
-                <View style={styles.fallbackWrap}>
+            <View style={styles.plate}>
+                {option.option_image_path ? (
+                    <Image source={{ uri: option.option_image_path }} style={styles.image} resizeMode="contain" />
+                ) : (
                     <LatexText
                         content={option.option_text || ''}
-                        color={COLORS.onSurface}
-                        fontSize={12}
+                        color={colors.onSurface}
+                        fontSize={13}
                         fontFamily={TYPOGRAPHY.fontFamily.medium}
+                        align="center"
                     />
-                </View>
-            )}
-            {showCheck && (
+                )}
+            </View>
+            {showCheck ? (
                 <View style={styles.check}>
-                    <MaterialIcon name="check_circle" size={18} color={COLORS.success} filled />
+                    <MaterialIcon name="check_circle" size={18} color={colors.success} filled />
                 </View>
-            )}
+            ) : null}
         </Pressable>
     );
 };
-
-const styles = StyleSheet.create({
-    tile: {
-        flex: 1,
-        minHeight: 88,
-        borderWidth: 2,
-        borderRadius: BORDER_RADIUS.xl,
-        padding: SPACING[2],
-        alignItems: 'center',
-        gap: SPACING[2],
-    },
-    letter: {
-        alignSelf: 'flex-start',
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    letterText: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: 12,
-        fontWeight: '700',
-    },
-    image: {
-        width: '100%',
-        height: 56,
-    },
-    fallbackWrap: {
-        width: '100%',
-        alignItems: 'center',
-    },
-    check: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-    },
-});
 
 export default FigureOptionTile;

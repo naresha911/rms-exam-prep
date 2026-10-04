@@ -1,5 +1,5 @@
 // Mistakes Screen - Review incorrectly answered questions
-import { View, Text, FlatList, Pressable, Alert } from "react-native";
+import { View, Text, FlatList, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useCallback } from "react";
@@ -8,16 +8,212 @@ import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAppStore } from "../../store/useAppStore";
 import { fetchMistakes } from "../../lib/supabase";
-import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
+import { SPACING, TYPOGRAPHY } from "../../constants";
 import { LatexText } from "../../components/questions/LatexText";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
 import type { AttemptAnswer, QuestionOption, PracticeQuestion } from "../../types";
 
 interface MistakeItem extends AttemptAnswer {
     questions: PracticeQuestion;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            backgroundColor: colors.background,
+        },
+        header: {
+            padding: SPACING[4],
+            borderBottomWidth: 1,
+            borderBottomColor: colors.cardBorder,
+        },
+        backButton: {
+            padding: SPACING[2],
+        },
+        backIcon: {
+            fontSize: 24,
+            color: colors.textPrimary,
+        },
+        headerTitle: {
+            flex: 1,
+            fontSize: TYPOGRAPHY.fontSize.xl,
+            fontWeight: "700" as const,
+            color: colors.textPrimary,
+            textAlign: "center" as const,
+            marginRight: 40,
+        },
+        listContent: {
+            padding: SPACING[4],
+        },
+        headerBlock: {
+            marginBottom: SPACING[3],
+        },
+        intro: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.textSecondary,
+        },
+        summaryRow: {
+            gap: SPACING[3],
+            marginTop: SPACING[3],
+        },
+        summaryCard: {
+            flex: 1,
+            padding: SPACING[3],
+            borderRadius: 8,
+        },
+        summaryError: {
+            backgroundColor: colors.errorLight,
+        },
+        summaryNeutral: {
+            backgroundColor: colors.backgroundSecondary,
+        },
+        summaryValue: {
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            fontWeight: "800" as const,
+        },
+        summaryValueError: {
+            color: colors.error,
+        },
+        summaryValueNeutral: {
+            color: colors.textPrimary,
+        },
+        summaryLabel: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.textSecondary,
+        },
+        card: {
+            marginBottom: SPACING[3],
+        },
+        tagRow: {
+            marginBottom: SPACING[2],
+        },
+        tag: {
+            paddingHorizontal: SPACING[2],
+            paddingVertical: 4,
+            borderRadius: 4,
+        },
+        subjectTag: {
+            backgroundColor: colors.primaryLight + "30",
+        },
+        tagText: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: "600" as const,
+            textTransform: "capitalize" as const,
+        },
+        subjectTagText: {
+            color: colors.primary,
+        },
+        badgeEasy: {
+            backgroundColor: colors.easy + "20",
+        },
+        badgeMedium: {
+            backgroundColor: colors.medium + "20",
+        },
+        badgeHard: {
+            backgroundColor: colors.hard + "20",
+        },
+        badgeDefault: {
+            backgroundColor: colors.backgroundSecondary,
+        },
+        diffEasy: {
+            color: colors.easy,
+        },
+        diffMedium: {
+            color: colors.medium,
+        },
+        diffHard: {
+            color: colors.hard,
+        },
+        diffDefault: {
+            color: colors.textSecondary,
+        },
+        question: {
+            marginBottom: SPACING[3],
+        },
+        answers: {
+            gap: SPACING[2],
+        },
+        answerBox: {
+            padding: SPACING[2],
+            borderRadius: 8,
+            borderWidth: 1,
+        },
+        wrongBox: {
+            backgroundColor: colors.errorLight,
+            borderColor: colors.error + "40",
+        },
+        rightBox: {
+            backgroundColor: colors.successLight,
+            borderColor: colors.success + "40",
+        },
+        answerEmoji: {
+            fontSize: 16,
+            marginRight: SPACING[2],
+        },
+        answerBody: {
+            flex: 1,
+        },
+        answerCaption: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: "600" as const,
+        },
+        wrongCaption: {
+            color: colors.error,
+        },
+        rightCaption: {
+            color: colors.success,
+        },
+        wrongAnswer: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.textSecondary,
+            marginTop: 2,
+        },
+        rightAnswer: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.success,
+            fontWeight: "600" as const,
+            marginTop: 2,
+        },
+        expandButton: {
+            marginTop: SPACING[3],
+            paddingVertical: SPACING[2],
+        },
+        expandLabel: {
+            color: colors.primary,
+            fontWeight: "600" as const,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+        },
+        explanation: {
+            padding: SPACING[3],
+            backgroundColor: colors.infoLight,
+            borderRadius: 8,
+            marginTop: SPACING[2],
+        },
+        explanationTitle: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.info,
+            fontWeight: "600" as const,
+            marginBottom: 4,
+        },
+        practiceButton: {
+            marginTop: SPACING[3],
+            paddingVertical: SPACING[2],
+            paddingHorizontal: SPACING[3],
+            backgroundColor: colors.primary,
+            borderRadius: 8,
+        },
+        practiceLabel: {
+            color: colors.textInverse,
+            fontWeight: "700" as const,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+        },
+    };
+}
+
 export default function MistakesScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { user } = useAppStore();
     const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -67,12 +263,16 @@ export default function MistakesScreen() {
         return subjectNames[subjectId] || "Unknown";
     };
 
-    const getDifficultyColor = (difficulty: string): string => {
+    const difficultyTone = (difficulty: string) => {
         switch (difficulty) {
-            case "easy": return COLORS.easy;
-            case "medium": return COLORS.medium;
-            case "hard": return COLORS.hard;
-            default: return COLORS.textSecondary;
+            case "easy":
+                return { badge: styles.badgeEasy, text: styles.diffEasy };
+            case "medium":
+                return { badge: styles.badgeMedium, text: styles.diffMedium };
+            case "hard":
+                return { badge: styles.badgeHard, text: styles.diffHard };
+            default:
+                return { badge: styles.badgeDefault, text: styles.diffDefault };
         }
     };
 
@@ -94,190 +294,75 @@ export default function MistakesScreen() {
             : "Answer not available";
 
         const isExpanded = expandedId === item.id;
+        const tone = difficultyTone(question.difficulty);
 
         return (
-            <Card style={{ marginBottom: SPACING[3] }}>
-                {/* Subject & Difficulty Tag */}
-                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: SPACING[2] }}>
-                    <View
-                        style={{
-                            paddingHorizontal: SPACING[2],
-                            paddingVertical: 4,
-                            backgroundColor: COLORS.primaryLight + "30",
-                            borderRadius: 4,
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.xs,
-                                color: COLORS.primary,
-                                fontWeight: "600",
-                            }}
-                        >
+            <Card style={styles.card}>
+                <View style={[layout.rowBetween, styles.tagRow]}>
+                    <View style={[styles.tag, styles.subjectTag]}>
+                        <Text style={[styles.tagText, styles.subjectTagText]}>
                             {getSubjectName(question.subject_id)}
                         </Text>
                     </View>
-                    <View
-                        style={{
-                            paddingHorizontal: SPACING[2],
-                            paddingVertical: 4,
-                            backgroundColor: getDifficultyColor(question.difficulty) + "20",
-                            borderRadius: 4,
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.xs,
-                                color: getDifficultyColor(question.difficulty),
-                                fontWeight: "600",
-                                textTransform: "capitalize",
-                            }}
-                        >
+                    <View style={[styles.tag, tone.badge]}>
+                        <Text style={[styles.tagText, tone.text]}>
                             {question.difficulty}
                         </Text>
                     </View>
                 </View>
 
-                {/* Question */}
                 <LatexText
                     content={questionText}
-                    color={COLORS.textPrimary}
+                    color={colors.textPrimary}
                     fontSize={TYPOGRAPHY.fontSize.base}
                     fontWeight="600"
-                    containerStyle={{ marginBottom: SPACING[3] }}
+                    containerStyle={styles.question}
                 />
 
-                {/* Your Answer vs Correct Answer */}
-                <View style={{ gap: SPACING[2] }}>
-                    {/* Your Answer */}
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            padding: SPACING[2],
-                            borderRadius: 8,
-                            backgroundColor: COLORS.errorLight,
-                            borderWidth: 1,
-                            borderColor: COLORS.error + "40",
-                        }}
-                    >
-                        <Text style={{ fontSize: 16, marginRight: SPACING[2] }}>❌</Text>
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xs,
-                                    color: COLORS.error,
-                                    fontWeight: "600",
-                                }}
-                            >
-                                Your Answer
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    color: COLORS.textSecondary,
-                                    marginTop: 2,
-                                }}
-                            >
-                                {userAnswerText}
-                            </Text>
+                <View style={styles.answers}>
+                    <View style={[layout.row, styles.answerBox, styles.wrongBox]}>
+                        <Text style={styles.answerEmoji}>❌</Text>
+                        <View style={styles.answerBody}>
+                            <Text style={[styles.answerCaption, styles.wrongCaption]}>Your Answer</Text>
+                            <Text style={styles.wrongAnswer}>{userAnswerText}</Text>
                         </View>
                     </View>
 
-                    {/* Correct Answer */}
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            padding: SPACING[2],
-                            borderRadius: 8,
-                            backgroundColor: COLORS.successLight,
-                            borderWidth: 1,
-                            borderColor: COLORS.success + "40",
-                        }}
-                    >
-                        <Text style={{ fontSize: 16, marginRight: SPACING[2] }}>✓</Text>
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xs,
-                                    color: COLORS.success,
-                                    fontWeight: "600",
-                                }}
-                            >
-                                Correct Answer
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.sm,
-                                    color: COLORS.success,
-                                    fontWeight: "600",
-                                    marginTop: 2,
-                                }}
-                            >
-                                {correctAnswer}
-                            </Text>
+                    <View style={[layout.row, styles.answerBox, styles.rightBox]}>
+                        <Text style={styles.answerEmoji}>✓</Text>
+                        <View style={styles.answerBody}>
+                            <Text style={[styles.answerCaption, styles.rightCaption]}>Correct Answer</Text>
+                            <Text style={styles.rightAnswer}>{correctAnswer}</Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Expand for Explanation */}
                 <Pressable
                     onPress={() => toggleExpand(item.id)}
-                    style={{
-                        marginTop: SPACING[3],
-                        paddingVertical: SPACING[2],
-                        alignItems: "center",
-                    }}
+                    style={({ pressed }) => [layout.center, styles.expandButton, pressed ? layout.pressed : null]}
                 >
-                    <Text style={{ color: COLORS.primary, fontWeight: "600", fontSize: TYPOGRAPHY.fontSize.sm }}>
+                    <Text style={styles.expandLabel}>
                         {isExpanded ? "▲ Hide Explanation" : "▼ Show Explanation"}
                     </Text>
                 </Pressable>
 
-                {isExpanded && explanation && (
-                    <View
-                        style={{
-                            padding: SPACING[3],
-                            backgroundColor: COLORS.infoLight,
-                            borderRadius: 8,
-                            marginTop: SPACING[2],
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                color: COLORS.info,
-                                fontWeight: "600",
-                                marginBottom: 4,
-                            }}
-                        >
-                            💡 Why is this the correct answer?
-                        </Text>
-                    <LatexText
-                        content={explanation}
-                        color={COLORS.textSecondary}
-                        fontSize={TYPOGRAPHY.fontSize.sm}
-                        lineHeight={20}
-                    />
+                {isExpanded && explanation ? (
+                    <View style={styles.explanation}>
+                        <Text style={styles.explanationTitle}>💡 Why is this the correct answer?</Text>
+                        <LatexText
+                            content={explanation}
+                            color={colors.textSecondary}
+                            fontSize={TYPOGRAPHY.fontSize.sm}
+                            lineHeight={20}
+                        />
                     </View>
-                )}
+                ) : null}
 
-                {/* Practice Again Button */}
                 <Pressable
                     onPress={() => handlePracticeAgain(question)}
-                    style={{
-                        marginTop: SPACING[3],
-                        paddingVertical: SPACING[2],
-                        paddingHorizontal: SPACING[3],
-                        backgroundColor: COLORS.primary,
-                        borderRadius: 8,
-                        alignItems: "center",
-                    }}
+                    style={({ pressed }) => [layout.center, styles.practiceButton, pressed ? layout.pressed : null]}
                 >
-                    <Text style={{ color: COLORS.textInverse, fontWeight: "700", fontSize: TYPOGRAPHY.fontSize.sm }}>
-                        📝 Practice This Question Again
-                    </Text>
+                    <Text style={styles.practiceLabel}>📝 Practice This Question Again</Text>
                 </Pressable>
             </Card>
         );
@@ -285,13 +370,12 @@ export default function MistakesScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+            <SafeAreaView style={[layout.fill, styles.screen]}>
                 <LoadingSpinner message="Loading mistakes..." />
             </SafeAreaView>
         );
     }
 
-    // Group mistakes by subject
     const mistakesBySubject = mistakes.reduce((acc, mistake) => {
         const subjectId = mistake.questions.subject_id;
         const subjectName = getSubjectName(subjectId);
@@ -303,32 +387,15 @@ export default function MistakesScreen() {
     }, {} as Record<string, MistakeItem[]>);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
-            {/* Header */}
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: SPACING[4],
-                    borderBottomWidth: 1,
-                    borderBottomColor: COLORS.cardBorder,
-                }}
-            >
-                <Pressable onPress={() => router.back()} style={{ padding: SPACING[2] }}>
-                    <Text style={{ fontSize: 24 }}>←</Text>
-                </Pressable>
-                <Text
-                    style={{
-                        flex: 1,
-                        fontSize: TYPOGRAPHY.fontSize.xl,
-                        fontWeight: "700",
-                        color: COLORS.textPrimary,
-                        textAlign: "center",
-                        marginRight: 40,
-                    }}
+        <SafeAreaView style={[layout.fill, styles.screen]}>
+            <View style={[layout.row, styles.header]}>
+                <Pressable
+                    onPress={() => router.back()}
+                    style={({ pressed }) => [styles.backButton, pressed ? layout.pressed : null]}
                 >
-                    ❌ My Mistakes
-                </Text>
+                    <Text style={styles.backIcon}>←</Text>
+                </Pressable>
+                <Text style={styles.headerTitle}>❌ My Mistakes</Text>
             </View>
 
             {mistakes.length === 0 ? (
@@ -342,78 +409,23 @@ export default function MistakesScreen() {
                     data={mistakes}
                     renderItem={renderMistakeItem}
                     keyExtractor={item => item.id}
-                    contentContainerStyle={{ padding: SPACING[4] }}
+                    contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
                     ListHeaderComponent={
-                        <View style={{ marginBottom: SPACING[3] }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.base,
-                                    color: COLORS.textSecondary,
-                                }}
-                            >
+                        <View style={styles.headerBlock}>
+                            <Text style={styles.intro}>
                                 Review questions you answered incorrectly. Understanding your mistakes helps you improve!
                             </Text>
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    gap: SPACING[3],
-                                    marginTop: SPACING[3],
-                                }}
-                            >
-                                <View
-                                    style={{
-                                        flex: 1,
-                                        padding: SPACING[3],
-                                        backgroundColor: COLORS.errorLight,
-                                        borderRadius: 8,
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                            fontWeight: "800",
-                                            color: COLORS.error,
-                                        }}
-                                    >
-                                        {mistakes.length}
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.xs,
-                                            color: COLORS.textSecondary,
-                                        }}
-                                    >
-                                        Total Mistakes
-                                    </Text>
+                            <View style={[layout.row, styles.summaryRow]}>
+                                <View style={[layout.center, styles.summaryCard, styles.summaryError]}>
+                                    <Text style={[styles.summaryValue, styles.summaryValueError]}>{mistakes.length}</Text>
+                                    <Text style={styles.summaryLabel}>Total Mistakes</Text>
                                 </View>
-                                <View
-                                    style={{
-                                        flex: 1,
-                                        padding: SPACING[3],
-                                        backgroundColor: COLORS.backgroundSecondary,
-                                        borderRadius: 8,
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                            fontWeight: "800",
-                                            color: COLORS.textPrimary,
-                                        }}
-                                    >
+                                <View style={[layout.center, styles.summaryCard, styles.summaryNeutral]}>
+                                    <Text style={[styles.summaryValue, styles.summaryValueNeutral]}>
                                         {Object.keys(mistakesBySubject).length}
                                     </Text>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.xs,
-                                            color: COLORS.textSecondary,
-                                        }}
-                                    >
-                                        Subjects
-                                    </Text>
+                                    <Text style={styles.summaryLabel}>Subjects</Text>
                                 </View>
                             </View>
                         </View>

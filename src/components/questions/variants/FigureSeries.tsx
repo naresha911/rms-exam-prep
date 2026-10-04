@@ -1,48 +1,93 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { Image, Text, View } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../../constants';
+import { useColors, useThemedStyles, type ColorPalette } from '../../../theme';
 import { QuestionCardShell } from '../QuestionCardShell';
 import { FigureOptionTile } from '../FigureOptionTile';
 import { StemText } from '../StemText';
 import { shellFromShared } from '../shellHelpers';
 import { MaterialIcon } from '../../ui/MaterialIcon';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../../constants';
 import type { SharedQuestionProps } from '../types';
 
-/** Non-verbal intelligence — problem figures + figure option grid. */
+function createStyles(colors: ColorPalette) {
+    return {
+        panel: {
+            backgroundColor: colors.surfaceContainerLow,
+            borderRadius: BORDER_RADIUS.xl,
+            padding: SPACING[3],
+            gap: SPACING[2],
+        },
+        label: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: 12,
+            fontWeight: '700' as const,
+            color: colors.onSurfaceVariant,
+        },
+        row: {
+            flexDirection: 'row' as const,
+            gap: SPACING[2],
+        },
+        cell: {
+            flex: 1,
+            aspectRatio: 1,
+            backgroundColor: colors.figurePlate,
+            borderRadius: BORDER_RADIUS.lg,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            alignItems: 'center' as const,
+            justifyContent: 'center' as const,
+            padding: SPACING[1],
+        },
+        image: {
+            width: '100%' as const,
+            height: '100%' as const,
+        },
+        optionGrid: {
+            flexDirection: 'row' as const,
+            flexWrap: 'wrap' as const,
+            marginHorizontal: -SPACING[1],
+        },
+        optionCell: {
+            width: '50%' as const,
+            padding: SPACING[1],
+        },
+    };
+}
+
+/** Non-verbal series: problem figures, then square option tiles. */
 export const FigureSeries: React.FC<SharedQuestionProps> = (props) => {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const shell = shellFromShared(props);
-    const problemUris = props.question.presentationHints?.problemFigureUris ?? [];
+    const problemUris = (props.question.presentationHints?.problemFigureUris ?? []).filter(Boolean);
     const browseRevealed =
         props.mode === 'browse' &&
         (props.solveStatus === 'correct' || props.solveStatus === 'incorrect');
-
-    // Pad to 4 cells; last often (?)
-    const cells = [...problemUris];
-    while (cells.length < 4) cells.push('');
-
+    const cells = problemUris.length > 0 && problemUris.length < 4
+        ? [...problemUris, '']
+        : problemUris.slice(0, 4);
     const sortedOptions = [...props.question.options].sort(
         (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
     );
 
     return (
         <QuestionCardShell {...shell} stem={<StemText>{props.question.question_text || ''}</StemText>}>
-            <View style={styles.problemPanel}>
-                <Text style={styles.panelLabel}>Problem Figures</Text>
-                <View style={styles.problemGrid}>
-                    {cells.slice(0, 4).map((uri, i) => (
-                        <View key={i} style={styles.problemCell}>
-                            {uri ? (
-                                <Image source={{ uri }} style={styles.problemImage} resizeMode="contain" />
-                            ) : i === cells.length - 1 || i === 3 ? (
-                                <MaterialIcon name="help" size={28} color={COLORS.primary} />
-                            ) : (
-                                <View style={styles.emptyCell} />
-                            )}
-                        </View>
-                    ))}
+            {cells.length > 0 ? (
+                <View style={styles.panel}>
+                    <Text style={styles.label}>Problem Figures</Text>
+                    <View style={styles.row}>
+                        {cells.map((uri, index) => (
+                            <View key={`${uri}-${index}`} style={styles.cell}>
+                                {uri ? (
+                                    <Image source={{ uri }} style={styles.image} resizeMode="contain" />
+                                ) : (
+                                    <MaterialIcon name="help" size={28} color={colors.primary} />
+                                )}
+                            </View>
+                        ))}
+                    </View>
                 </View>
-            </View>
-
+            ) : null}
             <View style={styles.optionGrid}>
                 {sortedOptions.map((option) => (
                     <View key={option.id} style={styles.optionCell}>
@@ -61,55 +106,5 @@ export const FigureSeries: React.FC<SharedQuestionProps> = (props) => {
         </QuestionCardShell>
     );
 };
-
-const styles = StyleSheet.create({
-    problemPanel: {
-        backgroundColor: COLORS.surfaceContainerLow,
-        borderRadius: BORDER_RADIUS.xl,
-        padding: SPACING[3],
-        gap: SPACING[2],
-    },
-    panelLabel: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: 12,
-        fontWeight: '700',
-        color: COLORS.onSurfaceVariant,
-    },
-    problemGrid: {
-        flexDirection: 'row',
-        gap: SPACING[2],
-    },
-    problemCell: {
-        flex: 1,
-        aspectRatio: 1,
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS.lg,
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: SPACING[1],
-    },
-    problemImage: {
-        width: '100%',
-        height: '100%',
-    },
-    emptyCell: {
-        width: 24,
-        height: 24,
-        borderRadius: 4,
-        backgroundColor: COLORS.surfaceContainer,
-    },
-    optionGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: SPACING[2],
-    },
-    optionCell: {
-        width: '48%',
-        flexGrow: 1,
-        flexBasis: '46%',
-    },
-});
 
 export default FigureSeries;

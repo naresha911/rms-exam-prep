@@ -1,30 +1,130 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants';
-import { DIFFICULTY_COLORS } from '../../constants/theme';
+import { Pressable, Text, View } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../constants';
+import {
+    difficultyColors,
+    useColors,
+    useThemedStyles,
+    type ColorPalette,
+} from '../../theme';
 import { MaterialIcon } from '../ui/MaterialIcon';
 import type { QuestionCardShellProps, QuestionSolveStatus } from './types';
 
-const STATUS_COPY: Record<
-    QuestionSolveStatus,
-    { label: string; color: string; icon: 'verified' | 'cancel' | 'help' }
-> = {
-    correct: {
-        label: 'Solved • Correct',
-        color: COLORS.success,
-        icon: 'verified',
-    },
-    incorrect: {
-        label: 'Solved • Incorrect',
-        color: COLORS['weakness-red'],
-        icon: 'cancel',
-    },
-    unattempted: {
-        label: 'Unattempted',
-        color: COLORS.onSurfaceVariant,
-        icon: 'help',
-    },
+const STATUS_ICON: Record<QuestionSolveStatus, 'verified' | 'cancel' | 'help'> = {
+    correct: 'verified',
+    incorrect: 'cancel',
+    unattempted: 'help',
 };
+
+const STATUS_LABEL: Record<QuestionSolveStatus, string> = {
+    correct: 'Solved • Correct',
+    incorrect: 'Solved • Incorrect',
+    unattempted: 'Unattempted',
+};
+
+const STATUS_STYLE = {
+    correct: 'statusCorrect',
+    incorrect: 'statusIncorrect',
+    unattempted: 'statusUnattempted',
+} as const;
+
+const DOT = {
+    easy: 'dotEasy',
+    medium: 'dotMedium',
+    hard: 'dotHard',
+} as const;
+
+function createStyles(colors: ColorPalette) {
+    const difficulty = difficultyColors(colors);
+    return {
+        card: {
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS.xl,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            padding: SPACING[4],
+            gap: SPACING[3],
+        },
+        header: {
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
+            justifyContent: 'space-between' as const,
+            gap: SPACING[2],
+        },
+        headerLeft: {
+            flex: 1,
+            flexDirection: 'row' as const,
+            flexWrap: 'wrap' as const,
+            alignItems: 'center' as const,
+            gap: SPACING[2],
+        },
+        qBadge: {
+            backgroundColor: colors.primary,
+            paddingHorizontal: 10,
+            paddingVertical: SPACING[1],
+            borderRadius: BORDER_RADIUS.lg,
+        },
+        qBadgeText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: 12,
+            fontWeight: '700' as const,
+            color: colors.onPrimary,
+        },
+        pill: {
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
+            gap: 6,
+            paddingHorizontal: SPACING[2],
+            paddingVertical: SPACING[1],
+            borderRadius: BORDER_RADIUS.lg,
+            maxWidth: 160,
+        },
+        pillNeutral: { backgroundColor: colors.surfaceContainer },
+        pillSource: { backgroundColor: colors.tertiaryFixed },
+        pillHighYield: { backgroundColor: colors.primaryFixedDim },
+        pillText: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: 11,
+            fontWeight: '600' as const,
+            color: colors.onSurfaceVariant,
+        },
+        pillSourceText: { color: colors.tertiary },
+        pillHighYieldText: { color: colors.primary, fontWeight: '700' as const },
+        dot: { width: 6, height: 6, borderRadius: 3 },
+        dotEasy: { backgroundColor: difficulty.easy.text },
+        dotMedium: { backgroundColor: difficulty.medium.text },
+        dotHard: { backgroundColor: difficulty.hard.text },
+        stemSlot: { gap: SPACING[2] },
+        bodySlot: { gap: SPACING[3] },
+        footer: {
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
+            justifyContent: 'space-between' as const,
+            paddingTop: SPACING[2],
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+        },
+        statusRow: {
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
+            gap: 6,
+        },
+        statusText: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: 12,
+            fontWeight: '600' as const,
+        },
+        statusCorrect: { color: colors.success },
+        statusIncorrect: { color: colors['weakness-red'] },
+        statusUnattempted: { color: colors.onSurfaceVariant },
+        ctaText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: 13,
+            fontWeight: '700' as const,
+            color: colors.primary,
+        },
+    };
+}
 
 export const QuestionCardShell: React.FC<QuestionCardShellProps> = ({
     questionNumber,
@@ -42,13 +142,18 @@ export const QuestionCardShell: React.FC<QuestionCardShellProps> = ({
     onFooterCta,
     showFooter = false,
 }) => {
-    const difficultyColors = difficulty ? DIFFICULTY_COLORS[difficulty] : null;
-    const statusMeta = footerStatus ? STATUS_COPY[footerStatus] : null;
-    const highYield = tags?.some((t) => t.toLowerCase() === 'high_yield' || t.toLowerCase() === 'high-yield');
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
+    const highYield = tags?.some((tag) => tag.toLowerCase() === 'high_yield' || tag.toLowerCase() === 'high-yield');
+    const statusColor =
+        footerStatus === 'correct'
+            ? colors.success
+            : footerStatus === 'incorrect'
+                ? colors['weakness-red']
+                : colors.onSurfaceVariant;
 
     return (
         <View style={styles.card}>
-            {/* Header row */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
                     {questionNumber != null && (
@@ -56,30 +161,28 @@ export const QuestionCardShell: React.FC<QuestionCardShellProps> = ({
                             <Text style={styles.qBadgeText}>Q{questionNumber}</Text>
                         </View>
                     )}
-                    {difficulty && difficultyColors && (
-                        <View style={[styles.pill, { backgroundColor: COLORS.surfaceContainer }]}>
-                            <View style={[styles.dot, { backgroundColor: difficultyColors.text }]} />
-                            <Text style={[styles.pillText, { color: COLORS.onSurfaceVariant }]}>
+                    {difficulty ? (
+                        <View style={[styles.pill, styles.pillNeutral]}>
+                            <View style={[styles.dot, styles[DOT[difficulty]]]} />
+                            <Text style={styles.pillText}>
                                 {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
                             </Text>
                         </View>
-                    )}
+                    ) : null}
                     {source ? (
-                        <View style={[styles.pill, { backgroundColor: COLORS.tertiaryFixed }]}>
-                            <Text style={[styles.pillText, { color: COLORS.tertiary }]} numberOfLines={1}>
+                        <View style={[styles.pill, styles.pillSource]}>
+                            <Text style={[styles.pillText, styles.pillSourceText]} numberOfLines={1}>
                                 {source}
                             </Text>
                         </View>
                     ) : null}
                     {highYield ? (
-                        <View style={[styles.pill, { backgroundColor: COLORS.primaryFixedDim }]}>
-                            <Text style={[styles.pillText, { color: COLORS.primary, fontWeight: '700' }]}>
-                                High Yield
-                            </Text>
+                        <View style={[styles.pill, styles.pillHighYield]}>
+                            <Text style={[styles.pillText, styles.pillHighYieldText]}>High Yield</Text>
                         </View>
                     ) : null}
                 </View>
-                {showBookmark && (
+                {showBookmark ? (
                     <Pressable
                         onPress={onToggleBookmark}
                         hitSlop={8}
@@ -89,24 +192,23 @@ export const QuestionCardShell: React.FC<QuestionCardShellProps> = ({
                         <MaterialIcon
                             name={isBookmarked ? 'bookmark' : 'bookmark_border'}
                             size={22}
-                            color={isBookmarked ? COLORS['warning-amber'] : COLORS.outlineVariant}
+                            color={isBookmarked ? colors['warning-amber'] : colors.outline}
                             filled={isBookmarked}
                         />
                     </Pressable>
-                )}
+                ) : null}
             </View>
 
-            {stem != null && <View style={styles.stemSlot}>{stem}</View>}
+            {stem != null ? <View style={styles.stemSlot}>{stem}</View> : null}
+            {children != null ? <View style={styles.bodySlot}>{children}</View> : null}
 
-            {children != null && <View style={styles.bodySlot}>{children}</View>}
-
-            {showFooter && (
+            {showFooter ? (
                 <View style={styles.footer}>
-                    {statusMeta ? (
+                    {footerStatus ? (
                         <View style={styles.statusRow}>
-                            <MaterialIcon name={statusMeta.icon} size={16} color={statusMeta.color} />
-                            <Text style={[styles.statusText, { color: statusMeta.color }]}>
-                                {statusMeta.label}
+                            <MaterialIcon name={STATUS_ICON[footerStatus]} size={16} color={statusColor} />
+                            <Text style={[styles.statusText, styles[STATUS_STYLE[footerStatus]]]}>
+                                {STATUS_LABEL[footerStatus]}
                                 {footerStatus === 'correct' && footerMarks != null ? ` (+${footerMarks})` : ''}
                             </Text>
                         </View>
@@ -119,99 +221,9 @@ export const QuestionCardShell: React.FC<QuestionCardShellProps> = ({
                         </Pressable>
                     ) : null}
                 </View>
-            )}
+            ) : null}
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS.xl,
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        padding: SPACING[4],
-        gap: SPACING[3],
-        shadowColor: COLORS.onSurface,
-        shadowOpacity: 0.04,
-        shadowRadius: 4,
-        shadowOffset: { width: 0, height: 1 },
-        elevation: 1,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: SPACING[2],
-    },
-    headerLeft: {
-        flex: 1,
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: SPACING[2],
-    },
-    qBadge: {
-        backgroundColor: COLORS.primary,
-        paddingHorizontal: 10,
-        paddingVertical: SPACING[1],
-        borderRadius: BORDER_RADIUS.lg,
-    },
-    qBadgeText: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: 12,
-        fontWeight: '700',
-        color: COLORS.onPrimary,
-    },
-    pill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        paddingHorizontal: SPACING[2],
-        paddingVertical: SPACING[1],
-        borderRadius: BORDER_RADIUS.lg,
-        maxWidth: 140,
-    },
-    pillText: {
-        fontFamily: TYPOGRAPHY.fontFamily.semibold,
-        fontSize: 11,
-        fontWeight: '600',
-    },
-    dot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-    },
-    stemSlot: {
-        gap: SPACING[2],
-    },
-    bodySlot: {
-        gap: SPACING[2],
-    },
-    footer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: SPACING[2],
-        borderTopWidth: 1,
-        borderTopColor: COLORS.outlineVariant,
-    },
-    statusRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    statusText: {
-        fontFamily: TYPOGRAPHY.fontFamily.semibold,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    ctaText: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: 13,
-        fontWeight: '700',
-        color: COLORS.primary,
-    },
-});
 
 export default QuestionCardShell;

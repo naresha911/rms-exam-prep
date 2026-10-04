@@ -2006,3 +2006,54 @@ The first clickable/working version should contain only this journey:
 → **Continue Learning**
 
 This gives us the fundamental product loop before building subscriptions, AI, leaderboards or complex gamification.
+
+
+## Topics
+nglish
+
+Jumbled sentences (1–5)
+Cloze passage (6, with blanks 7–10 inside that stem)
+Synonyms and antonyms (11–15, 21–25)
+Idioms and phrases (16–20)
+Spelling (26–30)
+One-word substitution (31–33; the paper’s directions say 31–35, and 34–35 are not stored)
+Reading comprehension (36–40; the story questions are stored, the shared passage is not)
+Parts of speech (41–45)
+Sentence completion, prepositions, and phrasal verbs (46–50)
+General knowledge
+
+History and polity
+Geography
+Science and health
+Sports
+Books, awards, organisations, and culture
+Mixed static facts (trains, governors, ministries, and five unnumbered items at the end)
+Reasoning
+
+Symbol operations (101–102)
+Clock direction (103)
+Embedded figure (112–113)
+Figure questions whose stem is only “Question Figure” (104–106, 144–145)
+Meaningful order of words (107)
+Letter series (108)
+Blood relations (109, 111)
+Symbol arrangement (110)
+Dictionary order (114–115)
+Calendar (116)
+Coding and decoding (117–120, 134)
+Odd one out (121–123, 128)
+Figure pattern completion (124–125)
+Figure analogy (126–127)
+Word and number analogy (129–131)
+Figure series (132–133)
+Word formation (135)
+Direction sense (136, 142)
+Venn diagram (137–138)
+Seating arrangement (139–141)
+Date puzzle (143)
+Ranking in a row (146)
+Number series (147–149)
+Missing number in a figure (150)
+Arithmetic
+
+Profit and loss, division, fractions, rectangles, largest number, percentage, ratio and HCF, triangle area, speed and time, multiples and factors, angles and quadrilaterals, average, simple interest, metric measures, linear equations, work rate, unitary method, mean proportion, divisibility, multiplication, and rounding (169–200)

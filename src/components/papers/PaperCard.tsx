@@ -1,8 +1,9 @@
 // PaperCard — previous-year paper catalogue card with status, metrics, and action row.
 
 import React from "react";
-import { View, Text, Pressable, StyleSheet, ViewStyle } from "react-native";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+import { Pressable, Text, View, ViewStyle } from "react-native";
+import { BORDER_RADIUS, SHADOWS, SPACING, TYPOGRAPHY } from "../../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
 import { MaterialIcon, MaterialIconName } from "../ui/MaterialIcon";
 import { Button } from "../ui/Button";
 import { StatusBadge } from "../shared/StatusBadge";
@@ -32,7 +33,124 @@ interface PaperCardProps {
     style?: ViewStyle;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        card: {
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: 16,
+            padding: SPACING[5],
+            borderWidth: 1,
+            borderColor: colors.backgroundTertiary,
+            gap: 14,
+            ...SHADOWS.sm,
+        },
+        accentSuccess: {
+            borderLeftWidth: 4,
+            borderLeftColor: colors.success,
+        },
+        accentWarning: {
+            borderLeftWidth: 4,
+            borderLeftColor: colors.warning,
+        },
+        topRow: {
+            gap: SPACING[2],
+        },
+        latestChip: {
+            gap: 4,
+            backgroundColor: colors.primaryFixed,
+            paddingHorizontal: 10,
+            paddingVertical: 2,
+            borderRadius: BORDER_RADIUS.full,
+        },
+        latestText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: 11,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            color: colors.primary,
+        },
+        title: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            color: colors.textPrimary,
+            lineHeight: 22,
+        },
+        subtitle: {
+            marginTop: 2,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+        },
+        metricsRow: {
+            gap: SPACING[4],
+            paddingTop: SPACING[1],
+            borderTopWidth: 1,
+            borderTopColor: colors.backgroundTertiary,
+        },
+        metricItem: {
+            gap: 4,
+        },
+        metricEnd: {
+            marginLeft: "auto" as const,
+        },
+        scoreText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+        scoreOk: {
+            color: colors.successText,
+        },
+        scoreWarn: {
+            color: colors.amberText,
+        },
+        durationText: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: TYPOGRAPHY.fontWeight.medium,
+            color: colors.onSurfaceVariant,
+        },
+        actionsRow: {
+            gap: SPACING[2],
+            paddingTop: 4,
+        },
+        actionBtn: {
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            gap: 6,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
+            borderRadius: 12,
+            minHeight: 40,
+        },
+        actionFlex: {
+            flex: 1,
+        },
+        actionOutline: {
+            backgroundColor: "transparent",
+            borderWidth: 1,
+            borderColor: colors.primaryLight,
+        },
+        actionMuted: {
+            backgroundColor: colors.surfaceContainerHigh,
+        },
+        actionSoft: {
+            backgroundColor: colors.primaryFixed,
+        },
+        actionText: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+        actionTextPrimary: {
+            color: colors.primary,
+        },
+    };
+}
+
 function SecondaryActionButton({ action }: { action: PaperCardAction }) {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const variant = action.variant ?? "outline";
     const isOutline = variant === "outline";
     const isSoft = variant === "soft";
@@ -41,18 +159,19 @@ function SecondaryActionButton({ action }: { action: PaperCardAction }) {
         <Pressable
             onPress={action.onPress}
             style={({ pressed }) => [
+                layout.row,
                 styles.actionBtn,
                 styles.actionFlex,
                 isOutline && styles.actionOutline,
                 variant === "muted" && styles.actionMuted,
                 isSoft && styles.actionSoft,
-                pressed && { opacity: 0.9 },
+                pressed && layout.pressed,
             ]}
             accessibilityRole="button"
             accessibilityLabel={action.label}
         >
             {action.icon ? (
-                <MaterialIcon name={action.icon} size={15} color={COLORS.primary} />
+                <MaterialIcon name={action.icon} size={15} color={colors.primary} />
             ) : null}
             <Text style={[styles.actionText, styles.actionTextPrimary]}>{action.label}</Text>
         </Pressable>
@@ -72,8 +191,11 @@ export const PaperCard: React.FC<PaperCardProps> = ({
     secondaryAction,
     style,
 }) => {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const showMetrics = !!(metrics?.scoreLabel || metrics?.durationLabel);
     const primaryIsSolid = (primaryAction.variant ?? "primary") === "primary";
+    const scoreIconColor = accent === "warning" ? colors.amberText : colors.successText;
 
     return (
         <View
@@ -84,11 +206,11 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                 style,
             ]}
         >
-            <View style={styles.topRow}>
+            <View style={[layout.rowBetween, styles.topRow]}>
                 <StatusBadge status={status} label={statusLabel} />
                 {isLatest ? (
-                    <View style={styles.latestChip}>
-                        <MaterialIcon name="auto_awesome" size={13} color={COLORS.primary} />
+                    <View style={[layout.row, styles.latestChip]}>
+                        <MaterialIcon name="auto_awesome" size={13} color={colors.primary} />
                         <Text style={styles.latestText}>{latestLabel}</Text>
                     </View>
                 ) : null}
@@ -100,34 +222,25 @@ export const PaperCard: React.FC<PaperCardProps> = ({
             </View>
 
             {showMetrics ? (
-                <View style={styles.metricsRow}>
+                <View style={[layout.row, styles.metricsRow]}>
                     {metrics?.scoreLabel ? (
-                        <View style={styles.metricItem}>
-                            <MaterialIcon
-                                name="military_tech"
-                                size={15}
-                                color={accent === "warning" ? "#B45309" : "#047857"}
-                            />
-                            <Text
-                                style={[
-                                    styles.scoreText,
-                                    accent === "warning" ? styles.scoreWarn : styles.scoreOk,
-                                ]}
-                            >
+                        <View style={[layout.row, styles.metricItem]}>
+                            <MaterialIcon name="military_tech" size={15} color={scoreIconColor} />
+                            <Text style={[styles.scoreText, accent === "warning" ? styles.scoreWarn : styles.scoreOk]}>
                                 {metrics.scoreLabel}
                             </Text>
                         </View>
                     ) : null}
                     {metrics?.durationLabel ? (
-                        <View style={[styles.metricItem, styles.metricEnd]}>
-                            <MaterialIcon name="schedule" size={15} color={COLORS.onSurfaceVariant} />
+                        <View style={[layout.row, styles.metricItem, styles.metricEnd]}>
+                            <MaterialIcon name="schedule" size={15} color={colors.onSurfaceVariant} />
                             <Text style={styles.durationText}>{metrics.durationLabel}</Text>
                         </View>
                     ) : null}
                 </View>
             ) : null}
 
-            <View style={styles.actionsRow}>
+            <View style={[layout.row, styles.actionsRow]}>
                 {secondaryAction ? <SecondaryActionButton action={secondaryAction} /> : null}
                 {primaryIsSolid ? (
                     <View style={styles.actionFlex}>
@@ -139,7 +252,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                             iconRight={primaryAction.icon ? undefined : "arrow_forward"}
                             icon={
                                 primaryAction.icon ? (
-                                    <MaterialIcon name={primaryAction.icon} size={15} color={COLORS.onPrimary} />
+                                    <MaterialIcon name={primaryAction.icon} size={15} color={colors.onPrimary} />
                                 ) : undefined
                             }
                         />
@@ -151,134 +264,5 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: 16,
-        padding: SPACING[5],
-        borderWidth: 1,
-        borderColor: "#F1F5F9",
-        gap: 14,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
-        shadowRadius: 4,
-        elevation: 1,
-    },
-    accentSuccess: {
-        borderLeftWidth: 4,
-        borderLeftColor: "#10B981",
-    },
-    accentWarning: {
-        borderLeftWidth: 4,
-        borderLeftColor: "#FBBF24",
-    },
-    topRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: SPACING[2],
-    },
-    latestChip: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        backgroundColor: "rgba(70, 72, 212, 0.10)",
-        paddingHorizontal: 10,
-        paddingVertical: 2,
-        borderRadius: BORDER_RADIUS.full,
-    },
-    latestText: {
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: 11,
-        fontWeight: "700",
-        color: COLORS.primary,
-    },
-    title: {
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: TYPOGRAPHY.fontSize.base,
-        fontWeight: "700",
-        color: "#0F172A",
-        lineHeight: 22,
-    },
-    subtitle: {
-        marginTop: 2,
-        fontFamily: "PlusJakartaSans_400Regular",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-    },
-    metricsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[4],
-        paddingTop: SPACING[1],
-        borderTopWidth: 1,
-        borderTopColor: "#F1F5F9",
-    },
-    metricItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-    },
-    metricEnd: {
-        marginLeft: "auto",
-    },
-    scoreText: {
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        fontWeight: "700",
-    },
-    scoreOk: {
-        color: "#047857",
-    },
-    scoreWarn: {
-        color: "#B45309",
-    },
-    durationText: {
-        fontFamily: "PlusJakartaSans_500Medium",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        fontWeight: "500",
-        color: COLORS.onSurfaceVariant,
-    },
-    actionsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[2],
-        paddingTop: 4,
-    },
-    actionBtn: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        borderRadius: 12,
-        minHeight: 40,
-    },
-    actionFlex: {
-        flex: 1,
-    },
-    actionOutline: {
-        backgroundColor: "transparent",
-        borderWidth: 1,
-        borderColor: "rgba(70, 72, 212, 0.20)",
-    },
-    actionMuted: {
-        backgroundColor: COLORS.surfaceContainerHigh,
-    },
-    actionSoft: {
-        backgroundColor: "rgba(70, 72, 212, 0.10)",
-    },
-    actionText: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        fontWeight: "600",
-    },
-    actionTextPrimary: {
-        color: COLORS.primary,
-    },
-});
 
 export default PaperCard;

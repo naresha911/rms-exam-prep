@@ -1,32 +1,119 @@
 // Settings Screen - App preferences and settings
 import { View, Text, ScrollView, Pressable, Switch, Alert } from "react-native";
+import type { ReactNode } from "react";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, SUPPORTED_LANGUAGES } from "../../constants";
+import { SPACING, TYPOGRAPHY, SUPPORTED_LANGUAGES } from "../../constants";
 import { signOut } from "../../lib/supabase";
 import { t } from "../../lib/i18n";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
+
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            backgroundColor: colors.background,
+        },
+        header: {
+            padding: SPACING[4],
+            borderBottomWidth: 1,
+            borderBottomColor: colors.cardBorder,
+        },
+        backButton: {
+            padding: SPACING[2],
+        },
+        backIcon: {
+            fontSize: 24,
+            color: colors.textPrimary,
+        },
+        headerTitle: {
+            flex: 1,
+            fontSize: TYPOGRAPHY.fontSize.xl,
+            fontWeight: "700" as const,
+            color: colors.textPrimary,
+            textAlign: "center" as const,
+            marginRight: 40,
+        },
+        scrollContent: {
+            padding: SPACING[4],
+        },
+        sectionLabel: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontWeight: "700" as const,
+            color: colors.textSecondary,
+            textTransform: "uppercase" as const,
+            letterSpacing: 1,
+            marginBottom: SPACING[2],
+        },
+        sectionCard: {
+            marginBottom: SPACING[5],
+        },
+        settingRow: {
+            paddingVertical: SPACING[3],
+            borderBottomWidth: 1,
+            borderBottomColor: colors.cardBorder,
+        },
+        languageRow: {
+            paddingVertical: SPACING[3],
+        },
+        settingIcon: {
+            fontSize: 22,
+            marginRight: SPACING[3],
+        },
+        settingBody: {
+            flex: 1,
+        },
+        settingTitle: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: "600" as const,
+            color: colors.textPrimary,
+        },
+        settingSubtitle: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.textSecondary,
+            marginTop: 2,
+        },
+        chevron: {
+            color: colors.textTertiary,
+            fontSize: 18,
+        },
+        signOutButton: {
+            borderColor: colors.error,
+        },
+        signOutLabel: {
+            color: colors.error,
+        },
+        disclaimer: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.textTertiary,
+            textAlign: "center" as const,
+            marginTop: SPACING[5],
+            paddingHorizontal: SPACING[4],
+            lineHeight: 16,
+        },
+    };
+}
 
 export default function SettingsScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { resetStore, user, preferences, updatePreferences } = useAppStore();
 
-    // Local state for toggles
     const [soundEnabled, setSoundEnabled] = useState(preferences?.sound ?? true);
-    const [vibrationEnabled, setVibrationEnabled] = useState(true); // vibration preference not in store
     const [notificationsEnabled, setNotificationsEnabled] = useState(preferences?.notifications ?? true);
-    const [darkMode, setDarkMode] = useState(preferences?.darkMode ?? false);
     const [autoShowSolution, setAutoShowSolution] = useState(isAutoShowSolution(preferences));
     const [selectedLanguage, setSelectedLanguage] = useState(
         preferences?.preferredLanguage || SUPPORTED_LANGUAGES[0].code
     );
     const [loading, setLoading] = useState(false);
+    const appearance = preferences.appearance;
 
     const handleToggle = (
-        setting: keyof typeof preferences,
+        setting: "notifications" | "sound" | "autoShowSolution",
         value: boolean,
         setter: (val: boolean) => void
     ) => {
@@ -76,129 +163,70 @@ export default function SettingsScreen() {
         );
     };
 
+    const switchTrack = { false: colors.cardBorder, true: colors.primaryLight };
+    const switchThumb = (on: boolean) => (on ? colors.primary : colors.backgroundTertiary);
+
     const renderSettingRow = (
         icon: string,
         title: string,
         subtitle?: string,
-        rightComponent?: React.ReactNode,
+        rightComponent?: ReactNode,
         onPress?: () => void
     ) => (
         <Pressable
             onPress={onPress}
             disabled={!onPress}
-            style={({ pressed }) => ({
-                flexDirection: "row",
-                alignItems: "center",
-                paddingVertical: SPACING[3],
-                borderBottomWidth: 1,
-                borderBottomColor: COLORS.cardBorder,
-                opacity: pressed && onPress ? 0.7 : 1,
-            })}
+            style={({ pressed }) => [
+                layout.row,
+                styles.settingRow,
+                pressed && onPress ? layout.pressed : null,
+            ]}
         >
-            <Text style={{ fontSize: 22, marginRight: SPACING[3] }}>{icon}</Text>
-            <View style={{ flex: 1 }}>
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.base,
-                        fontWeight: "600",
-                        color: COLORS.textPrimary,
-                    }}
-                >
-                    {title}
-                </Text>
-                {subtitle && (
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.xs,
-                            color: COLORS.textSecondary,
-                            marginTop: 2,
-                        }}
-                    >
-                        {subtitle}
-                    </Text>
-                )}
+            <Text style={styles.settingIcon}>{icon}</Text>
+            <View style={styles.settingBody}>
+                <Text style={styles.settingTitle}>{title}</Text>
+                {subtitle ? <Text style={styles.settingSubtitle}>{subtitle}</Text> : null}
             </View>
             {rightComponent}
         </Pressable>
     );
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
-            {/* Header */}
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: SPACING[4],
-                    borderBottomWidth: 1,
-                    borderBottomColor: COLORS.cardBorder,
-                }}
-            >
-                <Pressable onPress={() => router.back()} style={{ padding: SPACING[2] }}>
-                    <Text style={{ fontSize: 24 }}>←</Text>
-                </Pressable>
-                <Text
-                    style={{
-                        flex: 1,
-                        fontSize: TYPOGRAPHY.fontSize.xl,
-                        fontWeight: "700",
-                        color: COLORS.textPrimary,
-                        textAlign: "center",
-                        marginRight: 40,
-                    }}
+        <SafeAreaView style={[layout.fill, styles.screen]}>
+            <View style={[layout.row, styles.header]}>
+                <Pressable
+                    onPress={() => router.back()}
+                    style={({ pressed }) => [styles.backButton, pressed ? layout.pressed : null]}
                 >
-                    ⚙️ Settings
-                </Text>
+                    <Text style={styles.backIcon}>←</Text>
+                </Pressable>
+                <Text style={styles.headerTitle}>⚙️ Settings</Text>
             </View>
 
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[4] }}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Account Section */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.sm,
-                        fontWeight: "700",
-                        color: COLORS.textSecondary,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
-                        marginBottom: SPACING[2],
-                    }}
-                >
-                    Account
-                </Text>
-                <Card style={{ marginBottom: SPACING[5] }}>
+                <Text style={styles.sectionLabel}>Account</Text>
+                <Card style={styles.sectionCard}>
                     {renderSettingRow(
                         "👤",
                         "Edit Profile",
                         "Update your name, avatar, and details",
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>,
+                        <Text style={styles.chevron}>›</Text>,
                         () => router.push("/profile/edit")
                     )}
                     {renderSettingRow(
                         "🎯",
                         "Target Class",
                         user?.target_class ? `Class ${user.target_class}` : "Not set",
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>,
+                        <Text style={styles.chevron}>›</Text>,
                         () => router.push("/profile/edit")
                     )}
                 </Card>
 
-                {/* Notifications Section */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.sm,
-                        fontWeight: "700",
-                        color: COLORS.textSecondary,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
-                        marginBottom: SPACING[2],
-                    }}
-                >
-                    Notifications
-                </Text>
-                <Card style={{ marginBottom: SPACING[5] }}>
+                <Text style={styles.sectionLabel}>Notifications</Text>
+                <Card style={styles.sectionCard}>
                     {renderSettingRow(
                         "🔔",
                         "Push Notifications",
@@ -206,26 +234,14 @@ export default function SettingsScreen() {
                         <Switch
                             value={notificationsEnabled}
                             onValueChange={(val) => handleToggle("notifications", val, setNotificationsEnabled)}
-                            trackColor={{ false: COLORS.cardBorder, true: COLORS.primaryLight }}
-                            thumbColor={notificationsEnabled ? COLORS.primary : COLORS.backgroundTertiary}
+                            trackColor={switchTrack}
+                            thumbColor={switchThumb(notificationsEnabled)}
                         />
                     )}
                 </Card>
 
-                {/* Experience Section */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.sm,
-                        fontWeight: "700",
-                        color: COLORS.textSecondary,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
-                        marginBottom: SPACING[2],
-                    }}
-                >
-                    Experience
-                </Text>
-                <Card style={{ marginBottom: SPACING[5] }}>
+                <Text style={styles.sectionLabel}>Experience</Text>
+                <Card style={styles.sectionCard}>
                     {renderSettingRow(
                         "📖",
                         t("settings.autoShowSolution"),
@@ -233,8 +249,8 @@ export default function SettingsScreen() {
                         <Switch
                             value={autoShowSolution}
                             onValueChange={(val) => handleToggle("autoShowSolution", val, setAutoShowSolution)}
-                            trackColor={{ false: COLORS.cardBorder, true: COLORS.primaryLight }}
-                            thumbColor={autoShowSolution ? COLORS.primary : COLORS.backgroundTertiary}
+                            trackColor={switchTrack}
+                            thumbColor={switchThumb(autoShowSolution)}
                         />
                     )}
                     {renderSettingRow(
@@ -244,40 +260,25 @@ export default function SettingsScreen() {
                         <Switch
                             value={soundEnabled}
                             onValueChange={(val) => handleToggle("sound", val, setSoundEnabled)}
-                            trackColor={{ false: COLORS.cardBorder, true: COLORS.primaryLight }}
-                            thumbColor={soundEnabled ? COLORS.primary : COLORS.backgroundTertiary}
+                            trackColor={switchTrack}
+                            thumbColor={switchThumb(soundEnabled)}
                         />
                     )}
                     {renderSettingRow(
                         "🌙",
                         "Dark Mode",
-                        "Coming soon",
+                        "Switches the app between dark and light",
                         <Switch
-                            value={darkMode}
-                            onValueChange={() => {
-                                Alert.alert("Coming Soon", "Dark mode will be available in a future update!");
-                            }}
-                            trackColor={{ false: COLORS.cardBorder, true: COLORS.primaryLight }}
-                            thumbColor={darkMode ? COLORS.primary : COLORS.backgroundTertiary}
-                            disabled
+                            value={appearance === "dark"}
+                            onValueChange={(value) => updatePreferences({ appearance: value ? "dark" : "light" })}
+                            trackColor={switchTrack}
+                            thumbColor={switchThumb(appearance === "dark")}
                         />
                     )}
                 </Card>
 
-                {/* Language Section */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.sm,
-                        fontWeight: "700",
-                        color: COLORS.textSecondary,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
-                        marginBottom: SPACING[2],
-                    }}
-                >
-                    Language
-                </Text>
-                <Card style={{ marginBottom: SPACING[5] }}>
+                <Text style={styles.sectionLabel}>Language</Text>
+                <Card style={styles.sectionCard}>
                     <Pressable
                         onPress={() => {
                             Alert.alert(
@@ -289,89 +290,50 @@ export default function SettingsScreen() {
                                 }))
                             );
                         }}
-                        style={({ pressed }) => ({
-                            flexDirection: "row",
-                            alignItems: "center",
-                            paddingVertical: SPACING[3],
-                            opacity: pressed ? 0.7 : 1,
-                        })}
+                        style={({ pressed }) => [
+                            layout.row,
+                            styles.languageRow,
+                            pressed ? layout.pressed : null,
+                        ]}
                     >
-                        <Text style={{ fontSize: 22, marginRight: SPACING[3] }}>🌐</Text>
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.base,
-                                    fontWeight: "600",
-                                    color: COLORS.textPrimary,
-                                }}
-                            >
-                                App Language
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xs,
-                                    color: COLORS.textSecondary,
-                                    marginTop: 2,
-                                }}
-                            >
+                        <Text style={styles.settingIcon}>🌐</Text>
+                        <View style={styles.settingBody}>
+                            <Text style={styles.settingTitle}>App Language</Text>
+                            <Text style={styles.settingSubtitle}>
                                 {SUPPORTED_LANGUAGES.find(l => l.code === selectedLanguage)?.name || "English"}
                             </Text>
                         </View>
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>
+                        <Text style={styles.chevron}>›</Text>
                     </Pressable>
                 </Card>
 
-                {/* Data Section */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.sm,
-                        fontWeight: "700",
-                        color: COLORS.textSecondary,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
-                        marginBottom: SPACING[2],
-                    }}
-                >
-                    Data & Privacy
-                </Text>
-                <Card style={{ marginBottom: SPACING[5] }}>
+                <Text style={styles.sectionLabel}>Data & Privacy</Text>
+                <Card style={styles.sectionCard}>
                     {renderSettingRow(
                         "🗑️",
                         "Clear Cache",
                         "Free up storage space",
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>,
+                        <Text style={styles.chevron}>›</Text>,
                         handleClearCache
                     )}
                     {renderSettingRow(
                         "📜",
                         "Privacy Policy",
                         "How we handle your data",
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>,
+                        <Text style={styles.chevron}>›</Text>,
                         () => Alert.alert("Privacy Policy", "View our privacy policy at sainikprep.com/privacy")
                     )}
                     {renderSettingRow(
                         "📄",
                         "Terms of Service",
                         "App usage terms",
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>,
+                        <Text style={styles.chevron}>›</Text>,
                         () => Alert.alert("Terms of Service", "View our terms at sainikprep.com/terms")
                     )}
                 </Card>
 
-                {/* About Section */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.sm,
-                        fontWeight: "700",
-                        color: COLORS.textSecondary,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
-                        marginBottom: SPACING[2],
-                    }}
-                >
-                    About
-                </Text>
-                <Card style={{ marginBottom: SPACING[5] }}>
+                <Text style={styles.sectionLabel}>About</Text>
+                <Card style={styles.sectionCard}>
                     {renderSettingRow(
                         "ℹ️",
                         "App Version",
@@ -382,39 +344,28 @@ export default function SettingsScreen() {
                         "🆘",
                         "Help & Support",
                         "Get help with the app",
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>,
+                        <Text style={styles.chevron}>›</Text>,
                         () => Alert.alert("Help & Support", "Email us at support@sainikprep.com")
                     )}
                     {renderSettingRow(
                         "🐛",
                         "Report a Bug",
                         "Help us improve",
-                        <Text style={{ color: COLORS.textTertiary, fontSize: 18 }}>›</Text>,
+                        <Text style={styles.chevron}>›</Text>,
                         () => Alert.alert("Report Bug", "Email us at bugs@sainikprep.com with details")
                     )}
                 </Card>
 
-                {/* Sign Out */}
                 <Button
                     title="Sign Out"
                     variant="outline"
                     onPress={handleSignOut}
-                    style={{ borderColor: COLORS.error }}
-                    textStyle={{ color: COLORS.error }}
+                    style={styles.signOutButton}
+                    textStyle={styles.signOutLabel}
                     loading={loading}
                 />
 
-                {/* Disclaimer */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.xs,
-                        color: COLORS.textTertiary,
-                        textAlign: "center",
-                        marginTop: SPACING[5],
-                        paddingHorizontal: SPACING[4],
-                        lineHeight: 16,
-                    }}
-                >
+                <Text style={styles.disclaimer}>
                     Sainik Prep is an independent educational application and is not affiliated with NTA, Sainik Schools Society, or the Government of India.
                 </Text>
             </ScrollView>

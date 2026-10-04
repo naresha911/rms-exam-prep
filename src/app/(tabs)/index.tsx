@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -5,75 +6,587 @@ import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { MaterialIcon, MaterialIconName } from "../../components/ui/MaterialIcon";
 import { useAppStore } from "../../store/useAppStore";
 import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from "react-native-svg";
-import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY, normalizeStudentStandard } from "../../constants";
+import { BORDER_RADIUS, SHADOWS, SPACING, TYPOGRAPHY, normalizeStudentStandard } from "../../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
+
+type StudyVariant = "chapters" | "mocks" | "papers" | "drill";
+
+const STUDY_ICON = {
+  chapters: "studyIconChapters",
+  mocks: "studyIconMocks",
+  papers: "studyIconPapers",
+  drill: "studyIconDrill",
+} as const;
+
+const STUDY_ACTION = {
+  chapters: "studyActionChapters",
+  mocks: "studyActionMocks",
+  papers: "studyActionPapers",
+  drill: "studyActionDrill",
+} as const;
+
+const STUDY_ACTION_TEXT = {
+  chapters: "studyActionTextChapters",
+  mocks: "studyActionTextMocks",
+  papers: "studyActionTextPapers",
+  drill: "studyActionTextDrill",
+} as const;
+
+const STUDY_ICON_COLOR = {
+  chapters: "onTertiaryContainer",
+  mocks: "onPrimary",
+  papers: "onSecondaryContainer",
+  drill: "amberText",
+} as const;
+
+const STUDY_ACTION_COLOR = {
+  chapters: "tertiary",
+  mocks: "primary",
+  papers: "secondary",
+  drill: "warningText",
+} as const;
 
 interface StudyCardProps {
+  variant: StudyVariant;
   icon: MaterialIconName;
-  iconBackground: string;
-  iconColor: string;
-  iconBorderColor?: string;
   title: string;
   subtitle: string;
   actionLabel: string;
-  actionBackground: string;
-  actionColor: string;
-  actionBorderColor: string;
   onPress: () => void;
 }
 
+function createStyles(colors: ColorPalette) {
+  return {
+    container: { flex: 1, backgroundColor: colors.background },
+    header: {
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.surfaceContainer,
+      zIndex: 20,
+    },
+    headerInner: {
+      height: 56,
+      paddingHorizontal: SPACING[4],
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "space-between" as const,
+    },
+    profileButton: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      flex: 1,
+      minWidth: 0,
+      marginRight: 12,
+    },
+    avatarOuter: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.surfaceContainer,
+      backgroundColor: colors.surfaceContainerLow,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      overflow: "hidden" as const,
+      padding: 2,
+      flexGrow: 0,
+      flexShrink: 0,
+      ...SHADOWS.sm,
+    },
+    avatarFallback: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      backgroundColor: colors.surfaceContainerLow,
+    },
+    avatarImage: { width: 28, height: 28, borderRadius: 14 },
+    headerTextWrap: { flex: 1, minWidth: 0, marginLeft: 10 },
+    headerName: {
+      color: colors.onSurface,
+      fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+      fontSize: 14,
+      lineHeight: 18,
+      letterSpacing: -0.2,
+      includeFontPadding: false,
+    },
+    headerClass: {
+      color: colors.onSurfaceVariant,
+      fontFamily: TYPOGRAPHY.fontFamily.medium,
+      fontSize: 11,
+      lineHeight: 14,
+      letterSpacing: 0.3,
+      includeFontPadding: false,
+    },
+    notificationButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.surfaceContainerLowest,
+      borderWidth: 1,
+      borderColor: colors.surfaceContainer,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      flexGrow: 0,
+      flexShrink: 0,
+      ...SHADOWS.sm,
+    },
+    scrollContent: {
+      width: "100%" as const,
+      maxWidth: 720,
+      alignSelf: "center" as const,
+      paddingHorizontal: SPACING[4],
+      paddingTop: SPACING[2],
+      gap: SPACING[5],
+    },
+    hero: {
+      borderRadius: BORDER_RADIUS["3xl"],
+      paddingHorizontal: SPACING[5],
+      paddingTop: SPACING[6],
+      paddingBottom: SPACING[5],
+      overflow: "hidden" as const,
+      borderWidth: 1,
+      borderColor: colors.primaryLight,
+      backgroundColor: colors.onPrimaryFixedVariant,
+    },
+    missionPill: {
+      alignSelf: "flex-start" as const,
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderRadius: BORDER_RADIUS.full,
+      backgroundColor: colors.primary,
+      borderWidth: 1,
+      borderColor: colors.primaryLight,
+    },
+    missionPillText: {
+      color: colors.onPrimary,
+      fontFamily: TYPOGRAPHY.fontFamily.bold,
+      fontSize: 11,
+      letterSpacing: 0.8,
+    },
+    heroMain: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "space-between" as const,
+      paddingTop: 12,
+    },
+    heroCopy: { flex: 1, minWidth: 0, zIndex: 1, paddingRight: 12 },
+    heroTitle: {
+      color: colors.onPrimaryContainer,
+      fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+      fontSize: 24,
+      lineHeight: 30,
+      letterSpacing: -0.4,
+    },
+    heroTitleAccent: { color: colors.xpGold },
+    heroSubtitle: {
+      color: colors.primaryLight,
+      fontFamily: TYPOGRAPHY.fontFamily.medium,
+      fontSize: 12,
+      lineHeight: 18,
+      marginTop: 8,
+    },
+    mascotFrame: {
+      width: 88,
+      height: 88,
+      flexGrow: 0,
+      flexShrink: 0,
+      borderRadius: BORDER_RADIUS.xl,
+      backgroundColor: colors.primaryFixed,
+      borderWidth: 1,
+      borderColor: colors.primaryLight,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      overflow: "hidden" as const,
+      padding: 4,
+    },
+    liveTestCard: {
+      position: "relative" as const,
+      borderRadius: BORDER_RADIUS.xl,
+      borderWidth: 1,
+      borderColor: colors.warning,
+      backgroundColor: colors.warningLight,
+      padding: SPACING[4],
+      gap: 12,
+      overflow: "hidden" as const,
+      ...SHADOWS.sm,
+    },
+    liveCardGlow: {
+      position: "absolute" as const,
+      width: 112,
+      height: 112,
+      borderRadius: 56,
+      right: -32,
+      top: -32,
+      backgroundColor: colors.warning,
+      opacity: 0.12,
+    },
+    liveTopRow: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "space-between" as const,
+      gap: 8,
+    },
+    livePill: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: BORDER_RADIUS.full,
+      backgroundColor: colors.errorLight,
+      borderWidth: 1,
+      borderColor: colors.error,
+    },
+    liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.error },
+    livePillText: {
+      color: colors.error,
+      fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+      fontSize: 10,
+      letterSpacing: 0.7,
+    },
+    rankPill: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 4,
+      paddingHorizontal: 9,
+      paddingVertical: 4,
+      borderRadius: BORDER_RADIUS.full,
+      backgroundColor: colors.tertiaryFixed,
+      borderWidth: 1,
+      borderColor: colors.warning,
+    },
+    rankPillText: {
+      color: colors.warningText,
+      fontFamily: TYPOGRAPHY.fontFamily.bold,
+      fontSize: 10,
+    },
+    liveTitle: {
+      color: colors.onSurface,
+      fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+      fontSize: 17,
+      lineHeight: 22,
+    },
+    liveDescription: {
+      color: colors.onSurfaceVariant,
+      fontFamily: TYPOGRAPHY.fontFamily.regular,
+      fontSize: 12,
+      lineHeight: 18,
+    },
+    metaRow: { flexDirection: "row" as const, flexWrap: "wrap" as const, gap: 6 },
+    metaPill: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: BORDER_RADIUS.md,
+      backgroundColor: colors.surfaceContainerLow,
+      borderWidth: 1,
+      borderColor: colors.surfaceContainer,
+    },
+    metaPillHighlighted: {
+      backgroundColor: colors.tertiaryFixed,
+      borderColor: colors.warning,
+    },
+    metaPillText: {
+      color: colors.onSurfaceVariant,
+      fontFamily: TYPOGRAPHY.fontFamily.semibold,
+      fontSize: 10,
+    },
+    metaPillTextHighlighted: { color: colors.warningText, fontFamily: TYPOGRAPHY.fontFamily.bold },
+    actionPressable: { width: "100%" as const },
+    actionButton: {
+      width: "100%" as const,
+      height: 44,
+      minHeight: 44,
+      borderRadius: BORDER_RADIUS.full,
+      borderBottomWidth: 3,
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      paddingHorizontal: SPACING[5],
+    },
+    actionButtonAmber: {
+      backgroundColor: colors.warningText,
+      borderBottomColor: colors.onTertiaryFixedVariant,
+    },
+    actionButtonPrimary: {
+      backgroundColor: colors.primary,
+      borderBottomColor: colors.onPrimaryFixedVariant,
+    },
+    actionButtonText: {
+      color: colors.onPrimary,
+      fontFamily: TYPOGRAPHY.fontFamily.bold,
+      fontSize: 15,
+    },
+    resumeCard: {
+      position: "relative" as const,
+      padding: SPACING[4],
+      borderRadius: BORDER_RADIUS.xl,
+      borderWidth: 1,
+      borderColor: colors.surfaceContainer,
+      backgroundColor: colors.surfaceContainerLowest,
+      gap: 14,
+      overflow: "hidden" as const,
+      ...SHADOWS.sm,
+    },
+    resumeAccent: {
+      position: "absolute" as const,
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 6,
+      backgroundColor: colors.primary,
+    },
+    resumeTopRow: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 12,
+      paddingLeft: 8,
+    },
+    resumeIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: BORDER_RADIUS.lg,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      backgroundColor: colors.primaryFixed,
+    },
+    resumeCopy: { flex: 1 },
+    resumeLabel: {
+      color: colors.primary,
+      fontFamily: TYPOGRAPHY.fontFamily.bold,
+      fontSize: 10,
+      letterSpacing: 0.8,
+    },
+    resumeTitle: {
+      color: colors.onSurface,
+      fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+      fontSize: 16,
+      marginTop: 2,
+    },
+    resumeProgress: {
+      color: colors.onSurfaceVariant,
+      fontFamily: TYPOGRAPHY.fontFamily.regular,
+      fontSize: 12,
+      marginTop: 2,
+    },
+    resumeBottom: { paddingLeft: 8, gap: 10 },
+    progressTrack: {
+      height: 6,
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: BORDER_RADIUS.full,
+      overflow: "hidden" as const,
+    },
+    progressFill: {
+      height: "100%" as const,
+      backgroundColor: colors.primary,
+      borderRadius: BORDER_RADIUS.full,
+    },
+    sectionHeading: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 8,
+    },
+    sectionTitle: {
+      color: colors.onSurface,
+      fontFamily: TYPOGRAPHY.fontFamily.bold,
+      fontSize: 19,
+    },
+    studyList: { width: "100%" as const, paddingBottom: 8 },
+    studyPressable: { width: "100%" as const, marginBottom: 12 },
+    studyCard: {
+      width: "100%" as const,
+      backgroundColor: colors.surfaceContainerLowest,
+      borderRadius: BORDER_RADIUS.xl,
+      padding: SPACING[4],
+      borderWidth: 1,
+      borderColor: colors.surfaceContainer,
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      ...SHADOWS.sm,
+    },
+    studyIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: BORDER_RADIUS.xl,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      flexGrow: 0,
+      flexShrink: 0,
+      alignSelf: "center" as const,
+    },
+    studyIconChapters: { backgroundColor: colors.tertiaryContainer },
+    studyIconMocks: { backgroundColor: colors.primary },
+    studyIconPapers: { backgroundColor: colors.secondaryContainer },
+    studyIconDrill: {
+      backgroundColor: colors.warningLight,
+      borderWidth: 1,
+      borderColor: colors.warning,
+    },
+    studyCopy: {
+      flexGrow: 1,
+      flexShrink: 1,
+      flexBasis: 0,
+      minWidth: 0,
+      marginLeft: 14,
+      marginRight: 12,
+    },
+    studyTitle: {
+      color: colors.onSurface,
+      fontFamily: TYPOGRAPHY.fontFamily.bold,
+      fontSize: 15,
+      lineHeight: 20,
+      includeFontPadding: false,
+    },
+    studySubtitle: {
+      color: colors.onSurfaceVariant,
+      fontFamily: TYPOGRAPHY.fontFamily.regular,
+      fontSize: 12,
+      lineHeight: 16,
+      marginTop: 2,
+      includeFontPadding: false,
+    },
+    studyAction: {
+      height: 36,
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      paddingLeft: 14,
+      paddingRight: 12,
+      borderRadius: BORDER_RADIUS.full,
+      borderWidth: 1,
+      flexGrow: 0,
+      flexShrink: 0,
+    },
+    studyActionChapters: {
+      backgroundColor: colors.surfaceContainer,
+      borderColor: colors.tertiaryFixedDim,
+    },
+    studyActionMocks: {
+      backgroundColor: colors.primaryFixed,
+      borderColor: colors.primaryFixedDim,
+    },
+    studyActionPapers: {
+      backgroundColor: colors.secondaryFixed,
+      borderColor: colors.secondaryFixedDim,
+    },
+    studyActionDrill: {
+      backgroundColor: colors.warningLight,
+      borderColor: colors.warning,
+    },
+    studyActionText: {
+      fontFamily: TYPOGRAPHY.fontFamily.bold,
+      fontSize: 12,
+      lineHeight: 16,
+      includeFontPadding: false,
+      marginRight: 4,
+    },
+    studyActionTextChapters: { color: colors.tertiary },
+    studyActionTextMocks: { color: colors.primary },
+    studyActionTextPapers: { color: colors.secondary },
+    studyActionTextDrill: { color: colors.warningText },
+  };
+}
+
 function StudyCard({
+  variant,
   icon,
-  iconBackground,
-  iconColor,
-  iconBorderColor,
   title,
   subtitle,
   actionLabel,
-  actionBackground,
-  actionColor,
-  actionBorderColor,
   onPress,
 }: StudyCardProps) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useColors();
+  const iconColor = colors[STUDY_ICON_COLOR[variant]];
+  const actionColor = colors[STUDY_ACTION_COLOR[variant]];
+
   return (
     <Pressable
       onPress={onPress}
-      style={styles.studyPressable}
+      style={({ pressed }) => [styles.studyPressable, pressed ? layout.pressed : null]}
       accessibilityRole="button"
       accessibilityLabel={`${actionLabel} ${title}`}
     >
-      {({ pressed }) => (
-        <View className="flex-row items-center" style={[styles.studyCard, pressed && styles.pressed]}>
-          <View
-            style={[
-              styles.studyIcon,
-              { backgroundColor: iconBackground },
-              iconBorderColor ? { borderWidth: 1, borderColor: iconBorderColor } : undefined,
-            ]}
-          >
-            <MaterialIcon name={icon} size={26} color={iconColor} filled />
-          </View>
-          <View style={styles.studyCopy}>
-            <Text style={styles.studyTitle} numberOfLines={1} maxFontSizeMultiplier={1.15}>
-              {title}
-            </Text>
-            <Text style={styles.studySubtitle} numberOfLines={1} maxFontSizeMultiplier={1.15}>
-              {subtitle}
-            </Text>
-          </View>
-          <View
-            className="flex-row items-center"
-            style={[
-              styles.studyAction,
-              { backgroundColor: actionBackground, borderColor: actionBorderColor },
-            ]}
-          >
-            <Text style={[styles.studyActionText, { color: actionColor }]} maxFontSizeMultiplier={1}>
-              {actionLabel}
-            </Text>
-            <MaterialIcon name="arrow_forward" size={16} color={actionColor} />
-          </View>
+      <View style={styles.studyCard}>
+        <View style={[styles.studyIcon, styles[STUDY_ICON[variant]]]}>
+          <MaterialIcon name={icon} size={26} color={iconColor} filled />
         </View>
-      )}
+        <View style={styles.studyCopy}>
+          <Text style={styles.studyTitle} numberOfLines={1} maxFontSizeMultiplier={1.15}>
+            {title}
+          </Text>
+          <Text style={styles.studySubtitle} numberOfLines={1} maxFontSizeMultiplier={1.15}>
+            {subtitle}
+          </Text>
+        </View>
+        <View style={[styles.studyAction, styles[STUDY_ACTION[variant]]]}>
+          <Text style={[styles.studyActionText, styles[STUDY_ACTION_TEXT[variant]]]} maxFontSizeMultiplier={1}>
+            {actionLabel}
+          </Text>
+          <MaterialIcon name="arrow_forward" size={16} color={actionColor} />
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function MetaPill({
+  icon,
+  color,
+  label,
+  highlighted = false,
+}: {
+  icon: MaterialIconName;
+  color: string;
+  label: string;
+  highlighted?: boolean;
+}) {
+  const styles = useThemedStyles(createStyles);
+
+  return (
+    <View style={[styles.metaPill, highlighted ? styles.metaPillHighlighted : null]}>
+      <MaterialIcon name={icon} size={13} color={color} filled />
+      <Text style={[styles.metaPillText, highlighted ? styles.metaPillTextHighlighted : null]}>{label}</Text>
+    </View>
+  );
+}
+
+function ActionButton({
+  label,
+  variant,
+  onPress,
+}: {
+  label: string;
+  variant: "amber" | "primary";
+  onPress: () => void;
+}) {
+  const styles = useThemedStyles(createStyles);
+  const colors = useColors();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={styles.actionPressable}
+      android_ripple={{ color: colors.onPrimary }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <View
+        style={[
+          styles.actionButton,
+          variant === "amber" ? styles.actionButtonAmber : styles.actionButtonPrimary,
+        ]}
+      >
+        <Text style={styles.actionButtonText}>{label}</Text>
+        <MaterialIcon name="arrow_forward" size={18} color={colors.onPrimary} />
+      </View>
     </Pressable>
   );
 }
@@ -81,6 +594,8 @@ function StudyCard({
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const styles = useThemedStyles(createStyles);
+  const colors = useColors();
   const { user, onboardingData, lastPracticeActivity } = useAppStore();
   const profileName = user?.full_name?.trim() || "Aarav";
   const firstName = profileName.replace(/^Cadet\s+/i, "").split(" ")[0];
@@ -90,6 +605,18 @@ export default function HomeScreen() {
   const resumeSubject = lastPracticeActivity?.subjectName || "Mathematics";
   const resumeProgress = lastPracticeActivity?.progress ?? 65;
   const tabBarClearance = 84 + insets.bottom;
+  const progressWidth = useMemo(
+    () => StyleSheet.create({ fill: { width: `${resumeProgress}%` } }).fill,
+    [resumeProgress],
+  );
+  const headerOffset = useMemo(
+    () => StyleSheet.create({ pad: { paddingTop: insets.top } }).pad,
+    [insets.top],
+  );
+  const scrollOffset = useMemo(
+    () => StyleSheet.create({ pad: { paddingBottom: tabBarClearance } }).pad,
+    [tabBarClearance],
+  );
 
   const continueMission = () => {
     if (lastPracticeActivity?.topicId) {
@@ -101,7 +628,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top }]}>
+      <View style={[styles.header, headerOffset]}>
         <View style={styles.headerInner}>
           <Pressable
             onPress={() => router.push("/(tabs)/me")}
@@ -114,7 +641,7 @@ export default function HomeScreen() {
                 <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
               ) : (
                 <View style={styles.avatarFallback}>
-                  <MaterialIcon name="person" size={16} color={COLORS.onSurfaceVariant} />
+                  <MaterialIcon name="person" size={16} color={colors.onSurfaceVariant} />
                 </View>
               )}
             </View>
@@ -130,41 +657,41 @@ export default function HomeScreen() {
           <Pressable
             onPress={() => {}}
             style={styles.notificationButton}
-            android_ripple={{ color: COLORS.surfaceContainer, borderless: true, radius: 18 }}
+            android_ripple={{ color: colors.surfaceContainer, borderless: true, radius: 18 }}
             accessibilityRole="button"
             accessibilityLabel="Notifications"
           >
-            <MaterialIcon name="notifications" size={20} color={COLORS.onSurface} />
+            <MaterialIcon name="notifications" size={20} color={colors.onSurface} />
           </Pressable>
         </View>
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarClearance }]}
+        contentContainerStyle={[styles.scrollContent, scrollOffset]}
       >
         <View style={styles.hero}>
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <Svg width="100%" height="100%">
               <Defs>
                 <LinearGradient id="heroGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <Stop offset="0%" stopColor="#18193A" />
-                  <Stop offset="52%" stopColor="#241A5E" />
-                  <Stop offset="100%" stopColor="#3C1F8A" />
+                  <Stop offset="0%" stopColor={colors.onPrimaryFixedVariant} />
+                  <Stop offset="52%" stopColor={colors.primaryContainer} />
+                  <Stop offset="100%" stopColor={colors.gradientEnd} />
                 </LinearGradient>
               </Defs>
               <Rect width="100%" height="100%" fill="url(#heroGradient)" />
-              <Circle cx="96%" cy="7%" r="78" fill="#A855F7" opacity={0.14} />
-              <Circle cx="4%" cy="105%" r="70" fill="#6366F1" opacity={0.2} />
-              <Circle cx="72%" cy="62%" r="42" fill="#FBBF24" opacity={0.07} />
+              <Circle cx="96%" cy="7%" r="78" fill={colors.gradientEnd} opacity={0.14} />
+              <Circle cx="4%" cy="105%" r="70" fill={colors.gradientStart} opacity={0.2} />
+              <Circle cx="72%" cy="62%" r="42" fill={colors.xpGold} opacity={0.07} />
             </Svg>
           </View>
 
-          <View className="flex-row items-center" style={styles.missionPill}>
-            <MaterialIcon name="military_tech" size={14} color="#FCD34D" filled />
+          <View style={styles.missionPill}>
+            <MaterialIcon name="military_tech" size={14} color={colors.xpGold} filled />
             <Text style={styles.missionPillText}>MISSION CONTROL</Text>
           </View>
-          <View className="flex-row items-center" style={styles.heroMain}>
+          <View style={styles.heroMain}>
             <View style={styles.heroCopy}>
               <Text style={styles.heroTitle}>
                 Welcome back,{"\n"}
@@ -188,7 +715,7 @@ export default function HomeScreen() {
               <Text style={styles.livePillText}>LIVE ALL-INDIA TEST</Text>
             </View>
             <View style={styles.rankPill}>
-              <MaterialIcon name="trending_up" size={13} color="#92400E" />
+              <MaterialIcon name="trending_up" size={13} color={colors.warningText} />
               <Text style={styles.rankPillText}>Rank Prediction</Text>
             </View>
           </View>
@@ -197,10 +724,10 @@ export default function HomeScreen() {
             Compete nationwide with 4,800+ cadets taking this test live under real exam rules.
           </Text>
           <View style={styles.metaRow}>
-            <MetaPill icon="assignment" color={COLORS.tertiary} label="125 Qs" />
-            <MetaPill icon="military_tech" color={COLORS.secondary} label="300 Marks" />
-            <MetaPill icon="schedule" color={COLORS.primary} label="150 Mins" />
-            <MetaPill icon="stars" color="#B45309" label="+100 XP & Rank" highlighted />
+            <MetaPill icon="assignment" color={colors.tertiary} label="125 Qs" />
+            <MetaPill icon="military_tech" color={colors.secondary} label="300 Marks" />
+            <MetaPill icon="schedule" color={colors.primary} label="150 Mins" />
+            <MetaPill icon="stars" color={colors.amberText} label="+100 XP & Rank" highlighted />
           </View>
           <ActionButton
             label="Enter Live Test"
@@ -213,7 +740,7 @@ export default function HomeScreen() {
           <View style={styles.resumeAccent} />
           <View style={styles.resumeTopRow}>
             <View style={styles.resumeIcon}>
-              <MaterialIcon name="play_circle" size={24} color={COLORS.primary} filled />
+              <MaterialIcon name="play_circle" size={24} color={colors.primary} filled />
             </View>
             <View style={styles.resumeCopy}>
               <Text style={styles.resumeLabel}>CONTINUE YOUR MISSION</Text>
@@ -225,7 +752,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.resumeBottom}>
             <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: `${resumeProgress}%` }]} />
+              <View style={[styles.progressFill, progressWidth]} />
             </View>
             <ActionButton
               label="Continue Mission"
@@ -236,57 +763,40 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.sectionHeading}>
-          <MaterialIcon name="assignment_turned_in" size={22} color={COLORS.primary} filled />
+          <MaterialIcon name="assignment_turned_in" size={22} color={colors.primary} filled />
           <Text style={styles.sectionTitle} maxFontSizeMultiplier={1.15}>Study & Practice</Text>
         </View>
         <View style={styles.studyList}>
           <StudyCard
+            variant="chapters"
             icon="auto_stories"
-            iconBackground={COLORS.tertiaryContainer}
-            iconColor={COLORS.onTertiaryContainer}
             title="Learn & Chapters"
             subtitle="Syllabus, Chapters & Drills"
             actionLabel="Explore"
-            actionBackground={COLORS.surfaceContainer}
-            actionColor={COLORS.tertiary}
-            actionBorderColor="rgba(153,65,0,0.20)"
             onPress={() => router.push("/(tabs)/practice")}
           />
           <StudyCard
+            variant="mocks"
             icon="timer"
-            iconBackground={COLORS.primary}
-            iconColor={COLORS.onPrimary}
             title="Full Mock Tests"
             subtitle="Timed Exam Simulation"
             actionLabel="Start Test"
-            actionBackground={COLORS.primaryFixed}
-            actionColor={COLORS.primary}
-            actionBorderColor="rgba(70,72,212,0.20)"
             onPress={() => router.push("/test" as Href)}
           />
           <StudyCard
+            variant="papers"
             icon="history_edu"
-            iconBackground={COLORS.secondaryContainer}
-            iconColor={COLORS.onSecondaryContainer}
             title="Previous Papers"
             subtitle="2018 - 2024 Solved"
             actionLabel="Solve Now"
-            actionBackground={COLORS.secondaryFixed}
-            actionColor={COLORS.secondary}
-            actionBorderColor="rgba(0,88,190,0.20)"
             onPress={() => router.push("/papers")}
           />
           <StudyCard
+            variant="drill"
             icon="bolt"
-            iconBackground="rgba(245,158,11,0.15)"
-            iconColor="#B45309"
-            iconBorderColor="rgba(245,158,11,0.20)"
             title="Daily Speed Drill"
             subtitle="10 Qs • 5 Mins Rapid Fire"
             actionLabel="Play"
-            actionBackground="rgba(245,158,11,0.15)"
-            actionColor="#92400E"
-            actionBorderColor="rgba(245,158,11,0.30)"
             onPress={() => router.push("/(tabs)/practice")}
           />
         </View>
@@ -294,464 +804,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-function MetaPill({
-  icon,
-  color,
-  label,
-  highlighted = false,
-}: {
-  icon: MaterialIconName;
-  color: string;
-  label: string;
-  highlighted?: boolean;
-}) {
-  return (
-    <View style={[styles.metaPill, highlighted && styles.metaPillHighlighted]}>
-      <MaterialIcon name={icon} size={13} color={color} filled />
-      <Text style={[styles.metaPillText, highlighted && styles.metaPillTextHighlighted]}>{label}</Text>
-    </View>
-  );
-}
-
-function ActionButton({
-  label,
-  variant,
-  onPress,
-}: {
-  label: string;
-  variant: "amber" | "primary";
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={styles.actionPressable}
-      android_ripple={{ color: "rgba(255,255,255,0.18)" }}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
-      <View
-        className="flex-row items-center justify-center"
-        style={[
-          styles.actionButton,
-          variant === "amber" ? styles.actionButtonAmber : styles.actionButtonPrimary,
-        ]}
-      >
-        <Text style={styles.actionButtonText}>{label}</Text>
-        <MaterialIcon name="arrow_forward" size={18} color={COLORS.onPrimary} />
-      </View>
-    </Pressable>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    backgroundColor: COLORS.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.surfaceContainer,
-    zIndex: 20,
-  },
-  headerInner: {
-    height: 56,
-    paddingHorizontal: SPACING[4],
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  profileButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    minWidth: 0,
-    marginRight: 12,
-  },
-  avatarOuter: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.surfaceContainer,
-    backgroundColor: COLORS.surfaceContainerLow,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    padding: 2,
-    flexGrow: 0,
-    flexShrink: 0,
-    ...SHADOWS.sm,
-  },
-  avatarFallback: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.surfaceContainerLow,
-  },
-  avatarImage: { width: 28, height: 28, borderRadius: 14 },
-  headerTextWrap: { flex: 1, minWidth: 0, marginLeft: 10 },
-  headerName: {
-    color: COLORS.onSurface,
-    fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: -0.2,
-    includeFontPadding: false,
-  },
-  headerClass: {
-    color: COLORS.onSurfaceVariant,
-    fontFamily: TYPOGRAPHY.fontFamily.medium,
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 0.3,
-    includeFontPadding: false,
-  },
-  notificationButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: COLORS.surfaceContainer,
-    alignItems: "center",
-    justifyContent: "center",
-    flexGrow: 0,
-    flexShrink: 0,
-    ...SHADOWS.sm,
-  },
-  scrollContent: {
-    width: "100%",
-    maxWidth: 720,
-    alignSelf: "center",
-    paddingHorizontal: SPACING[4],
-    paddingTop: SPACING[2],
-    gap: SPACING[5],
-  },
-  hero: {
-    borderRadius: BORDER_RADIUS["3xl"],
-    paddingHorizontal: SPACING[5],
-    paddingTop: SPACING[6],
-    paddingBottom: SPACING[5],
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-    backgroundColor: "#241A5E",
-  },
-  missionPill: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: BORDER_RADIUS.full,
-    backgroundColor: "rgba(255,255,255,0.10)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.20)",
-  },
-  missionPillText: {
-    color: COLORS.onPrimary,
-    fontFamily: TYPOGRAPHY.fontFamily.bold,
-    fontSize: 11,
-    letterSpacing: 0.8,
-  },
-  heroMain: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 12,
-  },
-  heroCopy: { flex: 1, minWidth: 0, zIndex: 1, paddingRight: 12 },
-  heroTitle: {
-    color: COLORS.onPrimary,
-    fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-    fontSize: 24,
-    lineHeight: 30,
-    letterSpacing: -0.4,
-  },
-  heroTitleAccent: { color: "#FDE68A" },
-  heroSubtitle: {
-    color: "#C7D2FE",
-    fontFamily: TYPOGRAPHY.fontFamily.medium,
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 8,
-  },
-  mascotFrame: {
-    width: 88,
-    height: 88,
-    flexGrow: 0,
-    flexShrink: 0,
-    borderRadius: BORDER_RADIUS.xl,
-    backgroundColor: "rgba(255,255,255,0.10)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    padding: 4,
-  },
-  liveTestCard: {
-    position: "relative",
-    borderRadius: BORDER_RADIUS.xl,
-    borderWidth: 1,
-    borderColor: "rgba(245,158,11,0.30)",
-    backgroundColor: "#FFFBEB",
-    padding: SPACING[4],
-    gap: 12,
-    overflow: "hidden",
-    ...SHADOWS.sm,
-  },
-  liveCardGlow: {
-    position: "absolute",
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    right: -32,
-    top: -32,
-    backgroundColor: "rgba(245,158,11,0.10)",
-  },
-  liveTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  livePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: BORDER_RADIUS.full,
-    backgroundColor: "rgba(239,68,68,0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.18)",
-  },
-  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.error },
-  livePillText: {
-    color: COLORS.error,
-    fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-    fontSize: 10,
-    letterSpacing: 0.7,
-  },
-  rankPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: BORDER_RADIUS.full,
-    backgroundColor: "rgba(245,158,11,0.14)",
-    borderWidth: 1,
-    borderColor: "rgba(245,158,11,0.28)",
-  },
-  rankPillText: {
-    color: "#92400E",
-    fontFamily: TYPOGRAPHY.fontFamily.bold,
-    fontSize: 10,
-  },
-  liveTitle: {
-    color: COLORS.onSurface,
-    fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-    fontSize: 17,
-    lineHeight: 22,
-  },
-  liveDescription: {
-    color: COLORS.onSurfaceVariant,
-    fontFamily: TYPOGRAPHY.fontFamily.regular,
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  metaPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surfaceContainerLow,
-    borderWidth: 1,
-    borderColor: COLORS.surfaceContainer,
-  },
-  metaPillHighlighted: {
-    backgroundColor: "rgba(245,158,11,0.14)",
-    borderColor: "rgba(245,158,11,0.22)",
-  },
-  metaPillText: {
-    color: COLORS.onSurfaceVariant,
-    fontFamily: TYPOGRAPHY.fontFamily.semibold,
-    fontSize: 10,
-  },
-  metaPillTextHighlighted: { color: "#92400E", fontFamily: TYPOGRAPHY.fontFamily.bold },
-  actionPressable: { width: "100%" },
-  actionButton: {
-    width: "100%",
-    height: 44,
-    minHeight: 44,
-    borderRadius: BORDER_RADIUS.full,
-    borderBottomWidth: 3,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: SPACING[5],
-  },
-  actionButtonAmber: {
-    backgroundColor: "#92400E",
-    borderBottomColor: "#783200",
-  },
-  actionButtonPrimary: {
-    backgroundColor: COLORS.primary,
-    borderBottomColor: COLORS.onPrimaryFixedVariant,
-  },
-  actionButtonText: {
-    color: COLORS.onPrimary,
-    fontFamily: TYPOGRAPHY.fontFamily.bold,
-    fontSize: 15,
-  },
-  resumeCard: {
-    position: "relative",
-    padding: SPACING[4],
-    borderRadius: BORDER_RADIUS.xl,
-    borderWidth: 1,
-    borderColor: COLORS.surfaceContainer,
-    backgroundColor: COLORS.surfaceContainerLowest,
-    gap: 14,
-    overflow: "hidden",
-    ...SHADOWS.sm,
-  },
-  resumeAccent: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 6,
-    backgroundColor: COLORS.primary,
-  },
-  resumeTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingLeft: 8,
-  },
-  resumeIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: BORDER_RADIUS.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.primaryFixed,
-  },
-  resumeCopy: { flex: 1 },
-  resumeLabel: {
-    color: COLORS.primary,
-    fontFamily: TYPOGRAPHY.fontFamily.bold,
-    fontSize: 10,
-    letterSpacing: 0.8,
-  },
-  resumeTitle: {
-    color: COLORS.onSurface,
-    fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-    fontSize: 16,
-    marginTop: 2,
-  },
-  resumeProgress: {
-    color: COLORS.onSurfaceVariant,
-    fontFamily: TYPOGRAPHY.fontFamily.regular,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  resumeBottom: { paddingLeft: 8, gap: 10 },
-  progressTrack: {
-    height: 6,
-    backgroundColor: COLORS.surfaceContainer,
-    borderRadius: BORDER_RADIUS.full,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: COLORS.primary,
-    borderRadius: BORDER_RADIUS.full,
-  },
-  sectionHeading: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  sectionTitle: {
-    color: COLORS.onSurface,
-    fontFamily: TYPOGRAPHY.fontFamily.bold,
-    fontSize: 19,
-  },
-  studyList: { width: "100%", paddingBottom: 8 },
-  studyPressable: { width: "100%", marginBottom: 12 },
-  studyCard: {
-    width: "100%",
-    backgroundColor: COLORS.surfaceContainerLowest,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING[4],
-    borderWidth: 1,
-    borderColor: COLORS.surfaceContainer,
-    flexDirection: "row",
-    alignItems: "center",
-    ...SHADOWS.sm,
-  },
-  studyIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: BORDER_RADIUS.xl,
-    alignItems: "center",
-    justifyContent: "center",
-    flexGrow: 0,
-    flexShrink: 0,
-    alignSelf: "center",
-  },
-  studyCopy: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    minWidth: 0,
-    marginLeft: 14,
-    marginRight: 12,
-  },
-  studyTitle: {
-    color: COLORS.onSurface,
-    fontFamily: TYPOGRAPHY.fontFamily.bold,
-    fontSize: 15,
-    lineHeight: 20,
-    includeFontPadding: false,
-  },
-  studySubtitle: {
-    color: COLORS.onSurfaceVariant,
-    fontFamily: TYPOGRAPHY.fontFamily.regular,
-    fontSize: 12,
-    lineHeight: 16,
-    marginTop: 2,
-    includeFontPadding: false,
-  },
-  studyAction: {
-    height: 36,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingLeft: 14,
-    paddingRight: 12,
-    borderRadius: BORDER_RADIUS.full,
-    borderWidth: 1,
-    flexGrow: 0,
-    flexShrink: 0,
-  },
-  studyActionText: {
-    fontFamily: TYPOGRAPHY.fontFamily.bold,
-    fontSize: 12,
-    lineHeight: 16,
-    includeFontPadding: false,
-    marginRight: 4,
-  },
-  pressed: { opacity: 0.82, transform: [{ scale: 0.98 }] },
-});
-
-

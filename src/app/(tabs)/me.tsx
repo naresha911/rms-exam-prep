@@ -2,7 +2,7 @@
 // Tab route is `me` (not `profile`) to avoid clashing with `/profile/*` stack screens.
 // Per Stitch: avatar header with streak/XP, stats row, My Learning list,
 // Settings list, sign-out button.
-import { View, Text, ScrollView, Pressable, Alert, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "../../components/ui/Avatar";
@@ -10,11 +10,245 @@ import { StreakDisplay } from "../../components/shared/StreakDisplay";
 import { XpDisplay } from "../../components/shared/XpDisplay";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
 import { signOut } from "../../lib/supabase";
+
+type StatVariant = "questions" | "accuracy" | "level";
+
+const STAT_ICON = {
+    questions: "statIconQuestions",
+    accuracy: "statIconAccuracy",
+    level: "statIconLevel",
+} as const;
+
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        scrollContent: {
+            padding: SPACING[5],
+        },
+        header: {
+            alignItems: "center" as const,
+            marginBottom: SPACING[6],
+            paddingTop: SPACING[3],
+        },
+        userName: {
+            fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+            fontSize: TYPOGRAPHY.fontSize.xl,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            marginTop: SPACING[3],
+        },
+        userSubtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.onSurfaceVariant,
+            fontWeight: TYPOGRAPHY.fontWeight.medium,
+            marginTop: 2,
+        },
+        badges: {
+            flexDirection: "row" as const,
+            gap: SPACING[2],
+            marginTop: SPACING[3],
+        },
+        section: {
+            marginBottom: SPACING[5],
+        },
+        sectionTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            marginBottom: SPACING[3],
+        },
+        statsRow: {
+            flexDirection: "row" as const,
+            gap: SPACING[3],
+        },
+        statCard: {
+            flex: 1,
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS["2xl"],
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            padding: SPACING[3],
+            alignItems: "center" as const,
+        },
+        statIcon: {
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            marginBottom: SPACING[2],
+        },
+        statIconQuestions: { backgroundColor: colors.primaryContainer },
+        statIconAccuracy: { backgroundColor: colors.secondaryContainer },
+        statIconLevel: { backgroundColor: colors.primaryFixed },
+        statValue: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+        },
+        statLabel: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+            marginTop: 2,
+        },
+        menuCard: {
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS["2xl"],
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            overflow: "hidden" as const,
+        },
+        menuItem: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            paddingVertical: SPACING[4],
+            paddingHorizontal: SPACING[4],
+        },
+        menuItemBorder: {
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outlineVariant,
+        },
+        menuItemPressed: {
+            backgroundColor: colors.surfaceVariant,
+        },
+        menuIconWrap: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.primaryFixed,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            marginRight: SPACING[3],
+        },
+        menuContent: {
+            flex: 1,
+        },
+        menuTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+        menuSubtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+            marginTop: 2,
+        },
+        signOutBtn: {
+            marginTop: SPACING[2],
+            marginBottom: SPACING[4],
+        },
+        signOutCard: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS["2xl"],
+            borderWidth: 1,
+            borderColor: colors.error,
+            paddingVertical: SPACING[4],
+            gap: SPACING[2],
+        },
+        signOutText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.error,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+        disclaimer: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+            textAlign: "center" as const,
+            lineHeight: 18,
+        },
+    };
+}
+
+function statIconColor(colors: ColorPalette, variant: StatVariant) {
+    if (variant === "questions") return colors.primary;
+    if (variant === "accuracy") return colors.secondary;
+    return colors.gradientEnd;
+}
+
+function StatCard({
+    icon,
+    value,
+    label,
+    variant,
+}: {
+    icon: "quiz" | "trending_up" | "workspace_premium";
+    value: string;
+    label: string;
+    variant: StatVariant;
+}) {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
+
+    return (
+        <View style={styles.statCard}>
+            <View style={[styles.statIcon, styles[STAT_ICON[variant]]]}>
+                <MaterialIcon name={icon} size={18} color={statIconColor(colors, variant)} filled />
+            </View>
+            <Text style={styles.statValue}>{value}</Text>
+            <Text style={styles.statLabel}>{label}</Text>
+        </View>
+    );
+}
+
+function MenuItem({
+    icon,
+    title,
+    subtitle,
+    onPress,
+    isLast = false,
+}: {
+    icon: "bookmark" | "cancel" | "analytics" | "emoji_events" | "leaderboard" | "history" | "settings" | "edit" | "support_agent";
+    title: string;
+    subtitle: string;
+    onPress: () => void;
+    isLast?: boolean;
+}) {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
+
+    return (
+        <Pressable
+            onPress={onPress}
+            style={({ pressed }) => [
+                styles.menuItem,
+                !isLast ? styles.menuItemBorder : null,
+                pressed ? styles.menuItemPressed : null,
+            ]}
+        >
+            <View style={styles.menuIconWrap}>
+                <MaterialIcon name={icon} size={22} color={colors.primary} />
+            </View>
+            <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>{title}</Text>
+                <Text style={styles.menuSubtitle}>{subtitle}</Text>
+            </View>
+            <MaterialIcon name="chevron_right" size={22} color={colors.onSurfaceVariant} />
+        </Pressable>
+    );
+}
 
 export default function ProfileScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { user, streak, xp, level, levelName, dailyProgress, resetStore } = useAppStore();
 
     const handleSignOut = () => {
@@ -46,13 +280,12 @@ export default function ProfileScreen() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Profile Header — Stitch: centered avatar, name, streak/XP pills */}
                 <View style={styles.header}>
                     <Avatar
                         name={user?.full_name || "Student"}
                         uri={user?.avatar_url}
                         size={100}
-                        backgroundColor={COLORS.primary}
+                        backgroundColor={colors.primary}
                     />
                     <Text style={styles.userName}>
                         {user?.full_name || "Student"}
@@ -66,35 +299,30 @@ export default function ProfileScreen() {
                     </View>
                 </View>
 
-                {/* Stats Row — Stitch: surface-container cards */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>My Progress</Text>
                     <View style={styles.statsRow}>
                         <StatCard
                             icon="quiz"
+                            variant="questions"
                             value={dailyProgress.questionsAnswered.toString()}
                             label="Questions"
-                            iconBg={COLORS.primaryContainer}
-                            iconColor={COLORS.primary}
                         />
                         <StatCard
                             icon="trending_up"
+                            variant="accuracy"
                             value={`${accuracy}%`}
                             label="Accuracy"
-                            iconBg={COLORS.secondaryContainer}
-                            iconColor={COLORS.secondary}
                         />
                         <StatCard
                             icon="workspace_premium"
+                            variant="level"
                             value={level.toString()}
                             label="Level"
-                            iconBg="rgba(168,85,247,0.12)"
-                            iconColor="#A855F7"
                         />
                     </View>
                 </View>
 
-                {/* My Learning — Stitch: surface cards with icon rows */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>My Learning</Text>
                     <View style={styles.menuCard}>
@@ -138,7 +366,6 @@ export default function ProfileScreen() {
                     </View>
                 </View>
 
-                {/* Settings */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Settings</Text>
                     <View style={styles.menuCard}>
@@ -164,15 +391,16 @@ export default function ProfileScreen() {
                     </View>
                 </View>
 
-                {/* Sign Out */}
-                <Pressable onPress={handleSignOut} style={styles.signOutBtn}>
+                <Pressable
+                    onPress={handleSignOut}
+                    style={({ pressed }) => [styles.signOutBtn, pressed ? layout.pressed : null]}
+                >
                     <View style={styles.signOutCard}>
-                        <MaterialIcon name="logout" size={20} color={COLORS.error} />
+                        <MaterialIcon name="logout" size={20} color={colors.error} />
                         <Text style={styles.signOutText}>Sign Out</Text>
                     </View>
                 </Pressable>
 
-                {/* Disclaimer */}
                 <Text style={styles.disclaimer}>
                     This is an independent educational application and is not affiliated with NTA, Sainik Schools Society, or the Government of India.
                 </Text>
@@ -180,211 +408,3 @@ export default function ProfileScreen() {
         </SafeAreaView>
     );
 }
-
-function StatCard({
-    icon,
-    value,
-    label,
-    iconBg,
-    iconColor,
-}: {
-    icon: any;
-    value: string;
-    label: string;
-    iconBg: string;
-    iconColor: string;
-}) {
-    return (
-        <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: iconBg }]}>
-                <MaterialIcon name={icon} size={18} color={iconColor} filled />
-            </View>
-            <Text style={styles.statValue}>{value}</Text>
-            <Text style={styles.statLabel}>{label}</Text>
-        </View>
-    );
-}
-
-function MenuItem({
-    icon,
-    title,
-    subtitle,
-    onPress,
-    isLast = false,
-}: {
-    icon: any;
-    title: string;
-    subtitle: string;
-    onPress: () => void;
-    isLast?: boolean;
-}) {
-    return (
-        <Pressable
-            onPress={onPress}
-            style={({ pressed }) => [
-                styles.menuItem,
-                !isLast && styles.menuItemBorder,
-                pressed && styles.menuItemPressed,
-            ]}
-        >
-            <View style={styles.menuIconWrap}>
-                <MaterialIcon name={icon} size={22} color={COLORS.primary} />
-            </View>
-            <View style={styles.menuContent}>
-                <Text style={styles.menuTitle}>{title}</Text>
-                <Text style={styles.menuSubtitle}>{subtitle}</Text>
-            </View>
-            <MaterialIcon name="chevron_right" size={22} color={COLORS.onSurfaceVariant} />
-        </Pressable>
-    );
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    scrollContent: {
-        padding: SPACING[5],
-    },
-    header: {
-        alignItems: "center",
-        marginBottom: SPACING[6],
-        paddingTop: SPACING[3],
-    },
-    userName: {
-        fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-        fontSize: TYPOGRAPHY.fontSize.xl,
-        color: COLORS.onSurface,
-        fontWeight: "800",
-        marginTop: SPACING[3],
-    },
-    userSubtitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurfaceVariant,
-        fontWeight: "500",
-        marginTop: 2,
-    },
-    badges: {
-        flexDirection: "row",
-        gap: SPACING[2],
-        marginTop: SPACING[3],
-    },
-    section: {
-        marginBottom: SPACING[5],
-    },
-    sectionTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        fontWeight: "700",
-        marginBottom: SPACING[3],
-    },
-    statsRow: {
-        flexDirection: "row",
-        gap: SPACING[3],
-    },
-    statCard: {
-        flex: 1,
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        padding: SPACING[3],
-        alignItems: "center",
-    },
-    statIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: SPACING[2],
-    },
-    statValue: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        fontWeight: "800",
-    },
-    statLabel: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-        fontWeight: "600",
-        marginTop: 2,
-    },
-    menuCard: {
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        overflow: "hidden",
-    },
-    menuItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: SPACING[4],
-        paddingHorizontal: SPACING[4],
-    },
-    menuItemBorder: {
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.outlineVariant,
-    },
-    menuItemPressed: {
-        backgroundColor: COLORS.surfaceVariant,
-    },
-    menuIconWrap: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: COLORS.primaryFixed,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: SPACING[3],
-    },
-    menuContent: {
-        flex: 1,
-    },
-    menuTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        fontWeight: "600",
-    },
-    menuSubtitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-        marginTop: 2,
-    },
-    signOutBtn: {
-        marginTop: SPACING[2],
-        marginBottom: SPACING[4],
-    },
-    signOutCard: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.error,
-        paddingVertical: SPACING[4],
-        gap: SPACING[2],
-    },
-    signOutText: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.error,
-        fontWeight: "700",
-    },
-    disclaimer: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-        textAlign: "center",
-        lineHeight: 18,
-    },
-});

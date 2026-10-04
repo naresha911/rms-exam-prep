@@ -5,7 +5,6 @@ import {
     BackHandler,
     Pressable,
     ScrollView,
-    StyleSheet,
     Text,
     View,
 } from "react-native";
@@ -17,7 +16,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientProgressBar } from "@/components/shared/GradientProgressBar";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { QuestionRenderer, QuestionAssist, paperQuestionToRenderItem } from "@/components/questions";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
 import { useAppStore, isAutoShowSolution } from "@/store/useAppStore";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import {
@@ -43,6 +43,8 @@ export default function PaperSessionScreen() {
     const { preferences } = useAppStore();
     const preferredLanguage = preferences?.preferredLanguage || "en";
     const autoShowSolution = isAutoShowSolution(preferences);
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
 
     const [paper, setPaper] = useState<Paper | null>(null);
     const [questions, setQuestions] = useState<PaperSessionQuestion[]>([]);
@@ -435,8 +437,12 @@ export default function PaperSessionScreen() {
     return (
         <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
             <View style={styles.header}>
-                <Pressable onPress={handlePauseExit} style={styles.iconBtn} accessibilityLabel={t("common.back")}>
-                    <MaterialIcon name="close" size={22} color={COLORS.onSurface} />
+                <Pressable
+                    onPress={handlePauseExit}
+                    style={({ pressed }) => [styles.iconBtn, pressed && layout.pressed]}
+                    accessibilityLabel={t("common.back")}
+                >
+                    <MaterialIcon name="close" size={22} color={colors.onSurface} />
                 </Pressable>
                 <View style={styles.headerCenter}>
                     <Text style={styles.headerTitle} numberOfLines={1}>
@@ -447,8 +453,8 @@ export default function PaperSessionScreen() {
                     </Text>
                 </View>
                 <View style={[styles.timerPill, isLowTime && styles.timerLow]}>
-                    <MaterialIcon name="schedule" size={16} color={isLowTime ? COLORS.error : COLORS.primary} />
-                    <Text style={[styles.timerText, isLowTime && { color: COLORS.error }]}>
+                    <MaterialIcon name="schedule" size={16} color={isLowTime ? colors.error : colors.primary} />
+                    <Text style={[styles.timerText, isLowTime && styles.timerTextLow]}>
                         {formatTime(timeRemaining)}
                     </Text>
                 </View>
@@ -509,11 +515,15 @@ export default function PaperSessionScreen() {
             </ScrollView>
 
             <View style={styles.footer}>
-                <Pressable onPress={handleToggleFlag} style={styles.flagBtn} accessibilityLabel={t("papers.markReview")}>
+                <Pressable
+                    onPress={handleToggleFlag}
+                    style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
+                    accessibilityLabel={t("papers.markReview")}
+                >
                     <MaterialIcon
                         name="flag"
                         size={22}
-                        color={flagged.has(current.question_id) ? COLORS.warning : COLORS.onSurfaceVariant}
+                        color={flagged.has(current.question_id) ? colors.warning : colors.onSurfaceVariant}
                     />
                 </Pressable>
                 <Button
@@ -522,21 +532,21 @@ export default function PaperSessionScreen() {
                     size="sm"
                     disabled={currentIndex === 0}
                     onPress={() => goTo(currentIndex - 1)}
-                    style={{ flex: 1 }}
+                    style={styles.fill}
                 />
                 {currentIndex < questions.length - 1 ? (
                     <Button
                         title={t("common.next")}
                         size="sm"
                         onPress={() => goTo(currentIndex + 1)}
-                        style={{ flex: 1 }}
+                        style={styles.fill}
                     />
                 ) : (
                     <Button
                         title={t("tests.submitTest")}
                         size="sm"
                         onPress={() => setShowSubmitConfirm(true)}
-                        style={{ flex: 1 }}
+                        style={styles.fill}
                     />
                 )}
             </View>
@@ -556,13 +566,13 @@ export default function PaperSessionScreen() {
                                 title={t("common.cancel")}
                                 variant="outline"
                                 onPress={() => setShowSubmitConfirm(false)}
-                                style={{ flex: 1 }}
+                                style={styles.fill}
                             />
                             <Button
                                 title={submitting ? t("common.loading") : t("tests.submitTest")}
                                 onPress={finishSubmit}
                                 disabled={submitting}
-                                style={{ flex: 1 }}
+                                style={styles.fill}
                             />
                         </View>
                     </View>
@@ -572,71 +582,75 @@ export default function PaperSessionScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.background },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[2],
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.outlineVariant,
-        gap: SPACING[2],
-    },
-    iconBtn: { padding: SPACING[1] },
-    headerCenter: { flex: 1 },
-    headerTitle: { ...TYPOGRAPHY.labelLg, color: COLORS.onSurface },
-    headerSub: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant, marginTop: 2 },
-    timerPill: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        backgroundColor: COLORS.primaryFixed,
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: BORDER_RADIUS.full,
-    },
-    timerLow: { backgroundColor: COLORS.errorLight },
-    timerText: { ...TYPOGRAPHY.labelSm, color: COLORS.primary },
-    progressWrap: { paddingHorizontal: SPACING[4], paddingTop: SPACING[2] },
-    warnBanner: {
-        marginHorizontal: SPACING[4],
-        marginTop: SPACING[2],
-        backgroundColor: COLORS.warningLight,
-        borderRadius: BORDER_RADIUS.md,
-        padding: SPACING[2],
-    },
-    warnText: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant, fontWeight: "400" },
-    content: { padding: SPACING[4], paddingBottom: 120 },
-    marksLabel: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant, marginBottom: SPACING[2] },
-    unsupported: { marginTop: SPACING[2], color: COLORS.warning, ...TYPOGRAPHY.labelSm },
-    options: { gap: SPACING[1] },
-    footer: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[2],
-        padding: SPACING[4],
-        borderTopWidth: 1,
-        borderTopColor: COLORS.outlineVariant,
-        backgroundColor: COLORS.surface,
-    },
-    flagBtn: { padding: SPACING[2] },
-    modalOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.45)",
-        justifyContent: "center",
-        padding: SPACING[6],
-    },
-    modalCard: {
-        backgroundColor: COLORS.surface,
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING[6],
-    },
-    modalTitle: { ...TYPOGRAPHY.headlineMd, color: COLORS.onSurface, fontSize: 20 },
-    modalBody: { ...TYPOGRAPHY.bodyMd, color: COLORS.onSurfaceVariant, marginTop: SPACING[2] },
-    modalActions: { flexDirection: "row", gap: SPACING[2], marginTop: SPACING[6] },
-});
+function createStyles(colors: ColorPalette) {
+    return {
+        container: { flex: 1, backgroundColor: colors.background },
+        header: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[2],
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outlineVariant,
+            gap: SPACING[2],
+        },
+        iconBtn: { padding: SPACING[1] },
+        headerCenter: { flex: 1 },
+        headerTitle: { ...TYPOGRAPHY.labelLg, color: colors.onSurface },
+        headerSub: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant, marginTop: 2 },
+        timerPill: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: 4,
+            backgroundColor: colors.primaryFixed,
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: BORDER_RADIUS.full,
+        },
+        timerLow: { backgroundColor: colors.errorLight },
+        timerText: { ...TYPOGRAPHY.labelSm, color: colors.primary },
+        timerTextLow: { color: colors.error },
+        progressWrap: { paddingHorizontal: SPACING[4], paddingTop: SPACING[2] },
+        warnBanner: {
+            marginHorizontal: SPACING[4],
+            marginTop: SPACING[2],
+            backgroundColor: colors.warningLight,
+            borderRadius: BORDER_RADIUS.md,
+            padding: SPACING[2],
+        },
+        warnText: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant, fontWeight: TYPOGRAPHY.fontWeight.regular },
+        content: { padding: SPACING[4], paddingBottom: 120 },
+        marksLabel: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant, marginBottom: SPACING[2] },
+        unsupported: { marginTop: SPACING[2], color: colors.warning, ...TYPOGRAPHY.labelSm },
+        options: { gap: SPACING[1] },
+        footer: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: SPACING[2],
+            padding: SPACING[4],
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+            backgroundColor: colors.surface,
+        },
+        flagBtn: { padding: SPACING[2] },
+        fill: { flex: 1 },
+        modalOverlay: {
+            position: "absolute" as const,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: colors.overlay,
+            justifyContent: "center" as const,
+            padding: SPACING[6],
+        },
+        modalCard: {
+            backgroundColor: colors.surface,
+            borderRadius: BORDER_RADIUS.lg,
+            padding: SPACING[6],
+        },
+        modalTitle: { ...TYPOGRAPHY.headlineMd, color: colors.onSurface, fontSize: 20 },
+        modalBody: { ...TYPOGRAPHY.bodyMd, color: colors.onSurfaceVariant, marginTop: SPACING[2] },
+        modalActions: { flexDirection: "row" as const, gap: SPACING[2], marginTop: SPACING[6] },
+    };
+}

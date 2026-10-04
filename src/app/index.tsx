@@ -1,11 +1,21 @@
 import { useEffect } from "react";
-import { Redirect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { View, ActivityIndicator } from "react-native";
 import { useAppStore } from "../store/useAppStore";
-import { COLORS } from "../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../theme";
+
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            backgroundColor: colors.background,
+        },
+    };
+}
 
 export default function Index() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const onboardingComplete = useAppStore((s) => s.onboardingComplete);
     const isAuthenticated = useAppStore((s) => s.isAuthenticated);
     const isLoading = useAppStore((s) => s.isLoading);
@@ -30,15 +40,8 @@ export default function Index() {
     }, [onboardingComplete, isAuthenticated, isLoading, router]);
 
     return (
-        <View
-            style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: COLORS.background,
-            }}
-        >
-            <ActivityIndicator size="large" color={COLORS.primary} />
+        <View style={[layout.fill, layout.center, styles.screen]}>
+            <ActivityIndicator size="large" color={colors.primary} />
         </View>
     );
 }

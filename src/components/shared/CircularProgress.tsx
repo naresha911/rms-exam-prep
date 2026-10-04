@@ -1,10 +1,11 @@
 // CircularProgress — SVG donut chart matching mock test result & parent dashboard.
 // Indigo→purple gradient ring, large % label in center, optional trend indicator.
 
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
-import { COLORS, TYPOGRAPHY } from "../../constants";
+import React, { useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { TYPOGRAPHY } from '../../constants';
+import { layout, useColors, useThemedStyles, type ColorPalette } from '../../theme';
 
 interface CircularProgressProps {
     percentage: number;   // 0–100
@@ -15,6 +16,46 @@ interface CircularProgressProps {
     style?: any;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            position: 'relative' as const,
+        },
+        svg: {
+            position: 'absolute' as const,
+            top: 0,
+            left: 0,
+        },
+        percentage: {
+            fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+            fontSize: TYPOGRAPHY.fontSize['2xl'],
+            lineHeight: TYPOGRAPHY.fontSize['2xl'] * 1.2,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            color: colors.primary,
+        },
+        percentSign: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+        },
+        label: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+            marginTop: 2,
+        },
+        trend: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            marginTop: 2,
+        },
+        trendUp: {
+            color: colors['success-green'],
+        },
+        trendDown: {
+            color: colors.error,
+        },
+    };
+}
+
 export const CircularProgress: React.FC<CircularProgressProps> = ({
     percentage,
     size = 120,
@@ -23,30 +64,34 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
     trend,
     style,
 }) => {
+    const colors = useColors();
+    const styles = useThemedStyles(createStyles);
     const clamped = Math.min(Math.max(percentage, 0), 100);
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
     const filled = (clamped / 100) * circumference;
+    const frame = useMemo(
+        () => StyleSheet.create({ box: { width: size, height: size } }),
+        [size],
+    );
 
     return (
-        <View style={[styles.container, { width: size, height: size }, style]}>
+        <View style={[layout.center, styles.container, frame.box, style]}>
             <Svg width={size} height={size} style={styles.svg}>
                 <Defs>
                     <LinearGradient id="donutGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <Stop offset="0%" stopColor={COLORS.gradientStart} />
-                        <Stop offset="100%" stopColor={COLORS.gradientEnd} />
+                        <Stop offset="0%" stopColor={colors.gradientStart} />
+                        <Stop offset="100%" stopColor={colors.gradientEnd} />
                     </LinearGradient>
                 </Defs>
-                {/* Track */}
                 <Circle
                     cx={size / 2}
                     cy={size / 2}
                     r={radius}
-                    stroke={COLORS.surfaceContainer}
+                    stroke={colors.surfaceContainer}
                     strokeWidth={strokeWidth}
                     fill="none"
                 />
-                {/* Fill */}
                 <Circle
                     cx={size / 2}
                     cy={size / 2}
@@ -60,65 +105,20 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
                 />
             </Svg>
 
-            {/* Center text */}
-            <View style={styles.centerContent}>
-                <Text style={[styles.percentage, { color: COLORS.primary }]}>
+            <View style={layout.center}>
+                <Text style={styles.percentage}>
                     {Math.round(clamped)}
                     <Text style={styles.percentSign}>%</Text>
                 </Text>
-                {label && (
-                    <Text style={styles.label}>{label}</Text>
-                )}
-                {trend !== undefined && (
-                    <Text
-                        style={[
-                            styles.trend,
-                            { color: trend >= 0 ? COLORS["success-green"] : COLORS.error },
-                        ]}
-                    >
-                        {trend >= 0 ? "↑" : "↓"} {Math.abs(trend)}%
+                {label ? <Text style={styles.label}>{label}</Text> : null}
+                {trend !== undefined ? (
+                    <Text style={[styles.trend, trend >= 0 ? styles.trendUp : styles.trendDown]}>
+                        {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
                     </Text>
-                )}
+                ) : null}
             </View>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        position: "relative",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    svg: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-    },
-    centerContent: {
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    percentage: {
-        fontFamily: "PlusJakartaSans_800ExtraBold",
-        fontSize: TYPOGRAPHY.fontSize["2xl"],
-        lineHeight: TYPOGRAPHY.fontSize["2xl"] * 1.2,
-        fontWeight: "800",
-    },
-    percentSign: {
-        fontSize: TYPOGRAPHY.fontSize.lg,
-    },
-    label: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-        marginTop: 2,
-    },
-    trend: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        marginTop: 2,
-    },
-});
 
 export default CircularProgress;

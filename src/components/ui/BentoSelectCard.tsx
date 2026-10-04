@@ -2,10 +2,11 @@
 // Per Stitch: bg-surface, 2px outline-variant border, icon + title + subtitle,
 // circular check on right, primary overlay highlight when selected.
 
-import React from "react";
-import { View, Text, Pressable, StyleSheet, ViewStyle } from "react-native";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
-import { MaterialIcon, MaterialIconName } from "./MaterialIcon";
+import React from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../constants';
+import { layout, useColors, useThemedStyles, type ColorPalette } from '../../theme';
+import { MaterialIcon, MaterialIconName } from './MaterialIcon';
 
 interface BentoSelectCardProps {
     icon: MaterialIconName;
@@ -17,106 +18,104 @@ interface BentoSelectCardProps {
     style?: any;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            borderRadius: BORDER_RADIUS.lg,
+            padding: SPACING[6],
+            overflow: 'hidden' as const,
+            position: 'relative' as const,
+        },
+        containerSelected: {
+            borderColor: colors.primary,
+            borderWidth: 2,
+        },
+        left: {
+            flex: 1,
+        },
+        titleRow: {
+            gap: SPACING[2],
+        },
+        title: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize['2xl'],
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+        subtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurfaceVariant,
+            marginTop: SPACING[1],
+        },
+        check: {
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            borderWidth: 2,
+        },
+        checkOn: {
+            borderColor: colors.primary,
+            backgroundColor: colors.primary,
+        },
+        checkOff: {
+            borderColor: colors.outlineVariant,
+            backgroundColor: 'transparent',
+        },
+        overlay: {
+            position: 'absolute' as const,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: colors.primaryFixed,
+        },
+    };
+}
+
 export const BentoSelectCard: React.FC<BentoSelectCardProps> = ({
     icon,
-    iconColor = COLORS.primary,
+    iconColor,
     title,
     subtitle,
     selected = false,
     onPress,
     style,
 }) => {
+    const colors = useColors();
+    const styles = useThemedStyles(createStyles);
+    const glyph = iconColor ?? colors.primary;
+
     return (
         <Pressable
             onPress={onPress}
             style={({ pressed }) => [
                 styles.container,
-                selected && styles.containerSelected,
-                pressed && styles.pressed,
+                selected ? styles.containerSelected : null,
+                pressed ? layout.pressed : null,
                 style,
             ]}
             accessibilityRole="button"
             accessibilityState={{ selected }}
         >
-            <View style={styles.content}>
+            <View style={layout.rowBetween}>
                 <View style={styles.left}>
-                    <View style={styles.titleRow}>
-                        <MaterialIcon name={icon} size={20} color={iconColor} />
+                    <View style={[layout.row, styles.titleRow]}>
+                        <MaterialIcon name={icon} size={20} color={glyph} />
                         <Text style={styles.title}>{title}</Text>
                     </View>
-                    {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+                    {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                 </View>
-                <View
-                    style={[
-                        styles.check,
-                        selected
-                            ? { borderColor: COLORS.primary, backgroundColor: COLORS.primary }
-                            : { borderColor: COLORS.outlineVariant, backgroundColor: "transparent" },
-                    ]}
-                >
-                    {selected && <MaterialIcon name="check" size={14} color="#fff" weight={700} />}
+                <View style={[layout.center, styles.check, selected ? styles.checkOn : styles.checkOff]}>
+                    {selected ? <MaterialIcon name="check" size={14} color={colors.onPrimary} weight={700} /> : null}
                 </View>
             </View>
-            {/* Selection overlay (Stitch: primary border + 5% primary fill) */}
-            {selected && <View style={styles.overlay} pointerEvents="none" />}
+            {selected ? <View style={styles.overlay} pointerEvents="none" /> : null}
         </Pressable>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: COLORS.surface,
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING[6],
-        overflow: "hidden",
-        position: "relative",
-    } as ViewStyle,
-    containerSelected: {
-        borderColor: COLORS.primary,
-        borderWidth: 2,
-    },
-    pressed: {
-        transform: [{ scale: 0.99 }],
-    },
-    content: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-    left: {
-        flex: 1,
-    },
-    titleRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[2],
-    },
-    title: {
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: TYPOGRAPHY.fontSize["2xl"],
-        color: COLORS.onSurface,
-        fontWeight: "700",
-    },
-    subtitle: {
-        fontFamily: "PlusJakartaSans_400Regular",
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurfaceVariant,
-        marginTop: SPACING[1],
-    },
-    check: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        borderWidth: 2,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    overlay: {
-        ...StyleSheet.absoluteFill,
-        backgroundColor: "rgba(70, 72, 212, 0.05)",
-    },
-});
 
 export default BentoSelectCard;

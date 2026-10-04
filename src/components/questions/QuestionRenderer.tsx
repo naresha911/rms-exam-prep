@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../constants';
+import { View, Text } from 'react-native';
+import { SPACING, TYPOGRAPHY } from '../../constants';
+import { useThemedStyles, type ColorPalette } from '../../theme';
 import { resolvePresentation, getContentFlags } from './resolvePresentation';
 import { logQuestionPresentation } from './debugLog';
 import type {
@@ -128,6 +129,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = (props) => {
         debugSource,
     ]);
 
+    const styles = useThemedStyles(createStyles);
+
     if (presentation === 'comprehension_group' && group) {
         if (!onSelectChild) {
             return (
@@ -176,26 +179,28 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = (props) => {
     );
 };
 
-const styles = StyleSheet.create({
-    unsupported: {
-        padding: SPACING[4],
-        backgroundColor: COLORS.surfaceContainer,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-    },
-    unsupportedText: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: 13,
-        color: COLORS.onSurfaceVariant,
-    },
-    unsupportedHint: {
-        marginTop: SPACING[2],
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: 11,
-        color: COLORS.onSurfaceVariant,
-        textAlign: 'center',
-    },
-});
+function createStyles(colors: ColorPalette) {
+    return {
+        unsupported: {
+            padding: SPACING[4],
+            backgroundColor: colors.surfaceContainer,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+        },
+        unsupportedText: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: 13,
+            color: colors.onSurfaceVariant,
+        },
+        unsupportedHint: {
+            marginTop: SPACING[2],
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: 11,
+            color: colors.onSurfaceVariant,
+            textAlign: 'center' as const,
+        },
+    };
+}
 
 export default QuestionRenderer;

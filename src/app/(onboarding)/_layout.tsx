@@ -2,14 +2,64 @@
 // Per Stitch: sticky header with back arrow + 2-segment progress indicator.
 
 import { Stack } from "expo-router";
-import { View, Pressable, StyleSheet, Platform } from "react-native";
+import { View, Pressable, Platform } from "react-native";
 import { useRouter, usePathname } from "expo-router";
-import { COLORS, SPACING } from "../../constants";
+import { SPACING } from "../../constants";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
+
+function createStyles(colors: ColorPalette) {
+    return {
+        progressHeader: {
+            position: "absolute" as const,
+            top: Platform.OS === "android" ? 44 : 48,
+            left: 0,
+            right: 0,
+            height: 56,
+            justifyContent: "space-between" as const,
+            paddingHorizontal: SPACING[4],
+            backgroundColor: colors.surface,
+            zIndex: 100,
+        },
+        backButton: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.surfaceContainerHigh,
+        },
+        backButtonPressed: {
+            transform: [{ scale: 0.95 }],
+        },
+        spacer: {
+            width: 40,
+        },
+        progressSegments: {
+            gap: SPACING[1],
+        },
+        segment: {
+            width: 32,
+            height: 6,
+            borderRadius: 3,
+        },
+        segmentShort: {
+            width: 8,
+            height: 6,
+            borderRadius: 3,
+        },
+        segmentActive: {
+            backgroundColor: colors.primary,
+        },
+        segmentInactive: {
+            backgroundColor: colors.surfaceVariant,
+        },
+    };
+}
 
 export default function OnboardingLayout() {
     const router = useRouter();
     const pathname = usePathname();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
 
     // Determine active step (1=target-class, 2=goal)
     const getActiveStep = (): number => {
@@ -30,22 +80,23 @@ export default function OnboardingLayout() {
 
     return (
         <>
-            {/* Progress header is for steps 1–2 only — welcome has no stepper */}
             {activeStep > 0 && (
-                <View style={styles.progressHeader}>
+                <View style={[layout.row, styles.progressHeader]}>
                     <Pressable
                         onPress={handleBack}
                         style={({ pressed }) => [
+                            layout.center,
                             styles.backButton,
-                            pressed && styles.backButtonPressed,
+                            pressed ? layout.pressed : null,
+                            pressed ? styles.backButtonPressed : null,
                         ]}
                         accessibilityLabel="Go back"
                         accessibilityRole="button"
                     >
-                        <MaterialIcon name="arrow_back" size={24} color={COLORS.onSurfaceVariant} />
+                        <MaterialIcon name="arrow_back" size={24} color={colors.onSurfaceVariant} />
                     </Pressable>
 
-                    <View style={styles.progressSegments}>
+                    <View style={[layout.row, styles.progressSegments]}>
                         <View
                             style={[
                                 styles.segment,
@@ -67,64 +118,9 @@ export default function OnboardingLayout() {
             <Stack
                 screenOptions={{
                     headerShown: false,
-                    contentStyle: { backgroundColor: COLORS.background },
                     animation: "slide_from_right",
                 }}
             />
         </>
     );
 }
-
-const styles = StyleSheet.create({
-    progressHeader: {
-        position: "absolute",
-        top: Platform.OS === "android" ? 44 : 48,
-        left: 0,
-        right: 0,
-        height: 56,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: SPACING[4],
-        backgroundColor: COLORS.surface,
-        zIndex: 100,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: COLORS.surfaceContainerHigh,
-    },
-    backButtonPressed: {
-        opacity: 0.7,
-        transform: [{ scale: 0.95 }],
-    },
-    spacer: {
-        width: 40,
-    },
-    progressSegments: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[1],
-    },
-    segment: {
-        width: 32,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: COLORS.surfaceVariant,
-    },
-    segmentShort: {
-        width: 8,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: COLORS.surfaceVariant,
-    },
-    segmentActive: {
-        backgroundColor: COLORS.primary,
-    },
-    segmentInactive: {
-        backgroundColor: COLORS.surfaceVariant,
-    },
-});

@@ -10,6 +10,7 @@ import {
     PracticeQuestion
 } from '../types';
 import { XP_REWARDS, LEVEL_THRESHOLDS, LEVEL_NAMES, DAILY_GOALS } from '../constants';
+import type { Appearance } from '../theme/palette';
 
 // User preferences store
 interface UserPreferences {
@@ -17,7 +18,8 @@ interface UserPreferences {
     sound: boolean;
     dailyGoal: number;
     preferredLanguage: string;
-    darkMode: boolean;
+    /** Unset installs stay dark. The old unused `darkMode` flag is ignored. */
+    appearance: Appearance;
     /** After answering, automatically open the worked solution. Default on. */
     autoShowSolution: boolean;
 }
@@ -128,7 +130,7 @@ const defaultPreferences: UserPreferences = {
     sound: true,
     dailyGoal: 20,
     preferredLanguage: 'en',
-    darkMode: false,
+    appearance: 'dark',
     autoShowSolution: true,
 };
 

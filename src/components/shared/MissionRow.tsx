@@ -2,12 +2,13 @@
 // Per Stitch: icon tile (primary/secondary/tertiary container bg) + title + subtitle + status circle.
 // Matches stitch_screens/home_dashboard/code.html lines 250–292.
 
-import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
-import { MaterialIcon, MaterialIconName } from "../ui/MaterialIcon";
+import React, { useMemo } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { SPACING, TYPOGRAPHY } from '../../constants';
+import { layout, useColors, useThemedStyles, type ColorPalette } from '../../theme';
+import { MaterialIcon, MaterialIconName } from '../ui/MaterialIcon';
 
-export type MissionStatus = "not_started" | "completed" | "in_progress";
+export type MissionStatus = 'not_started' | 'completed' | 'in_progress';
 
 interface MissionRowProps {
     icon: MaterialIconName;
@@ -20,99 +21,118 @@ interface MissionRowProps {
     style?: any;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            padding: SPACING[3],
+            borderRadius: SPACING[4],
+            gap: SPACING[4],
+        },
+        rowPressed: {
+            backgroundColor: colors.surfaceMuted,
+        },
+        iconWrap: {
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+        },
+        content: {
+            flex: 1,
+        },
+        title: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+        subtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.onSurfaceVariant,
+            marginTop: 2,
+        },
+        statusCircle: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+        },
+        statusDone: {
+            backgroundColor: colors['success-green'],
+        },
+        statusActive: {
+            borderWidth: 2,
+            borderColor: colors.primary,
+            backgroundColor: colors.primary,
+        },
+        statusIdle: {
+            borderWidth: 2,
+            borderColor: colors.outlineVariant,
+            backgroundColor: 'transparent',
+        },
+    };
+}
+
 export const MissionRow: React.FC<MissionRowProps> = ({
     icon,
     title,
     subtitle,
-    status = "not_started",
-    iconBg = COLORS.primaryContainer,
-    iconColor = COLORS.onPrimaryContainer,
+    status = 'not_started',
+    iconBg,
+    iconColor,
     onPress,
     style,
 }) => {
-    const Wrapper: any = onPress ? Pressable : View;
-    const wrapperProps = onPress ? { onPress } : {};
+    const colors = useColors();
+    const styles = useThemedStyles(createStyles);
+    const tileBg = iconBg ?? colors.primaryContainer;
+    const glyph = iconColor ?? colors.onPrimaryContainer;
+    const tile = useMemo(
+        () => StyleSheet.create({ iconWrap: { backgroundColor: tileBg } }),
+        [tileBg],
+    );
 
-    return (
-        <Wrapper
-            {...wrapperProps}
-            style={({ pressed }: any) => [
-                styles.container,
-                pressed && { backgroundColor: COLORS.surfaceMuted },
-                style,
-            ]}
-        >
-            <View style={[styles.iconWrap, { backgroundColor: iconBg }]}>
-                <MaterialIcon name={icon} size={22} color={iconColor} />
+    const statusStyle =
+        status === 'completed' ? styles.statusDone : status === 'in_progress' ? styles.statusActive : styles.statusIdle;
+
+    const body = (
+        <>
+            <View style={[layout.center, styles.iconWrap, tile.iconWrap]}>
+                <MaterialIcon name={icon} size={22} color={glyph} />
             </View>
             <View style={styles.content}>
                 <Text style={styles.title} numberOfLines={1}>{title}</Text>
                 <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>
             </View>
-            <View style={styles.statusWrap}>
-                {status === "completed" ? (
-                    <View style={[styles.statusCircle, { backgroundColor: COLORS["success-green"] }]}>
-                        <MaterialIcon name="check" size={14} color="#fff" weight={700} />
+            <View style={layout.center}>
+                {status === 'completed' ? (
+                    <View style={[layout.center, styles.statusCircle, styles.statusDone]}>
+                        <MaterialIcon name="check" size={14} color={colors.onPrimary} weight={700} />
                     </View>
                 ) : (
-                    <View
-                        style={[
-                            styles.statusCircle,
-                            {
-                                borderWidth: 2,
-                                borderColor:
-                                    status === "in_progress" ? COLORS.primary : COLORS.outlineVariant,
-                                backgroundColor: status === "in_progress" ? COLORS.primary : "transparent",
-                            },
-                        ]}
-                    />
+                    <View style={[layout.center, styles.statusCircle, statusStyle]} />
                 )}
             </View>
-        </Wrapper>
+        </>
     );
-};
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: SPACING[3],
-        borderRadius: SPACING[4],
-        gap: SPACING[4],
-    },
-    iconWrap: {
-        width: 48,
-        height: 48,
-        borderRadius: 12,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    content: {
-        flex: 1,
-    },
-    title: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        fontWeight: "600",
-    },
-    subtitle: {
-        fontFamily: "PlusJakartaSans_400Regular",
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurfaceVariant,
-        marginTop: 2,
-    },
-    statusWrap: {
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    statusCircle: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-});
+    if (onPress) {
+        return (
+            <Pressable
+                onPress={onPress}
+                style={({ pressed }) => [
+                    layout.row,
+                    styles.container,
+                    pressed ? styles.rowPressed : null,
+                    pressed ? layout.pressed : null,
+                    style,
+                ]}
+            >
+                {body}
+            </Pressable>
+        );
+    }
+
+    return <View style={[layout.row, styles.container, style]}>{body}</View>;
+};
 
 export default MissionRow;

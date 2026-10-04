@@ -5,13 +5,14 @@
 // canonical Google Material Symbols "Outlined" path data.
 //
 // Usage:
-//   <MaterialIcon name="home" size={24} color={COLORS.primary} />
-//   <MaterialIcon name="check" size={16} color="#fff" weight={600} />
+//   <MaterialIcon name="home" size={24} color={colors.primary} />
+//   <MaterialIcon name="check" size={16} weight={600} />
 
 import React from "react";
 import { View, ViewStyle, TextStyle, Text } from "react-native";
-import Svg, { Path, Circle } from "react-native-svg";
-import { COLORS } from "../../constants";
+import Svg, { Path } from "react-native-svg";
+import { useMemo } from "react";
+import { useColors } from "../../theme";
 
 export type MaterialIconName =
     // Navigation
@@ -29,6 +30,8 @@ export type MaterialIconName =
     | "notifications"
     | "check"
     | "check_circle"
+    | "radio_button_checked"
+    | "radio_button_unchecked"
     | "cancel"
     | "help"
     | "close"
@@ -184,6 +187,8 @@ const ICON_PATHS: Record<MaterialIconName, string> = {
     notifications: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6V11a6 6 0 0 0-5-5.91V4a1 1 0 0 0-2 0v1.09A6 6 0 0 0 6 11v5l-2 2v1h16v-1Z",
     check: "M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41Z",
     check_circle: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm-1 14.59L6.41 12 7.83 10.59 11 13.76l5.17-5.17L17.59 10Z",
+    radio_button_unchecked: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z",
+    radio_button_checked: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Zm0-13a5 5 0 1 0 5 5 5 5 0 0 0-5-5Z",
     cancel: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12Z",
     help: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 17h-2v-2h2Zm2.07-7.75-.9.92A3.4 3.4 0 0 0 13 14.5h-2v-.5a4.4 4.4 0 0 1 1.17-2.83l1.24-1.26A1.94 1.94 0 0 0 14 8.5a2 2 0 0 0-4 0H8a4 4 0 0 1 8 0 3.2 3.2 0 0 1-.93 2.25Z",
     close: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12Z",
@@ -316,7 +321,7 @@ const ICON_PATHS: Record<MaterialIconName, string> = {
 // These paths are complete filled Material Symbols silhouettes. The even-odd
 // rule keeps cutouts consistent on Android.
 const FILLED_VARIANTS: MaterialIconName[] = [
-    "favorite", "star", "check_circle", "bookmark", "home", "menu_book", "person", "assignment_turned_in",
+    "favorite", "star", "check_circle", "radio_button_checked", "radio_button_unchecked", "bookmark", "home", "menu_book", "person", "assignment_turned_in",
     "notifications", "school", "smart_toy", "check", "thumb_up", "shield", "verified",
     "military_tech", "workspace_premium", "emoji_events", "rocket_launch", "play_circle",
     "auto_awesome", "lightbulb", "local_fire_department", "stars", "error", "info",
@@ -329,40 +334,44 @@ const FILLED_VARIANTS: MaterialIconName[] = [
 export const MaterialIcon: React.FC<MaterialIconProps> = ({
     name,
     size = 24,
-    color = COLORS.onSurface,
+    color,
     weight = 400,
     filled = false,
     style,
 }) => {
+    const colors = useColors();
+    const resolvedColor = color ?? colors.onSurface;
+    const frame = useMemo(
+        () => ({
+            width: size,
+            height: size,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        }),
+        [size]
+    );
+    const fallbackText = useMemo(
+        () => ({ color: resolvedColor, fontSize: size * 0.7 }) as TextStyle,
+        [resolvedColor, size]
+    );
     const path = ICON_PATHS[name];
     if (!path) {
-        // Fallback: small question circle so the screen still renders cleanly
         return (
-            <View
-                style={[
-                    { width: size, height: size, alignItems: "center", justifyContent: "center" },
-                    style,
-                ]}
-            >
-                <Text style={{ color, fontSize: size * 0.7 } as TextStyle}>?</Text>
+            <View style={[frame, style]}>
+                <Text style={fallbackText}>?</Text>
             </View>
         );
     }
 
     return (
-        <View
-            style={[
-                { width: size, height: size, alignItems: "center", justifyContent: "center" },
-                style,
-            ]}
-        >
+        <View style={[frame, style]}>
             <Svg width={size} height={size} viewBox="0 0 24 24">
                 {filled && FILLED_VARIANTS.includes(name) ? (
-                    <Path d={path} fill={color} fillRule="evenodd" />
+                    <Path d={path} fill={resolvedColor} fillRule="evenodd" />
                 ) : (
                     <Path
                         d={path}
-                        stroke={color}
+                        stroke={resolvedColor}
                         strokeWidth={weight >= 600 ? 1.6 : 1.2}
                         fill="none"
                         strokeLinecap="round"

@@ -1,14 +1,46 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { Image, Text, View } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../../constants';
+import { useThemedStyles, type ColorPalette } from '../../../theme';
 import { QuestionCardShell } from '../QuestionCardShell';
 import { OptionGrid } from '../OptionGrid';
 import { StemText } from '../StemText';
 import { shellFromShared } from '../shellHelpers';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../../constants';
 import type { SharedQuestionProps } from '../types';
 
-/** Geometry / figure question with diagram well + 2×2 options. */
+function createStyles(colors: ColorPalette) {
+    return {
+        well: {
+            backgroundColor: colors.surfaceContainerLow,
+            borderRadius: BORDER_RADIUS.xl,
+            padding: SPACING[3],
+            alignItems: 'center' as const,
+            gap: SPACING[2],
+        },
+        plate: {
+            width: '100%' as const,
+            minHeight: 180,
+            borderRadius: BORDER_RADIUS.lg,
+            backgroundColor: colors.figurePlate,
+            alignItems: 'center' as const,
+            justifyContent: 'center' as const,
+            padding: SPACING[2],
+        },
+        diagram: {
+            width: '100%' as const,
+            height: 180,
+        },
+        caption: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: 12,
+            color: colors.onSurfaceVariant,
+        },
+    };
+}
+
+/** Shared diagram on a light plate, then a 2×2 answer grid. */
 export const McqDiagram: React.FC<SharedQuestionProps> = (props) => {
+    const styles = useThemedStyles(createStyles);
     const shell = shellFromShared(props);
     const path = props.question.diagram_path;
     const browseRevealed =
@@ -17,14 +49,14 @@ export const McqDiagram: React.FC<SharedQuestionProps> = (props) => {
 
     return (
         <QuestionCardShell {...shell} stem={<StemText>{props.question.question_text || ''}</StemText>}>
-            <View style={styles.diagramWell}>
-                {path ? (
-                    <Image source={{ uri: path }} style={styles.diagram} resizeMode="contain" />
-                ) : (
-                    <View style={styles.diagramPlaceholder}>
+            <View style={styles.well}>
+                <View style={styles.plate}>
+                    {path ? (
+                        <Image source={{ uri: path }} style={styles.diagram} resizeMode="contain" />
+                    ) : (
                         <Text style={styles.caption}>Diagram unavailable</Text>
-                    </View>
-                )}
+                    )}
+                </View>
                 <Text style={styles.caption}>Figure</Text>
             </View>
             <OptionGrid
@@ -39,32 +71,5 @@ export const McqDiagram: React.FC<SharedQuestionProps> = (props) => {
         </QuestionCardShell>
     );
 };
-
-const styles = StyleSheet.create({
-    diagramWell: {
-        backgroundColor: COLORS.surfaceContainerLow,
-        borderRadius: BORDER_RADIUS.xl,
-        padding: SPACING[3],
-        alignItems: 'center',
-        gap: SPACING[2],
-    },
-    diagram: {
-        width: '100%',
-        height: 160,
-    },
-    diagramPlaceholder: {
-        width: '100%',
-        height: 120,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: COLORS.surfaceContainer,
-        borderRadius: BORDER_RADIUS.lg,
-    },
-    caption: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: 12,
-        color: COLORS.onSurfaceVariant,
-    },
-});
 
 export default McqDiagram;

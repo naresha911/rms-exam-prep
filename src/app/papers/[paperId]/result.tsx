@@ -9,7 +9,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { MascotDisplay } from "@/components/shared/MascotDisplay";
 import { CircularProgress } from "@/components/shared/CircularProgress";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from "@/constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
 import {
     fetchPaperAttemptWithAnswers,
     fetchPaperMeta,
@@ -18,8 +19,88 @@ import { Paper, PaperAttempt, PaperAttemptAnswer } from "@/types";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { t } from "@/lib/i18n";
 
+type ScoreTone = "excellent" | "good" | "keep";
+type StatTone = "success" | "error" | "muted";
+
+const TONE = {
+    excellent: "toneExcellent",
+    good: "toneGood",
+    keep: "toneKeep",
+} as const;
+
+const STAT_VALUE = {
+    success: "statSuccess",
+    error: "statError",
+    muted: "statMuted",
+} as const;
+
+function createStyles(colors: ColorPalette) {
+    return {
+        container: { flex: 1, backgroundColor: colors.background },
+        scroll: { padding: SPACING[4], paddingBottom: 120 },
+        header: { alignItems: "center" as const, marginBottom: SPACING[4] },
+        headline: { ...TYPOGRAPHY.headlineMd, marginTop: SPACING[2] },
+        toneExcellent: { color: colors.success },
+        toneGood: { color: colors.primary },
+        toneKeep: { color: colors.warning },
+        sub: { ...TYPOGRAPHY.bodyMd, color: colors.onSurfaceVariant, textAlign: "center" as const, marginTop: SPACING[1] },
+        scoreCard: {
+            gap: SPACING[4],
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS.lg,
+            padding: SPACING[4],
+            marginBottom: SPACING[4],
+        },
+        scoreStats: { flex: 1 },
+        scoreValue: { ...TYPOGRAPHY.headlineMd, color: colors.onSurface },
+        scoreLabel: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant },
+        timeValue: { ...TYPOGRAPHY.bodyMd, color: colors.onSurfaceVariant, marginTop: SPACING[1] },
+        statRow: { gap: SPACING[2], marginBottom: SPACING[4] },
+        statCard: {
+            flex: 1,
+            backgroundColor: colors.surfaceContainerLow,
+            borderRadius: BORDER_RADIUS.md,
+            padding: SPACING[3],
+            alignItems: "center" as const,
+        },
+        statValue: { ...TYPOGRAPHY.headlineMd, fontSize: 22 },
+        statSuccess: { color: colors.success },
+        statError: { color: colors.error },
+        statMuted: { color: colors.onSurfaceVariant },
+        statLabel: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant, marginTop: 4 },
+        reviewTitle: { ...TYPOGRAPHY.labelLg, color: colors.onSurface, marginBottom: SPACING[2] },
+        reviewRow: {
+            gap: SPACING[2],
+            paddingVertical: SPACING[2],
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: colors.outlineVariant,
+        },
+        reviewText: { ...TYPOGRAPHY.bodyMd, color: colors.onSurface, flex: 1 },
+        footer: {
+            gap: SPACING[2],
+            padding: SPACING[4],
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+            backgroundColor: colors.surface,
+        },
+        flexFill: { flex: 1 },
+    };
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone: StatTone }) {
+    const styles = useThemedStyles(createStyles);
+    return (
+        <View style={styles.statCard}>
+            <Text style={[styles.statValue, styles[STAT_VALUE[tone]]]}>{value}</Text>
+            <Text style={styles.statLabel}>{label}</Text>
+        </View>
+    );
+}
+
 export default function PaperResultScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { paperId, attemptId } = useLocalSearchParams<{ paperId: string; attemptId: string }>();
     const [paper, setPaper] = useState<Paper | null>(null);
     const [attempt, setAttempt] = useState<PaperAttempt | null>(null);
@@ -110,8 +191,7 @@ export default function PaperResultScreen() {
     const percentage = max > 0 ? Math.round((score / max) * 100) : 0;
     const minutes = Math.floor((attempt.time_spent_seconds || 0) / 60);
     const seconds = (attempt.time_spent_seconds || 0) % 60;
-    const tone =
-        percentage >= 80 ? COLORS.success : percentage >= 50 ? COLORS.primary : COLORS.warning;
+    const tone: ScoreTone = percentage >= 80 ? "excellent" : percentage >= 50 ? "good" : "keep";
     const expression = percentage >= 80 ? "celebrating" : percentage >= 50 ? "happy" : "encouraging";
 
     return (
@@ -119,7 +199,7 @@ export default function PaperResultScreen() {
             <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
                     <MascotDisplay expression={expression as any} size={120} />
-                    <Text style={[styles.headline, { color: tone }]}>
+                    <Text style={[styles.headline, styles[TONE[tone]]]}>
                         {percentage >= 80
                             ? t("papers.resultExcellent")
                             : percentage >= 50
@@ -131,7 +211,7 @@ export default function PaperResultScreen() {
                     </Text>
                 </View>
 
-                <View style={styles.scoreCard}>
+                <View style={[layout.row, styles.scoreCard]}>
                     <CircularProgress percentage={percentage} size={100} strokeWidth={8} />
                     <View style={styles.scoreStats}>
                         <Text style={styles.scoreValue}>
@@ -144,19 +224,25 @@ export default function PaperResultScreen() {
                     </View>
                 </View>
 
-                <View style={styles.statRow}>
-                    <Stat label={t("papers.correct")} value={String(sectionBreakdown.correct)} color={COLORS.success} />
-                    <Stat label={t("papers.incorrect")} value={String(sectionBreakdown.wrong)} color={COLORS.error} />
-                    <Stat label={t("papers.skipped")} value={String(sectionBreakdown.skipped)} color={COLORS.onSurfaceVariant} />
+                <View style={[layout.row, styles.statRow]}>
+                    <Stat label={t("papers.correct")} value={String(sectionBreakdown.correct)} tone="success" />
+                    <Stat label={t("papers.incorrect")} value={String(sectionBreakdown.wrong)} tone="error" />
+                    <Stat label={t("papers.skipped")} value={String(sectionBreakdown.skipped)} tone="muted" />
                 </View>
 
                 <Text style={styles.reviewTitle}>{t("papers.answerReview")}</Text>
                 {answers.map((ans, idx) => (
-                    <View key={ans.id} style={styles.reviewRow}>
+                    <View key={ans.id} style={[layout.row, styles.reviewRow]}>
                         <MaterialIcon
                             name={ans.is_correct ? "check_circle" : "cancel"}
                             size={20}
-                            color={ans.is_correct ? COLORS.success : ans.is_correct === false ? COLORS.error : COLORS.onSurfaceVariant}
+                            color={
+                                ans.is_correct
+                                    ? colors.success
+                                    : ans.is_correct === false
+                                      ? colors.error
+                                      : colors.onSurfaceVariant
+                            }
                         />
                         <Text style={styles.reviewText}>
                             Q{idx + 1}:{" "}
@@ -171,78 +257,20 @@ export default function PaperResultScreen() {
                 ))}
             </ScrollView>
 
-            <View style={styles.footer}>
+            <View style={[layout.row, styles.footer]}>
                 <Button
                     title={t("papers.backToPapers")}
                     variant="outline"
                     onPress={() => router.replace("/papers")}
-                    style={{ flex: 1 }}
+                    style={styles.flexFill}
                 />
                 <Button
                     title={starting ? t("common.loading") : t("papers.reattempt")}
                     onPress={handleReattempt}
                     disabled={starting}
-                    style={{ flex: 1 }}
+                    style={styles.flexFill}
                 />
             </View>
         </SafeAreaView>
     );
 }
-
-function Stat({ label, value, color }: { label: string; value: string; color: string }) {
-    return (
-        <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color }]}>{value}</Text>
-            <Text style={styles.statLabel}>{label}</Text>
-        </View>
-    );
-}
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.background },
-    scroll: { padding: SPACING[4], paddingBottom: 120 },
-    header: { alignItems: "center", marginBottom: SPACING[4] },
-    headline: { ...TYPOGRAPHY.headlineMd, marginTop: SPACING[2] },
-    sub: { ...TYPOGRAPHY.bodyMd, color: COLORS.onSurfaceVariant, textAlign: "center", marginTop: SPACING[1] },
-    scoreCard: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[4],
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING[4],
-        marginBottom: SPACING[4],
-    },
-    scoreStats: { flex: 1 },
-    scoreValue: { ...TYPOGRAPHY.headlineMd, color: COLORS.onSurface },
-    scoreLabel: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant },
-    timeValue: { ...TYPOGRAPHY.bodyMd, color: COLORS.onSurfaceVariant, marginTop: SPACING[1] },
-    statRow: { flexDirection: "row", gap: SPACING[2], marginBottom: SPACING[4] },
-    statCard: {
-        flex: 1,
-        backgroundColor: COLORS.surfaceContainerLow,
-        borderRadius: BORDER_RADIUS.md,
-        padding: SPACING[3],
-        alignItems: "center",
-    },
-    statValue: { ...TYPOGRAPHY.headlineMd, fontSize: 22 },
-    statLabel: { ...TYPOGRAPHY.labelSm, color: COLORS.onSurfaceVariant, marginTop: 4 },
-    reviewTitle: { ...TYPOGRAPHY.labelLg, color: COLORS.onSurface, marginBottom: SPACING[2] },
-    reviewRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[2],
-        paddingVertical: SPACING[2],
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: COLORS.outlineVariant,
-    },
-    reviewText: { ...TYPOGRAPHY.bodyMd, color: COLORS.onSurface, flex: 1 },
-    footer: {
-        flexDirection: "row",
-        gap: SPACING[2],
-        padding: SPACING[4],
-        borderTopWidth: 1,
-        borderTopColor: COLORS.outlineVariant,
-        backgroundColor: COLORS.surface,
-    },
-});

@@ -4,9 +4,9 @@
 // Per Stitch: sticky sidebar on tablet (md+), FAB on mobile, legend footer.
 
 import React from "react";
-import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
-import { COLORS, SPACING, TYPOGRAPHY } from "../../constants";
-import { MaterialIcon } from "../ui/MaterialIcon";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SPACING, TYPOGRAPHY } from "../../constants";
+import { layout, useThemedStyles, type ColorPalette } from "../../theme";
 
 export type PaletteState = "unanswered" | "answered" | "skipped" | "marked" | "current";
 
@@ -18,36 +18,102 @@ interface QuestionPaletteProps {
     style?: any;
 }
 
-const STATE_COLORS: Record<PaletteState, string> = {
-    unanswered: "transparent",
-    answered: COLORS["success-green"],
-    skipped: COLORS.error,
-    marked: COLORS["warning-amber"],
-    current: COLORS.primary,
-};
+const BUBBLE = {
+    unanswered: "bubbleUnanswered",
+    answered: "bubbleAnswered",
+    skipped: "bubbleSkipped",
+    marked: "bubbleMarked",
+    current: "bubbleCurrent",
+} as const;
 
-const STATE_TEXT_COLORS: Record<PaletteState, string> = {
-    unanswered: COLORS.onSurface,
-    answered: "#fff",
-    skipped: "#fff",
-    marked: "#fff",
-    current: COLORS.onPrimary,
-};
+const LEGEND = [
+    { key: "answered", label: "Answered", dot: "legendAnswered" },
+    { key: "skipped", label: "Skipped", dot: "legendSkipped" },
+    { key: "marked", label: "Marked for Review", dot: "legendMarked" },
+    { key: "unanswered", label: "Unanswered", dot: "legendUnanswered" },
+] as const;
 
-const STATE_BORDER_COLORS: Record<PaletteState, string> = {
-    unanswered: COLORS.outlineVariant,
-    answered: COLORS["success-green"],
-    skipped: COLORS.error,
-    marked: COLORS["warning-amber"],
-    current: COLORS.primary,
-};
-
-const LEGEND_ITEMS: { color: string; label: string }[] = [
-    { color: COLORS["success-green"], label: "Answered" },
-    { color: COLORS.error, label: "Skipped" },
-    { color: COLORS["warning-amber"], label: "Marked for Review" },
-    { color: COLORS.outlineVariant, label: "Unanswered" },
-];
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            padding: SPACING[4],
+        },
+        header: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+            marginBottom: SPACING[4],
+        },
+        grid: {
+            flexDirection: "row" as const,
+            flexWrap: "wrap" as const,
+            gap: SPACING[2],
+        },
+        bubble: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            backgroundColor: "transparent",
+            borderWidth: 2,
+        },
+        bubbleUnanswered: { borderColor: colors.outlineVariant },
+        bubbleAnswered: { borderColor: colors["success-green"] },
+        bubbleSkipped: { borderColor: colors.error },
+        bubbleMarked: { borderColor: colors["warning-amber"] },
+        bubbleCurrent: {
+            backgroundColor: colors.primary,
+            borderColor: colors.primary,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 4,
+        },
+        bubbleText: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+            color: colors.onSurfaceVariant,
+        },
+        bubbleTextCurrent: {
+            color: colors.onPrimary,
+        },
+        legend: {
+            marginTop: SPACING[4],
+            paddingTop: SPACING[4],
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+            gap: SPACING[2],
+        },
+        legendItem: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: SPACING[2],
+        },
+        legendDot: {
+            width: 12,
+            height: 12,
+            borderRadius: 6,
+        },
+        legendAnswered: { backgroundColor: colors["success-green"] },
+        legendSkipped: { backgroundColor: colors.error },
+        legendMarked: { backgroundColor: colors["warning-amber"] },
+        legendUnanswered: {
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            borderColor: colors.outlineVariant,
+        },
+        legendLabel: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+    };
+}
 
 export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
     total,
@@ -56,6 +122,8 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
     onQuestionPress,
     style,
 }) => {
+    const styles = useThemedStyles(createStyles);
+
     const getState = (idx: number): PaletteState => {
         if (idx + 1 === current) return "current";
         return states[idx] ?? "unanswered";
@@ -72,28 +140,15 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                         <Pressable
                             key={i}
                             onPress={() => onQuestionPress?.(i)}
-                            style={[
+                            style={({ pressed }) => [
                                 styles.bubble,
-                                {
-                                    backgroundColor: isCurrent ? STATE_COLORS[state] : "transparent",
-                                    borderColor: STATE_BORDER_COLORS[state],
-                                    borderWidth: 2,
-                                },
-                                isCurrent && styles.bubbleCurrent,
+                                styles[BUBBLE[state]],
+                                pressed && layout.pressed,
                             ]}
                             accessibilityRole="button"
                             accessibilityLabel={`Question ${i + 1}`}
                         >
-                            <Text
-                                style={[
-                                    styles.bubbleText,
-                                    {
-                                        color: isCurrent
-                                            ? STATE_TEXT_COLORS[state]
-                                            : COLORS.onSurfaceVariant,
-                                    },
-                                ]}
-                            >
+                            <Text style={[styles.bubbleText, isCurrent && styles.bubbleTextCurrent]}>
                                 {i + 1}
                             </Text>
                         </Pressable>
@@ -101,16 +156,10 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                 })}
             </ScrollView>
 
-            {/* Legend */}
             <View style={styles.legend}>
-                {LEGEND_ITEMS.map((item) => (
-                    <View key={item.label} style={styles.legendItem}>
-                        <View
-                            style={[
-                                styles.legendDot,
-                                { backgroundColor: item.color, borderWidth: item.color === COLORS.outlineVariant ? 2 : 0, borderColor: item.color },
-                            ]}
-                        />
+                {LEGEND.map((item) => (
+                    <View key={item.key} style={styles.legendItem}>
+                        <View style={[styles.legendDot, styles[item.dot]]} />
                         <Text style={styles.legendLabel}>{item.label}</Text>
                     </View>
                 ))}
@@ -118,65 +167,5 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        padding: SPACING[4],
-    },
-    header: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        fontWeight: "600",
-        marginBottom: SPACING[4],
-    },
-    grid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: SPACING[2],
-    },
-    bubble: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    bubbleCurrent: {
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 4,
-    },
-    bubbleText: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        fontWeight: "600",
-    },
-    legend: {
-        marginTop: SPACING[4],
-        paddingTop: SPACING[4],
-        borderTopWidth: 1,
-        borderTopColor: COLORS.outlineVariant,
-        gap: SPACING[2],
-    },
-    legendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[2],
-    },
-    legendDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-    },
-    legendLabel: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-        fontWeight: "600",
-    },
-});
 
 export default QuestionPalette;

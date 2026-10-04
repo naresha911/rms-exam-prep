@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, Alert, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { View, Text, Pressable, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/Button";
@@ -9,12 +9,113 @@ import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useAppStore } from "@/store/useAppStore";
 import { signUp, saveOnboardingData, ensureStudentProfile } from "@/lib/supabase";
 import { trackEvent, identifyUser, EVENTS } from "@/lib/analytics";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
 
 type FormErrors = { name?: string; email?: string; password?: string };
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: { backgroundColor: colors.background },
+        scrollContent: { flexGrow: 1, paddingHorizontal: SPACING[5], paddingTop: SPACING[4], paddingBottom: SPACING[6] },
+        header: { marginBottom: SPACING[5] },
+        mascotBadge: {
+            width: 88,
+            height: 88,
+            borderRadius: BORDER_RADIUS["2xl"],
+            backgroundColor: colors.tertiaryLight,
+            marginRight: SPACING[4],
+        },
+        headerCopy: { flex: 1 },
+        eyebrow: {
+            color: colors.primary,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            letterSpacing: 1.2,
+            marginBottom: SPACING[1],
+        },
+        title: {
+            color: colors.onSurface,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.xl,
+            lineHeight: 27,
+        },
+        subtitle: {
+            color: colors.onSurfaceVariant,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            lineHeight: 20,
+            marginTop: SPACING[1],
+        },
+        formCard: {
+            backgroundColor: colors.cardBackground,
+            borderRadius: BORDER_RADIUS["2xl"],
+            padding: SPACING[5],
+            shadowColor: colors.onSurface,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.1,
+            shadowRadius: 16,
+            elevation: 5,
+        },
+        cardTitle: {
+            color: colors.onSurface,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            marginBottom: SPACING[1],
+        },
+        cardSubtitle: {
+            color: colors.onSurfaceVariant,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            lineHeight: 20,
+            marginBottom: SPACING[5],
+        },
+        form: { gap: SPACING[3] },
+        cta: { marginTop: SPACING[5] },
+        divider: { marginVertical: SPACING[5] },
+        dividerLine: { flex: 1, height: 1, backgroundColor: colors.outlineVariant },
+        dividerText: {
+            color: colors.onSurfaceVariant,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            paddingHorizontal: SPACING[3],
+        },
+        socialRow: { justifyContent: "center" as const, gap: SPACING[3] },
+        socialButton: {
+            width: 52,
+            height: 48,
+            borderRadius: BORDER_RADIUS.lg,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            backgroundColor: colors.surface,
+        },
+        legal: {
+            color: colors.textTertiary,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            lineHeight: 17,
+            textAlign: "center" as const,
+            marginTop: SPACING[4],
+            paddingHorizontal: SPACING[4],
+        },
+        loginRow: { justifyContent: "center" as const, marginTop: SPACING[5] },
+        loginLabel: {
+            color: colors.onSurfaceVariant,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+        },
+        loginLink: {
+            color: colors.primary,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+        },
+    };
+}
+
 export default function SignUpScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { setAuthenticated, setUser, onboardingData } = useAppStore();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -79,16 +180,16 @@ export default function SignUpScreen() {
         }
     };
 
-    const leadingIcon = (name: "person_outline" | "email" | "lock_outline") => (
-        <MaterialIcon name={name} size={20} color={COLORS.textTertiary} />
+    const leadingIcon = (iconName: "person_outline" | "email" | "lock_outline") => (
+        <MaterialIcon name={iconName} size={20} color={colors.textTertiary} />
     );
 
     return (
-        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-            <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <SafeAreaView style={[layout.fill, styles.container]} edges={["top", "bottom"]}>
+            <KeyboardAvoidingView style={layout.fill} behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                    <View style={styles.header}>
-                        <View style={styles.mascotBadge}><MascotDisplay expression="celebrating" size={72} /></View>
+                    <View style={[layout.row, styles.header]}>
+                        <View style={[layout.center, styles.mascotBadge]}><MascotDisplay expression="celebrating" size={72} /></View>
                         <View style={styles.headerCopy}>
                             <Text style={styles.eyebrow}>CADET QUEST</Text>
                             <Text style={styles.title}>Your journey starts here</Text>
@@ -101,45 +202,33 @@ export default function SignUpScreen() {
                         <View style={styles.form}>
                             <Input label="Full name" placeholder="Your name" value={name} onChangeText={setName} autoCapitalize="words" leftIcon={leadingIcon("person_outline")} error={errors.name} />
                             <Input label="Email address" placeholder="you@example.com" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} leftIcon={leadingIcon("email")} error={errors.email} />
-                            <Input label="Password" placeholder="At least 6 characters" value={password} onChangeText={setPassword} secureTextEntry={!showPassword} leftIcon={leadingIcon("lock_outline")} rightIcon={<MaterialIcon name={showPassword ? "visibility_off" : "visibility"} size={20} color={COLORS.textTertiary} />} onRightIconPress={() => setShowPassword((visible) => !visible)} error={errors.password} />
+                            <Input label="Password" placeholder="At least 6 characters" value={password} onChangeText={setPassword} secureTextEntry={!showPassword} leftIcon={leadingIcon("lock_outline")} rightIcon={<MaterialIcon name={showPassword ? "visibility_off" : "visibility"} size={20} color={colors.textTertiary} />} onRightIconPress={() => setShowPassword((visible) => !visible)} error={errors.password} />
                         </View>
                         <Button title="Create Account" onPress={handleSignUp} loading={loading} fullWidth size="lg" iconRight="arrow_forward" style={styles.cta} />
-                        <View style={styles.divider}><View style={styles.dividerLine} /><Text style={styles.dividerText}>or continue with</Text><View style={styles.dividerLine} /></View>
-                        <View style={styles.socialRow}>
-                            <Pressable accessibilityRole="button" accessibilityLabel="Continue with Google" style={styles.socialButton} onPress={() => Alert.alert("Coming Soon", "Google sign in will be available soon.")}><MaterialIcon name="email" size={21} color={COLORS.primary} /></Pressable>
-                            <Pressable accessibilityRole="button" accessibilityLabel="Continue with Apple" style={styles.socialButton} onPress={() => Alert.alert("Coming Soon", "Apple sign in will be available soon.")}><MaterialIcon name="smart_toy" size={21} color={COLORS.onSurface} /></Pressable>
+                        <View style={[layout.row, styles.divider]}><View style={styles.dividerLine} /><Text style={styles.dividerText}>or continue with</Text><View style={styles.dividerLine} /></View>
+                        <View style={[layout.row, styles.socialRow]}>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel="Continue with Google"
+                                style={({ pressed }) => [layout.center, styles.socialButton, pressed ? layout.pressed : null]}
+                                onPress={() => Alert.alert("Coming Soon", "Google sign in will be available soon.")}
+                            >
+                                <MaterialIcon name="email" size={21} color={colors.primary} />
+                            </Pressable>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel="Continue with Apple"
+                                style={({ pressed }) => [layout.center, styles.socialButton, pressed ? layout.pressed : null]}
+                                onPress={() => Alert.alert("Coming Soon", "Apple sign in will be available soon.")}
+                            >
+                                <MaterialIcon name="smart_toy" size={21} color={colors.onSurface} />
+                            </Pressable>
                         </View>
                     </View>
                     <Text style={styles.legal}>By signing up, you agree to our Terms of Service and Privacy Policy.</Text>
-                    <View style={styles.loginRow}><Text style={styles.loginLabel}>Already have an account? </Text><Pressable onPress={() => router.replace("/(auth)/sign-in")}><Text style={styles.loginLink}>Log in</Text></Pressable></View>
+                    <View style={[layout.row, styles.loginRow]}><Text style={styles.loginLabel}>Already have an account? </Text><Pressable onPress={() => router.replace("/(auth)/sign-in")}><Text style={styles.loginLink}>Log in</Text></Pressable></View>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.background },
-    flex: { flex: 1 },
-    scrollContent: { flexGrow: 1, paddingHorizontal: SPACING[5], paddingTop: SPACING[4], paddingBottom: SPACING[6] },
-    header: { flexDirection: "row", alignItems: "center", marginBottom: SPACING[5] },
-    mascotBadge: { width: 88, height: 88, borderRadius: BORDER_RADIUS["2xl"], alignItems: "center", justifyContent: "center", backgroundColor: COLORS.tertiaryLight, marginRight: SPACING[4] },
-    headerCopy: { flex: 1 },
-    eyebrow: { color: COLORS.primary, fontFamily: TYPOGRAPHY.fontFamily.bold, fontSize: TYPOGRAPHY.fontSize.xs, letterSpacing: 1.2, marginBottom: SPACING[1] },
-    title: { color: COLORS.onSurface, fontFamily: TYPOGRAPHY.fontFamily.bold, fontSize: TYPOGRAPHY.fontSize.xl, lineHeight: 27 },
-    subtitle: { color: COLORS.onSurfaceVariant, fontFamily: TYPOGRAPHY.fontFamily.regular, fontSize: TYPOGRAPHY.fontSize.sm, lineHeight: 20, marginTop: SPACING[1] },
-    formCard: { backgroundColor: COLORS.cardBackground, borderRadius: BORDER_RADIUS["2xl"], padding: SPACING[5], shadowColor: COLORS.onSurface, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 5 },
-    cardTitle: { color: COLORS.onSurface, fontFamily: TYPOGRAPHY.fontFamily.bold, fontSize: TYPOGRAPHY.fontSize["2xl"], marginBottom: SPACING[1] },
-    cardSubtitle: { color: COLORS.onSurfaceVariant, fontFamily: TYPOGRAPHY.fontFamily.regular, fontSize: TYPOGRAPHY.fontSize.sm, lineHeight: 20, marginBottom: SPACING[5] },
-    form: { gap: SPACING[3] },
-    cta: { marginTop: SPACING[5] },
-    divider: { flexDirection: "row", alignItems: "center", marginVertical: SPACING[5] },
-    dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.outlineVariant },
-    dividerText: { color: COLORS.onSurfaceVariant, fontFamily: TYPOGRAPHY.fontFamily.regular, fontSize: TYPOGRAPHY.fontSize.xs, paddingHorizontal: SPACING[3] },
-    socialRow: { flexDirection: "row", justifyContent: "center", gap: SPACING[3] },
-    socialButton: { width: 52, height: 48, borderRadius: BORDER_RADIUS.lg, borderWidth: 1, borderColor: COLORS.outlineVariant, backgroundColor: COLORS.surface, alignItems: "center", justifyContent: "center" },
-    legal: { color: COLORS.textTertiary, fontFamily: TYPOGRAPHY.fontFamily.regular, fontSize: TYPOGRAPHY.fontSize.xs, lineHeight: 17, textAlign: "center", marginTop: SPACING[4], paddingHorizontal: SPACING[4] },
-    loginRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: SPACING[5] },
-    loginLabel: { color: COLORS.onSurfaceVariant, fontFamily: TYPOGRAPHY.fontFamily.regular, fontSize: TYPOGRAPHY.fontSize.sm },
-    loginLink: { color: COLORS.primary, fontFamily: TYPOGRAPHY.fontFamily.bold, fontSize: TYPOGRAPHY.fontSize.sm },
-});

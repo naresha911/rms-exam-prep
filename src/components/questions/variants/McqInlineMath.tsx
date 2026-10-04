@@ -1,14 +1,36 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../../constants';
+import { useColors, useThemedStyles, type ColorPalette } from '../../../theme';
 import { QuestionCardShell } from '../QuestionCardShell';
 import { OptionGrid } from '../OptionGrid';
 import { LatexText } from '../LatexText';
 import { shellFromShared } from '../shellHelpers';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../../constants';
 import type { SharedQuestionProps } from '../types';
 
-/** Word stem with embedded TeX + 2×2 numeric options. */
+function createStyles(colors: ColorPalette) {
+    return {
+        stemWrap: {
+            gap: SPACING[2],
+        },
+        chips: {
+            flexDirection: 'row' as const,
+            flexWrap: 'wrap' as const,
+            gap: SPACING[2],
+        },
+        chip: {
+            backgroundColor: colors.surfaceContainerHigh,
+            borderRadius: BORDER_RADIUS.lg,
+            paddingHorizontal: SPACING[2],
+            paddingVertical: SPACING[1],
+        },
+    };
+}
+
+/** Word stem with expression chips and a 2×2 numeric grid. */
 export const McqInlineMath: React.FC<SharedQuestionProps> = (props) => {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const shell = shellFromShared(props);
     const chips = props.question.presentationHints?.inlineMathChips;
     const browseRevealed =
@@ -22,23 +44,27 @@ export const McqInlineMath: React.FC<SharedQuestionProps> = (props) => {
                 <View style={styles.stemWrap}>
                     <LatexText
                         content={props.question.question_text || ''}
-                        color={COLORS.onSurface}
-                        fontSize={15}
+                        color={colors.onSurface}
+                        fontSize={16}
                         fontFamily={TYPOGRAPHY.fontFamily.semibold}
                         fontWeight="600"
-                        lineHeight={Math.round(15 * 1.35)}
+                        lineHeight={22}
                     />
-                    {chips?.map((chip, i) => (
-                        <View key={`chip-${i}`} style={styles.chip}>
-                            <LatexText
-                                content={`$${chip}$`}
-                                color={COLORS.primary}
-                                fontSize={13}
-                                fontFamily={TYPOGRAPHY.fontFamily.semibold}
-                                fontWeight="600"
-                            />
+                    {chips?.length ? (
+                        <View style={styles.chips}>
+                            {chips.map((chip, index) => (
+                                <View key={`chip-${index}`} style={styles.chip}>
+                                    <LatexText
+                                        content={`$${chip}$`}
+                                        color={colors.primary}
+                                        fontSize={14}
+                                        fontFamily={TYPOGRAPHY.fontFamily.semibold}
+                                        fontWeight="600"
+                                    />
+                                </View>
+                            ))}
                         </View>
-                    ))}
+                    ) : null}
                 </View>
             }
         >
@@ -50,24 +76,10 @@ export const McqInlineMath: React.FC<SharedQuestionProps> = (props) => {
                 revealed={props.revealed}
                 browseRevealed={browseRevealed}
                 onSelect={props.onSelect}
+                layoutMode="equation"
             />
         </QuestionCardShell>
     );
 };
-
-const styles = StyleSheet.create({
-    stemWrap: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: SPACING[2],
-    },
-    chip: {
-        backgroundColor: COLORS.surfaceContainerHigh,
-        borderRadius: BORDER_RADIUS.lg,
-        paddingHorizontal: SPACING[2],
-        paddingVertical: SPACING[1],
-    },
-});
 
 export default McqInlineMath;

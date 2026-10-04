@@ -1,42 +1,55 @@
 // Practice Hub — Stitch-aligned subject and practice mode listing screen.
 // Per Stitch: page title + subtitle, colored practice mode cards, subject list.
-import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, getSubjectsForStandard, normalizeStudentStandard } from "../../constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, getSubjectsForStandard, normalizeStudentStandard } from "../../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
 
 const PRACTICE_MODES = [
     {
+        key: "quick" as const,
         icon: "bolt" as const,
         title: "Quick Practice",
         subtitle: "5-20 questions for daily practice",
-        bg: COLORS.primary,
-        textColor: COLORS.onPrimary,
     },
     {
+        key: "topic" as const,
         icon: "menu_book" as const,
         title: "Topic Practice",
         subtitle: "Master specific topics",
-        bg: COLORS.secondary,
-        textColor: COLORS.onSecondary,
     },
     {
+        key: "weak" as const,
         icon: "psychology" as const,
         title: "Weak Areas",
         subtitle: "Focus on topics that need work",
-        bg: COLORS.tertiary,
-        textColor: COLORS.onTertiary,
     },
     {
+        key: "speed" as const,
         icon: "timer" as const,
         title: "Speed Test",
         subtitle: "Timed challenges",
-        bg: "rgba(249, 115, 22, 1)",
-        textColor: "#fff",
     },
 ];
+
+type PracticeModeKey = (typeof PRACTICE_MODES)[number]["key"];
+
+const MODE_CARD = {
+    quick: "modeQuick",
+    topic: "modeTopic",
+    weak: "modeWeak",
+    speed: "modeSpeed",
+} as const;
+
+const MODE_INK = {
+    quick: "inkQuick",
+    topic: "inkTopic",
+    weak: "inkWeak",
+    speed: "inkSpeed",
+} as const;
 
 const SUBJECT_EMOJI: Record<string, string> = {
     MAT: "📐",
@@ -48,9 +61,147 @@ const SUBJECT_EMOJI: Record<string, string> = {
     SSC: "🏛️",
 };
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        scrollContent: {
+            padding: SPACING[5],
+        },
+        pageTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            marginBottom: SPACING[1],
+        },
+        pageSubtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurfaceVariant,
+            marginBottom: SPACING[6],
+        },
+        sectionTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            marginBottom: SPACING[3],
+        },
+        modesContainer: {
+            gap: SPACING[3],
+            marginBottom: SPACING[6],
+        },
+        modeCard: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            borderRadius: BORDER_RADIUS["2xl"],
+            padding: SPACING[4],
+            gap: SPACING[4],
+        },
+        modeQuick: { backgroundColor: colors.primary },
+        modeTopic: { backgroundColor: colors.secondary },
+        modeWeak: { backgroundColor: colors.tertiary },
+        modeSpeed: { backgroundColor: colors.progressOrange },
+        modeIconWrap: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+            backgroundColor: colors.surfaceContainerLowest,
+        },
+        modeContent: {
+            flex: 1,
+        },
+        modeTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+        modeSubtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            marginTop: 2,
+            opacity: 0.8,
+        },
+        inkQuick: { color: colors.onPrimary },
+        inkTopic: { color: colors.onSecondary },
+        inkWeak: { color: colors.onTertiary },
+        inkSpeed: { color: colors.onPrimary },
+        subjectsContainer: {
+            gap: SPACING[3],
+        },
+        subjectCard: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS["2xl"],
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            padding: SPACING[4],
+            gap: SPACING[4],
+        },
+        subjectCardPressed: {
+            backgroundColor: colors.surfaceVariant,
+        },
+        subjectIcon: {
+            width: 52,
+            height: 52,
+            borderRadius: BORDER_RADIUS.lg,
+            backgroundColor: colors.primaryFixed,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        subjectEmoji: {
+            fontSize: 26,
+        },
+        subjectContent: {
+            flex: 1,
+        },
+        subjectName: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+        subjectSubtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+            marginTop: 2,
+        },
+        subjectArrow: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: colors.surfaceContainerHigh,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+    };
+}
+
+function modeIconColor(colors: ColorPalette, key: PracticeModeKey) {
+    if (key === "quick") return colors.primary;
+    if (key === "topic") return colors.secondary;
+    if (key === "weak") return colors.tertiary;
+    return colors.progressOrange;
+}
+
+function modeInkColor(colors: ColorPalette, key: PracticeModeKey) {
+    if (key === "topic") return colors.onSecondary;
+    if (key === "weak") return colors.onTertiary;
+    return colors.onPrimary;
+}
+
 export default function PracticeScreen() {
     const router = useRouter();
     const { user } = useAppStore();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
 
     const subjects = getSubjectsForStandard(user?.target_class);
     const studentStandard = normalizeStudentStandard(user?.target_class);
@@ -61,41 +212,39 @@ export default function PracticeScreen() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
                 <Text style={styles.pageTitle}>Practice Hub</Text>
                 <Text style={styles.pageSubtitle}>
                     Choose your learning path
                 </Text>
 
-                {/* Practice Modes — Stitch: colored cards */}
                 <Text style={styles.sectionTitle}>Practice Modes</Text>
                 <View style={styles.modesContainer}>
-                    {PRACTICE_MODES.map((mode, idx) => (
+                    {PRACTICE_MODES.map((mode) => (
                         <Pressable
                             key={mode.title}
                             onPress={() => router.push("/(tabs)/practice")}
                             style={({ pressed }) => [
                                 styles.modeCard,
-                                pressed && styles.modeCardPressed,
+                                styles[MODE_CARD[mode.key]],
+                                pressed ? layout.pressed : null,
                             ]}
                         >
-                            <View style={[styles.modeIconWrap, { backgroundColor: mode.textColor + "20" }]}>
-                                <MaterialIcon name={mode.icon} size={24} color={mode.textColor} />
+                            <View style={styles.modeIconWrap}>
+                                <MaterialIcon name={mode.icon} size={24} color={modeIconColor(colors, mode.key)} />
                             </View>
                             <View style={styles.modeContent}>
-                                <Text style={[styles.modeTitle, { color: mode.textColor }]}>
+                                <Text style={[styles.modeTitle, styles[MODE_INK[mode.key]]]}>
                                     {mode.title}
                                 </Text>
-                                <Text style={[styles.modeSubtitle, { color: mode.textColor, opacity: 0.8 }]}>
+                                <Text style={[styles.modeSubtitle, styles[MODE_INK[mode.key]]]}>
                                     {mode.subtitle}
                                 </Text>
                             </View>
-                            <MaterialIcon name="chevron_right" size={20} color={mode.textColor} />
+                            <MaterialIcon name="chevron_right" size={20} color={modeInkColor(colors, mode.key)} />
                         </Pressable>
                     ))}
                 </View>
 
-                {/* Subjects */}
                 <Text style={styles.sectionTitle}>Subjects</Text>
                 <View style={styles.subjectsContainer}>
                     {subjects.map((subject) => (
@@ -104,7 +253,7 @@ export default function PracticeScreen() {
                             onPress={() => router.push(`/practice/${subject.id}`)}
                             style={({ pressed }) => [
                                 styles.subjectCard,
-                                pressed && styles.subjectCardPressed,
+                                pressed ? styles.subjectCardPressed : null,
                             ]}
                         >
                             <View style={styles.subjectIcon}>
@@ -119,7 +268,7 @@ export default function PracticeScreen() {
                                 </Text>
                             </View>
                             <View style={styles.subjectArrow}>
-                                <MaterialIcon name="chevron_right" size={20} color={COLORS.primary} />
+                                <MaterialIcon name="chevron_right" size={20} color={colors.primary} />
                             </View>
                         </Pressable>
                     ))}
@@ -128,117 +277,3 @@ export default function PracticeScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    scrollContent: {
-        padding: SPACING[5],
-    },
-    pageTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.extrabold,
-        fontSize: TYPOGRAPHY.fontSize["2xl"],
-        color: COLORS.onSurface,
-        fontWeight: "800",
-        marginBottom: SPACING[1],
-    },
-    pageSubtitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurfaceVariant,
-        marginBottom: SPACING[6],
-    },
-    sectionTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        fontWeight: "700",
-        marginBottom: SPACING[3],
-    },
-    modesContainer: {
-        gap: SPACING[3],
-        marginBottom: SPACING[6],
-    },
-    modeCard: {
-        flexDirection: "row",
-        alignItems: "center",
-        borderRadius: BORDER_RADIUS["2xl"],
-        padding: SPACING[4],
-        gap: SPACING[4],
-    },
-    modeCardPressed: {
-        opacity: 0.85,
-    },
-    modeIconWrap: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    modeContent: {
-        flex: 1,
-    },
-    modeTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        fontWeight: "700",
-    },
-    modeSubtitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        marginTop: 2,
-    },
-    subjectsContainer: {
-        gap: SPACING[3],
-    },
-    subjectCard: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        padding: SPACING[4],
-        gap: SPACING[4],
-    },
-    subjectCardPressed: {
-        backgroundColor: COLORS.surfaceVariant,
-    },
-    subjectIcon: {
-        width: 52,
-        height: 52,
-        borderRadius: BORDER_RADIUS.lg,
-        backgroundColor: COLORS.primaryFixed,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    subjectEmoji: {
-        fontSize: 26,
-    },
-    subjectContent: {
-        flex: 1,
-    },
-    subjectName: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        fontWeight: "700",
-    },
-    subjectSubtitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-        marginTop: 2,
-    },
-    subjectArrow: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: COLORS.surfaceContainerHigh,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-});

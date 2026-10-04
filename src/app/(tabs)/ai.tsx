@@ -10,13 +10,12 @@ import {
     Pressable,
     KeyboardAvoidingView,
     Platform,
-    StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "../../components/ui/Button";
 import { MascotDisplay } from "../../components/shared/MascotDisplay";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
 
 // Mock AI responses
 const AI_RESPONSES = [
@@ -40,8 +39,167 @@ const QUICK_TOPICS: { label: string; icon: "calculate" | "language" | "psycholog
     { label: "GK Facts", icon: "public" },
 ];
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        header: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[3],
+            backgroundColor: colors.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outlineVariant,
+            gap: SPACING[3],
+        },
+        headerText: {
+            flex: 1,
+        },
+        headerName: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+        headerStatus: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: 4,
+            marginTop: 2,
+        },
+        statusDot: {
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: colors.success,
+        },
+        headerStatusText: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.success,
+            fontWeight: TYPOGRAPHY.fontWeight.medium,
+        },
+        chipsContainer: {
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[3],
+            gap: SPACING[2],
+            flexDirection: "row" as const,
+        },
+        chip: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            backgroundColor: colors.surfaceContainerHigh,
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[2],
+            borderRadius: BORDER_RADIUS.full,
+            gap: 4,
+        },
+        chipPressed: {
+            backgroundColor: colors.surfaceVariant,
+        },
+        chipText: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.primary,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+        chatContent: {
+            padding: SPACING[4],
+            paddingBottom: SPACING[6],
+        },
+        messageRow: {
+            flexDirection: "row" as const,
+            alignItems: "flex-end" as const,
+            marginBottom: SPACING[4],
+        },
+        messageRowUser: {
+            justifyContent: "flex-end" as const,
+        },
+        bubble: {
+            maxWidth: "75%" as const,
+            padding: SPACING[4],
+            borderRadius: BORDER_RADIUS.xl,
+        },
+        bubbleAI: {
+            backgroundColor: colors.surfaceContainerHigh,
+            borderBottomLeftRadius: 4,
+            marginLeft: SPACING[2],
+        },
+        bubbleUser: {
+            backgroundColor: colors.primary,
+            borderBottomRightRadius: 4,
+            marginRight: SPACING[2],
+        },
+        bubbleText: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurface,
+            lineHeight: 24,
+        },
+        bubbleTextUser: {
+            color: colors.onPrimary,
+        },
+        userAvatar: {
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: colors.primaryContainer,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        typingIndicator: {
+            flexDirection: "row" as const,
+            gap: 4,
+            paddingVertical: 4,
+        },
+        typingDot: {
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: colors.onSurfaceVariant,
+        },
+        inputBar: {
+            flexDirection: "row" as const,
+            alignItems: "flex-end" as const,
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[3],
+            backgroundColor: colors.surface,
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+            gap: SPACING[2],
+        },
+        textInput: {
+            flex: 1,
+            backgroundColor: colors.surfaceContainerHigh,
+            borderRadius: BORDER_RADIUS.xl,
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[3],
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurface,
+            maxHeight: 120,
+        },
+        sendBtn: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: colors.surfaceContainerHigh,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        sendBtnActive: {
+            backgroundColor: colors.primary,
+        },
+    };
+}
+
 export default function AIScreen() {
     const scrollViewRef = useRef<ScrollView>(null);
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "1",
@@ -79,14 +237,15 @@ export default function AIScreen() {
         }, 1500);
     };
 
+    const canSend = inputText.trim().length > 0;
+
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             <KeyboardAvoidingView
-                style={{ flex: 1 }}
+                style={layout.fill}
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
             >
-                {/* Stitch-style sticky header */}
                 <View style={styles.header}>
                     <MascotDisplay expression="encouraging" size={44} />
                     <View style={styles.headerText}>
@@ -98,7 +257,6 @@ export default function AIScreen() {
                     </View>
                 </View>
 
-                {/* Quick topic chips — Stitch: surface-container chips */}
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -110,19 +268,18 @@ export default function AIScreen() {
                             onPress={() => setInputText(`Explain ${topic.label}`)}
                             style={({ pressed }) => [
                                 styles.chip,
-                                pressed && styles.chipPressed,
+                                pressed ? styles.chipPressed : null,
                             ]}
                         >
-                            <MaterialIcon name={topic.icon} size={16} color={COLORS.primary} />
+                            <MaterialIcon name={topic.icon} size={16} color={colors.primary} />
                             <Text style={styles.chipText}>{topic.label}</Text>
                         </Pressable>
                     ))}
                 </ScrollView>
 
-                {/* Chat messages */}
                 <ScrollView
                     ref={scrollViewRef}
-                    style={{ flex: 1 }}
+                    style={layout.fill}
                     contentContainerStyle={styles.chatContent}
                     showsVerticalScrollIndicator={false}
                     onContentSizeChange={() =>
@@ -134,7 +291,7 @@ export default function AIScreen() {
                             key={message.id}
                             style={[
                                 styles.messageRow,
-                                message.isUser && styles.messageRowUser,
+                                message.isUser ? styles.messageRowUser : null,
                             ]}
                         >
                             {!message.isUser && (
@@ -150,7 +307,7 @@ export default function AIScreen() {
                                 <Text
                                     style={[
                                         styles.bubbleText,
-                                        message.isUser && styles.bubbleTextUser,
+                                        message.isUser ? styles.bubbleTextUser : null,
                                     ]}
                                 >
                                     {message.text}
@@ -159,15 +316,14 @@ export default function AIScreen() {
 
                             {message.isUser && (
                                 <View style={styles.userAvatar}>
-                                    <MaterialIcon name="person" size={18} color={COLORS.onPrimary} filled />
+                                    <MaterialIcon name="person" size={18} color={colors.onPrimary} filled />
                                 </View>
                             )}
                         </View>
                     ))}
 
-                    {/* Typing indicator */}
                     {isTyping && (
-                        <View style={[styles.messageRow, styles.messageRowAI]}>
+                        <View style={styles.messageRow}>
                             <MascotDisplay expression="thinking" size={36} />
                             <View style={[styles.bubble, styles.bubbleAI]}>
                                 <View style={styles.typingIndicator}>
@@ -180,30 +336,29 @@ export default function AIScreen() {
                     )}
                 </ScrollView>
 
-                {/* Stitch-style sticky input bar */}
                 <View style={styles.inputBar}>
                     <TextInput
                         value={inputText}
                         onChangeText={setInputText}
                         placeholder="Ask Cadet Vijay anything..."
-                        placeholderTextColor={COLORS.onSurfaceVariant}
+                        placeholderTextColor={colors.onSurfaceVariant}
                         multiline
                         maxLength={500}
                         style={styles.textInput}
                     />
                     <Pressable
                         onPress={handleSend}
-                        disabled={!inputText.trim()}
+                        disabled={!canSend}
                         style={({ pressed }) => [
                             styles.sendBtn,
-                            inputText.trim() && styles.sendBtnActive,
-                            pressed && styles.sendBtnPressed,
+                            canSend ? styles.sendBtnActive : null,
+                            pressed ? layout.pressed : null,
                         ]}
                     >
                         <MaterialIcon
                             name="send"
                             size={22}
-                            color={inputText.trim() ? COLORS.onPrimary : COLORS.onSurfaceVariant}
+                            color={canSend ? colors.onPrimary : colors.onSurfaceVariant}
                         />
                     </Pressable>
                 </View>
@@ -211,164 +366,3 @@ export default function AIScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[3],
-        backgroundColor: COLORS.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.outlineVariant,
-        gap: SPACING[3],
-    },
-    headerText: {
-        flex: 1,
-    },
-    headerName: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        fontWeight: "700",
-    },
-    headerStatus: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        marginTop: 2,
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: COLORS.success,
-    },
-    headerStatusText: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.success,
-        fontWeight: "500",
-    },
-    chipsContainer: {
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[3],
-        gap: SPACING[2],
-        flexDirection: "row",
-    },
-    chip: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: COLORS.surfaceContainerHigh,
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[2],
-        borderRadius: BORDER_RADIUS.full,
-        gap: 4,
-    },
-    chipPressed: {
-        backgroundColor: COLORS.surfaceVariant,
-    },
-    chipText: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.primary,
-        fontWeight: "600",
-    },
-    chatContent: {
-        padding: SPACING[4],
-        paddingBottom: SPACING[6],
-    },
-    messageRow: {
-        flexDirection: "row",
-        alignItems: "flex-end",
-        marginBottom: SPACING[4],
-    },
-    messageRowUser: {
-        justifyContent: "flex-end",
-    },
-    messageRowAI: {
-        justifyContent: "flex-start",
-    },
-    bubble: {
-        maxWidth: "75%",
-        padding: SPACING[4],
-        borderRadius: BORDER_RADIUS.xl,
-    },
-    bubbleAI: {
-        backgroundColor: COLORS.surfaceContainerHigh,
-        borderBottomLeftRadius: 4,
-        marginLeft: SPACING[2],
-    },
-    bubbleUser: {
-        backgroundColor: COLORS.primary,
-        borderBottomRightRadius: 4,
-        marginRight: SPACING[2],
-    },
-    bubbleText: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        lineHeight: 24,
-    },
-    bubbleTextUser: {
-        color: COLORS.onPrimary,
-    },
-    userAvatar: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: COLORS.primaryContainer,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    typingIndicator: {
-        flexDirection: "row",
-        gap: 4,
-        paddingVertical: 4,
-    },
-    typingDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: COLORS.onSurfaceVariant,
-    },
-    inputBar: {
-        flexDirection: "row",
-        alignItems: "flex-end",
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[3],
-        backgroundColor: COLORS.surface,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.outlineVariant,
-        gap: SPACING[2],
-    },
-    textInput: {
-        flex: 1,
-        backgroundColor: COLORS.surfaceContainerHigh,
-        borderRadius: BORDER_RADIUS.xl,
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[3],
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurface,
-        maxHeight: 120,
-    },
-    sendBtn: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: COLORS.surfaceContainerHigh,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    sendBtnActive: {
-        backgroundColor: COLORS.primary,
-    },
-    sendBtnPressed: {
-        opacity: 0.8,
-    },
-});

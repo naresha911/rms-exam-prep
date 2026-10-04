@@ -8,7 +8,8 @@ import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAppStore } from "../../store/useAppStore";
 import { fetchTopicStats } from "../../lib/supabase";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
+import { SPACING, TYPOGRAPHY } from "../../constants";
+import { layout, useThemedStyles, type ColorPalette } from "../../theme";
 
 interface RevisionItem {
     id: string;
@@ -21,13 +22,161 @@ interface RevisionItem {
     icon: string;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            backgroundColor: colors.background,
+        },
+        scrollContent: {
+            padding: SPACING[5],
+        },
+        header: {
+            alignItems: "center" as const,
+            marginBottom: SPACING[6],
+        },
+        title: {
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            fontWeight: "800" as const,
+            color: colors.textPrimary,
+            marginTop: SPACING[3],
+        },
+        subtitle: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.textSecondary,
+            textAlign: "center" as const,
+            marginTop: SPACING[1],
+        },
+        summaryCard: {
+            backgroundColor: colors.primary,
+            marginBottom: SPACING[4],
+        },
+        summaryRow: {
+            flexDirection: "row" as const,
+            justifyContent: "space-around" as const,
+        },
+        summaryStat: {
+            alignItems: "center" as const,
+        },
+        summaryValue: {
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            fontWeight: "800" as const,
+            color: colors.onPrimary,
+        },
+        summaryAccuracy: {
+            color: colors.warning,
+        },
+        summaryLabel: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onPrimary,
+            opacity: 0.8,
+        },
+        summaryDivider: {
+            width: 1,
+            backgroundColor: colors.onPrimary,
+            opacity: 0.3,
+        },
+        listHeader: {
+            marginBottom: SPACING[3],
+        },
+        listTitle: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: "700" as const,
+            color: colors.textPrimary,
+        },
+        sortLabel: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.primary,
+            fontWeight: "600" as const,
+        },
+        topicCardGood: {
+            marginBottom: SPACING[3],
+            borderLeftWidth: 4,
+            borderLeftColor: colors.success,
+        },
+        topicCardMid: {
+            marginBottom: SPACING[3],
+            borderLeftWidth: 4,
+            borderLeftColor: colors.warning,
+        },
+        topicCardLow: {
+            marginBottom: SPACING[3],
+            borderLeftWidth: 4,
+            borderLeftColor: colors.error,
+        },
+        topicIcon: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: colors.surfaceContainer,
+            marginRight: SPACING[3],
+        },
+        topicEmoji: {
+            fontSize: 24,
+        },
+        topicBody: {
+            flex: 1,
+        },
+        topicName: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: "700" as const,
+            color: colors.textPrimary,
+        },
+        topicMeta: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.textSecondary,
+        },
+        topicScore: {
+            alignItems: "flex-end" as const,
+        },
+        accuracyValue: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: "700" as const,
+        },
+        accuracyGood: {
+            color: colors.success,
+        },
+        accuracyMid: {
+            color: colors.warning,
+        },
+        accuracyLow: {
+            color: colors.error,
+        },
+        accuracyCaption: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.textTertiary,
+        },
+        tipCard: {
+            marginTop: SPACING[4],
+            backgroundColor: colors.surfaceMuted,
+            alignItems: "center" as const,
+        },
+        tipEmoji: {
+            fontSize: 32,
+            marginBottom: SPACING[2],
+        },
+        tipTitle: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.textPrimary,
+            textAlign: "center" as const,
+            fontWeight: "600" as const,
+        },
+        tipBody: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.textSecondary,
+            textAlign: "center" as const,
+            marginTop: SPACING[1],
+            lineHeight: 20,
+        },
+    };
+}
+
 export default function RevisionCentreScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
     const { user } = useAppStore();
     const [revisions, setRevisions] = useState<RevisionItem[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Format relative time from ISO date string
     const formatLastAttempt = (dateStr: string): string => {
         const date = new Date(dateStr);
         const now = new Date();
@@ -41,7 +190,6 @@ export default function RevisionCentreScreen() {
         return `${Math.floor(diffDays / 30)} month${diffDays >= 60 ? "s" : ""} ago`;
     };
 
-    // Get icon based on subject name
     const getSubjectIcon = (subjectName: string): string => {
         const name = subjectName.toLowerCase();
         if (name.includes("math")) return "🔢";
@@ -63,7 +211,6 @@ export default function RevisionCentreScreen() {
         const { data, error } = await fetchTopicStats(user.id);
 
         if (!error && data && data.length > 0) {
-            // Transform and filter weak topics (accuracy < 70)
             const transformed: RevisionItem[] = data
                 .filter((stat: any) => {
                     const accuracy = stat.total_attempts > 0
@@ -86,7 +233,6 @@ export default function RevisionCentreScreen() {
                         icon: getSubjectIcon(stat.topics?.subjects?.name || ""),
                     };
                 })
-                // Sort by accuracy (lowest first = most urgent)
                 .sort((a: RevisionItem, b: RevisionItem) => a.accuracy - b.accuracy);
 
             setRevisions(transformed);
@@ -100,17 +246,16 @@ export default function RevisionCentreScreen() {
         loadRevisions();
     }, [loadRevisions]);
 
-    // Calculate stats from real data
     const topicsToRevise = revisions.length;
     const questionsPending = revisions.reduce((sum, r) => sum + r.questions, 0);
     const avgAccuracy = topicsToRevise > 0
         ? Math.round(revisions.reduce((sum, r) => sum + r.accuracy, 0) / topicsToRevise)
         : 0;
 
-    const getAccuracyColor = (accuracy: number) => {
-        if (accuracy >= 80) return COLORS.success;
-        if (accuracy >= 60) return COLORS.warning;
-        return COLORS.error;
+    const accuracyTone = (accuracy: number) => {
+        if (accuracy >= 80) return { text: styles.accuracyGood, card: styles.topicCardGood };
+        if (accuracy >= 60) return { text: styles.accuracyMid, card: styles.topicCardMid };
+        return { text: styles.accuracyLow, card: styles.topicCardLow };
     };
 
     const getAccuracyLabel = (accuracy: number) => {
@@ -121,7 +266,7 @@ export default function RevisionCentreScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+            <SafeAreaView style={[layout.fill, styles.screen]}>
                 <LoadingSpinner message="Loading revision topics..." />
             </SafeAreaView>
         );
@@ -129,7 +274,7 @@ export default function RevisionCentreScreen() {
 
     if (revisions.length === 0) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+            <SafeAreaView style={[layout.fill, styles.screen]}>
                 <EmptyState
                     title="No Revision Topics Yet!"
                     description="Great work! You don't have any weak topics right now. Start practising to track your progress and find areas to improve."
@@ -142,253 +287,78 @@ export default function RevisionCentreScreen() {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <SafeAreaView style={[layout.fill, styles.screen]}>
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[5] }}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
-                <View
-                    style={{
-                        alignItems: "center",
-                        marginBottom: SPACING[6],
-                    }}
-                >
+                <View style={styles.header}>
                     <MascotDisplay expression="thinking" size={100} showBackground />
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize["2xl"],
-                            fontWeight: "800",
-                            color: COLORS.textPrimary,
-                            marginTop: SPACING[3],
-                        }}
-                    >
-                        Revision Centre
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.base,
-                            color: COLORS.textSecondary,
-                            textAlign: "center",
-                            marginTop: SPACING[1],
-                        }}
-                    >
-                        Topics that need more practice
-                    </Text>
+                    <Text style={styles.title}>Revision Centre</Text>
+                    <Text style={styles.subtitle}>Topics that need more practice</Text>
                 </View>
 
-                {/* Stats Summary */}
-                <Card
-                    variant="elevated"
-                    style={{
-                        backgroundColor: COLORS.primary,
-                        marginBottom: SPACING[4],
-                    }}
-                >
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-around",
-                        }}
-                    >
-                        <View style={{ alignItems: "center" }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                    fontWeight: "800",
-                                    color: COLORS.onPrimary,
-                                }}
-                            >
-                                {topicsToRevise}
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xs,
-                                    color: "rgba(255,255,255,0.8)",
-                                }}
-                            >
-                                Topics to Revise
-                            </Text>
+                <Card variant="elevated" style={styles.summaryCard}>
+                    <View style={styles.summaryRow}>
+                        <View style={styles.summaryStat}>
+                            <Text style={styles.summaryValue}>{topicsToRevise}</Text>
+                            <Text style={styles.summaryLabel}>Topics to Revise</Text>
                         </View>
-                        <View
-                            style={{
-                                width: 1,
-                                backgroundColor: "rgba(255,255,255,0.3)",
-                            }}
-                        />
-                        <View style={{ alignItems: "center" }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                    fontWeight: "800",
-                                    color: COLORS.onPrimary,
-                                }}
-                            >
-                                {questionsPending}
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xs,
-                                    color: "rgba(255,255,255,0.8)",
-                                }}
-                            >
-                                Questions Pending
-                            </Text>
+                        <View style={styles.summaryDivider} />
+                        <View style={styles.summaryStat}>
+                            <Text style={styles.summaryValue}>{questionsPending}</Text>
+                            <Text style={styles.summaryLabel}>Questions Pending</Text>
                         </View>
-                        <View
-                            style={{
-                                width: 1,
-                                backgroundColor: "rgba(255,255,255,0.3)",
-                            }}
-                        />
-                        <View style={{ alignItems: "center" }}>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize["2xl"],
-                                    fontWeight: "800",
-                                    color: COLORS.warning,
-                                }}
-                            >
-                                {avgAccuracy}%
-                            </Text>
-                            <Text
-                                style={{
-                                    fontSize: TYPOGRAPHY.fontSize.xs,
-                                    color: "rgba(255,255,255,0.8)",
-                                }}
-                            >
-                                Avg. Accuracy
-                            </Text>
+                        <View style={styles.summaryDivider} />
+                        <View style={styles.summaryStat}>
+                            <Text style={[styles.summaryValue, styles.summaryAccuracy]}>{avgAccuracy}%</Text>
+                            <Text style={styles.summaryLabel}>Avg. Accuracy</Text>
                         </View>
                     </View>
                 </Card>
 
-                {/* Topics List */}
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: SPACING[3] }}>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.lg,
-                            fontWeight: "700",
-                            color: COLORS.textPrimary,
-                        }}
-                    >
-                        Topics to Revisit
-                    </Text>
+                <View style={[layout.rowBetween, styles.listHeader]}>
+                    <Text style={styles.listTitle}>Topics to Revisit</Text>
                     <Pressable>
-                        <Text
-                            style={{
-                                fontSize: TYPOGRAPHY.fontSize.sm,
-                                color: COLORS.primary,
-                                fontWeight: "600",
-                            }}
-                        >
-                            Sort by ▼
-                        </Text>
+                        <Text style={styles.sortLabel}>Sort by ▼</Text>
                     </Pressable>
                 </View>
 
-                {revisions.map((item) => (
-                    <Pressable
-                        key={item.id}
-                        onPress={() => router.push({
-                            pathname: "/practice/session",
-                            params: { subjectId: item.subjectId, topicId: item.id, count: "10" }
-                        })}
-                    >
-                        <Card
-                            variant="elevated"
-                            style={{
-                                marginBottom: SPACING[3],
-                                borderLeftWidth: 4,
-                                borderLeftColor: getAccuracyColor(item.accuracy),
-                            }}
+                {revisions.map((item) => {
+                    const tone = accuracyTone(item.accuracy);
+                    return (
+                        <Pressable
+                            key={item.id}
+                            onPress={() => router.push({
+                                pathname: "/practice/session",
+                                params: { subjectId: item.subjectId, topicId: item.id, count: "10" }
+                            })}
                         >
-                            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                <View
-                                    style={{
-                                        width: 48,
-                                        height: 48,
-                                        borderRadius: 24,
-                                        backgroundColor: COLORS.surfaceContainer,
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginRight: SPACING[3],
-                                    }}
-                                >
-                                    <Text style={{ fontSize: 24 }}>{item.icon}</Text>
+                            <Card variant="elevated" style={tone.card}>
+                                <View style={layout.row}>
+                                    <View style={[layout.center, styles.topicIcon]}>
+                                        <Text style={styles.topicEmoji}>{item.icon}</Text>
+                                    </View>
+                                    <View style={styles.topicBody}>
+                                        <Text style={styles.topicName}>{item.topic}</Text>
+                                        <Text style={styles.topicMeta}>
+                                            {item.subject} • {item.questions} questions • {item.lastAttempt}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.topicScore}>
+                                        <Text style={[styles.accuracyValue, tone.text]}>{item.accuracy}%</Text>
+                                        <Text style={styles.accuracyCaption}>{getAccuracyLabel(item.accuracy)}</Text>
+                                    </View>
                                 </View>
-                                <View style={{ flex: 1 }}>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.base,
-                                            fontWeight: "700",
-                                            color: COLORS.textPrimary,
-                                        }}
-                                    >
-                                        {item.topic}
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.sm,
-                                            color: COLORS.textSecondary,
-                                        }}
-                                    >
-                                        {item.subject} • {item.questions} questions • {item.lastAttempt}
-                                    </Text>
-                                </View>
-                                <View style={{ alignItems: "flex-end" }}>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.lg,
-                                            fontWeight: "700",
-                                            color: getAccuracyColor(item.accuracy),
-                                        }}
-                                    >
-                                        {item.accuracy}%
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.xs,
-                                            color: COLORS.textTertiary,
-                                        }}
-                                    >
-                                        {getAccuracyLabel(item.accuracy)}
-                                    </Text>
-                                </View>
-                            </View>
-                        </Card>
-                    </Pressable>
-                ))}
+                            </Card>
+                        </Pressable>
+                    );
+                })}
 
-                {/* Empty State Hint */}
-                <Card
-                    variant="outlined"
-                    style={{
-                        marginTop: SPACING[4],
-                        backgroundColor: COLORS.surfaceMuted,
-                        alignItems: "center",
-                    }}
-                >
-                    <Text style={{ fontSize: 32, marginBottom: SPACING[2] }}>💡</Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.base,
-                            color: COLORS.textPrimary,
-                            textAlign: "center",
-                            fontWeight: "600",
-                        }}
-                    >
-                        Tip
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.sm,
-                            color: COLORS.textSecondary,
-                            textAlign: "center",
-                            marginTop: SPACING[1],
-                            lineHeight: 20,
-                        }}
-                    >
+                <Card variant="outlined" style={styles.tipCard}>
+                    <Text style={styles.tipEmoji}>💡</Text>
+                    <Text style={styles.tipTitle}>Tip</Text>
+                    <Text style={styles.tipBody}>
                         Revising weak topics for 10 minutes daily can boost your score by 25%!
                     </Text>
                 </Card>

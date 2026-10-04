@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, type Href } from "expo-router";
-import { COLORS, SPACING, normalizeStudentStandard } from "@/constants";
+import { SPACING, normalizeStudentStandard } from "@/constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
 import { TopAppBar } from "@/components/ui/TopAppBar";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -25,6 +26,19 @@ import { trackEvent, EVENTS } from "@/lib/analytics";
 import { t, setLanguage } from "@/lib/i18n";
 
 const PAGE_SIZE = 20;
+
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        scrollContent: { paddingBottom: 40 },
+        heroWrap: { paddingHorizontal: SPACING[4], marginTop: SPACING[2] },
+        tipWrap: { paddingHorizontal: SPACING[4], marginTop: SPACING[3] },
+        list: { paddingHorizontal: SPACING[4], marginTop: SPACING[4], gap: SPACING[3] },
+    };
+}
 
 function formatAttemptDate(iso: string | null | undefined): string {
     if (!iso) return "";
@@ -54,6 +68,8 @@ function statusLabel(status: PaperListStatus): string {
 
 export default function MockTestsScreen() {
     const { user, onboardingData, streak, preferences } = useAppStore();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
 
     useEffect(() => {
@@ -247,7 +263,7 @@ export default function MockTestsScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+        <SafeAreaView style={styles.screen} edges={["top"]}>
             <TopAppBar
                 title="AISSEE"
                 highlight="Cadet"
@@ -258,18 +274,18 @@ export default function MockTestsScreen() {
             />
 
             <ScrollView
-                className="flex-1"
-                contentContainerStyle={{ paddingBottom: 40 }}
+                style={layout.fill}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={() => loadPage({ refresh: true })}
-                        tintColor={COLORS.primary}
+                        tintColor={colors.primary}
                     />
                 }
             >
-                <View style={{ paddingHorizontal: SPACING[4], marginTop: SPACING[2] }}>
+                <View style={styles.heroWrap}>
                     <HeroHeaderCard
                         badgeIcon="assignment"
                         badgeLabel={t("tests.missionBadge")}
@@ -297,11 +313,11 @@ export default function MockTestsScreen() {
                     />
                 </View>
 
-                <View style={{ paddingHorizontal: SPACING[4], marginTop: SPACING[3] }}>
+                <View style={styles.tipWrap}>
                     <ProTipCard title={t("tests.proTipTitle")} body={t("tests.proTipBody")} />
                 </View>
 
-                <View style={{ paddingHorizontal: SPACING[4], marginTop: SPACING[4], gap: SPACING[3] }}>
+                <View style={styles.list}>
                     {loading && !tests.length ? (
                         <LoadingSpinner message={t("tests.loadingList")} />
                     ) : error && !tests.length ? (

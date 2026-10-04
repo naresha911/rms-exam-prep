@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
+import { SPACING } from '../../constants';
+import { useColors, useThemedStyles, type ColorPalette } from '../../theme';
 import { AnswerCard, type AnswerState } from '../practice/AnswerCard';
 import { MaterialIcon } from '../ui/MaterialIcon';
-import { COLORS, SPACING } from '../../constants';
 import type { QuestionOption } from '../../types';
 import type { QuestionUiMode, SelectionMode } from './types';
 import { deriveOptionState, shouldShowCorrectCheck } from './optionState';
@@ -16,10 +17,16 @@ export interface OptionStackProps {
     revealed?: boolean;
     browseRevealed?: boolean;
     onSelect?: (value: string) => void;
-    /** Show trailing radio / check affordance */
     showRadio?: boolean;
 }
 
+function createStyles(_colors: ColorPalette) {
+    return {
+        stack: { gap: SPACING[2] },
+    };
+}
+
+/** Full-width rows. The radio sits inside the row so it does not cover the answer. */
 export const OptionStack: React.FC<OptionStackProps> = ({
     options,
     selectedValue,
@@ -30,9 +37,9 @@ export const OptionStack: React.FC<OptionStackProps> = ({
     onSelect,
     showRadio = true,
 }) => {
-    const sorted = [...options].sort(
-        (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
-    );
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
+    const sorted = [...options].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
 
     return (
         <View style={styles.stack}>
@@ -52,55 +59,35 @@ export const OptionStack: React.FC<OptionStackProps> = ({
                     (mode === 'browse' && browseRevealed) || (mode !== 'browse' && !!revealed);
                 const isSelected = selectedValue === value;
                 const showCheck = shouldShowCorrectCheck(option, mode, revealed, browseRevealed);
+                const showExamRadio = showRadio && !showCheck && mode === 'exam';
 
                 return (
-                    <View key={option.id} style={styles.row}>
-                        <AnswerCard
-                            label={option.option_key.toUpperCase()}
-                            text={option.option_text || ''}
-                            state={state}
-                            showCheck={showCheck}
-                            onPress={
-                                interactive && !disabledReveal && onSelect
-                                    ? () => onSelect(value)
-                                    : undefined
-                            }
-                            style={styles.card}
-                        />
-                        {showRadio && !showCheck && mode === 'exam' && (
-                            <View style={styles.radioOverlay} pointerEvents="none">
+                    <AnswerCard
+                        key={option.id}
+                        label={option.option_key.toUpperCase()}
+                        text={option.option_text || ''}
+                        state={state}
+                        showCheck={showCheck}
+                        onPress={
+                            interactive && !disabledReveal && onSelect
+                                ? () => onSelect(value)
+                                : undefined
+                        }
+                        trailing={
+                            showExamRadio ? (
                                 <MaterialIcon
-                                    name={isSelected ? 'check_circle' : 'help'}
-                                    size={20}
-                                    color={isSelected ? COLORS.primary : COLORS.outlineVariant}
+                                    name={isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}
+                                    size={22}
+                                    color={isSelected ? colors.primary : colors.outline}
                                     filled={isSelected}
                                 />
-                            </View>
-                        )}
-                    </View>
+                            ) : null
+                        }
+                    />
                 );
             })}
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    stack: {
-        gap: SPACING[2],
-    },
-    row: {
-        position: 'relative',
-    },
-    card: {
-        minHeight: SPACING['touch-target'],
-    },
-    radioOverlay: {
-        position: 'absolute',
-        right: SPACING[4],
-        top: 0,
-        bottom: 0,
-        justifyContent: 'center',
-    },
-});
 
 export default OptionStack;

@@ -4,14 +4,99 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { useEffect, useState } from "react";
-import { fetchTopics, fetchSubjects } from "../../lib/supabase";
+import { fetchTopics } from "../../lib/supabase";
 import { Topic, Subject } from "../../types";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SUBJECTS } from "../../constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SUBJECTS } from "../../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
+
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        scrollContent: {
+            padding: SPACING[5],
+        },
+        quickCard: {
+            backgroundColor: colors.primary,
+            borderRadius: BORDER_RADIUS["2xl"],
+            padding: SPACING[5],
+            marginBottom: SPACING[5],
+        },
+        quickRow: {
+            gap: SPACING[3],
+        },
+        quickEmoji: {
+            fontSize: 36,
+        },
+        quickCopy: {
+            flex: 1,
+        },
+        quickTitle: {
+            color: colors.onPrimary,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+        },
+        quickSubtitle: {
+            color: colors.onPrimary,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            marginTop: 2,
+            opacity: 0.9,
+        },
+        quickArrow: {
+            color: colors.onPrimary,
+            fontSize: 20,
+        },
+        sectionTitle: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            color: colors.textPrimary,
+            marginBottom: SPACING[3],
+        },
+        emptyText: {
+            textAlign: "center" as const,
+            color: colors.textSecondary,
+            paddingVertical: SPACING[4],
+        },
+        topicList: {
+            gap: SPACING[2],
+        },
+        topicCard: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+        },
+        topicIcon: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.primaryFixed,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        topicEmoji: {
+            fontSize: 18,
+        },
+        topicName: {
+            flex: 1,
+            marginLeft: SPACING[3],
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+            color: colors.textPrimary,
+        },
+        topicArrow: {
+            color: colors.primary,
+            fontSize: 18,
+        },
+    };
+}
 
 export default function SubjectTopicsScreen() {
     const router = useRouter();
     const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
     const subjectIdNum = parseInt(subjectId || "0", 10);
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
 
     const [loading, setLoading] = useState(true);
     const [topics, setTopics] = useState<Topic[]>([]);
@@ -24,7 +109,6 @@ export default function SubjectTopicsScreen() {
     const loadTopics = async () => {
         setLoading(true);
         try {
-            // Get subject info from constants
             const allSubjects = [
                 ...SUBJECTS.class5,
                 ...SUBJECTS.class8,
@@ -38,8 +122,7 @@ export default function SubjectTopicsScreen() {
                 });
             }
 
-            // Fetch topics from Supabase
-            const { data, error } = await fetchTopics(subjectIdNum);
+            const { data } = await fetchTopics(subjectIdNum);
             if (data) {
                 setTopics(data);
             }
@@ -51,87 +134,48 @@ export default function SubjectTopicsScreen() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <SafeAreaView style={styles.screen}>
             <Stack.Screen
                 options={{
                     headerShown: true,
                     title: subject?.name || "Topics",
-                    headerStyle: { backgroundColor: COLORS.background },
                     headerShadowVisible: false,
-                    headerTitleStyle: { fontWeight: "700" },
                 }}
             />
             {loading ? (
                 <LoadingSpinner message="Loading topics..." />
             ) : (
                 <ScrollView
-                    contentContainerStyle={{ padding: SPACING[5] }}
+                    contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Quick Practice Card */}
                     <Pressable
                         onPress={() => router.push(`/practice/session?subjectId=${subjectIdNum}&count=10`)}
+                        style={({ pressed }) => [pressed ? layout.pressed : null]}
                     >
-                        <View
-                            style={{
-                                backgroundColor: COLORS.primary,
-                                borderRadius: BORDER_RADIUS["2xl"],
-                                padding: SPACING[5],
-                                marginBottom: SPACING[5],
-                            }}
-                        >
-                            <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING[3] }}>
-                                <Text style={{ fontSize: 36 }}>⚡</Text>
-                                <View style={{ flex: 1 }}>
-                                    <Text
-                                        style={{
-                                            color: "#fff",
-                                            fontSize: TYPOGRAPHY.fontSize.lg,
-                                            fontWeight: "800",
-                                        }}
-                                    >
-                                        Quick Practice
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            color: "rgba(255,255,255,0.9)",
-                                            fontSize: TYPOGRAPHY.fontSize.sm,
-                                            marginTop: 2,
-                                        }}
-                                    >
+                        <View style={styles.quickCard}>
+                            <View style={[layout.row, styles.quickRow]}>
+                                <Text style={styles.quickEmoji}>⚡</Text>
+                                <View style={styles.quickCopy}>
+                                    <Text style={styles.quickTitle}>Quick Practice</Text>
+                                    <Text style={styles.quickSubtitle}>
                                         10 random questions from {subject?.name || "this subject"}
                                     </Text>
                                 </View>
-                                <Text style={{ color: "#fff", fontSize: 20 }}>→</Text>
+                                <Text style={styles.quickArrow}>→</Text>
                             </View>
                         </View>
                     </Pressable>
 
-                    {/* Topics List */}
-                    <Text
-                        style={{
-                            fontSize: TYPOGRAPHY.fontSize.lg,
-                            fontWeight: "700",
-                            color: COLORS.textPrimary,
-                            marginBottom: SPACING[3],
-                        }}
-                    >
-                        Topics
-                    </Text>
+                    <Text style={styles.sectionTitle}>Topics</Text>
                     {topics.length === 0 ? (
                         <Card>
-                            <Text
-                                style={{
-                                    textAlign: "center",
-                                    color: COLORS.textSecondary,
-                                    paddingVertical: SPACING[4],
-                                }}
-                            >
+                            <Text style={styles.emptyText}>
                                 No topics available yet. Check back soon!
                             </Text>
                         </Card>
                     ) : (
-                        <View style={{ gap: SPACING[2] }}>
+                        <View style={styles.topicList}>
                             {topics.map((topic) => (
                                 <Pressable
                                     key={topic.id}
@@ -140,32 +184,14 @@ export default function SubjectTopicsScreen() {
                                             `/practice/session?subjectId=${subjectIdNum}&topicId=${topic.id}&count=10`
                                         )
                                     }
+                                    style={({ pressed }) => [pressed ? layout.pressed : null]}
                                 >
-                                    <Card style={{ flexDirection: "row", alignItems: "center" }}>
-                                        <View
-                                            style={{
-                                                width: 40,
-                                                height: 40,
-                                                borderRadius: 20,
-                                                backgroundColor: COLORS.primaryLight + "30",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            <Text style={{ fontSize: 18 }}>📚</Text>
+                                    <Card style={styles.topicCard}>
+                                        <View style={styles.topicIcon}>
+                                            <Text style={styles.topicEmoji}>📚</Text>
                                         </View>
-                                        <Text
-                                            style={{
-                                                flex: 1,
-                                                marginLeft: SPACING[3],
-                                                fontSize: TYPOGRAPHY.fontSize.base,
-                                                fontWeight: "600",
-                                                color: COLORS.textPrimary,
-                                            }}
-                                        >
-                                            {topic.name}
-                                        </Text>
-                                        <Text style={{ color: COLORS.primary, fontSize: 18 }}>→</Text>
+                                        <Text style={styles.topicName}>{topic.name}</Text>
+                                        <Text style={styles.topicArrow}>→</Text>
                                     </Card>
                                 </Pressable>
                             ))}

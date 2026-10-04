@@ -1,22 +1,14 @@
-import React from "react";
-import {
-    ActivityIndicator,
-    Pressable,
-    Text,
-    View,
-    ViewStyle,
-    TextStyle,
-    StyleSheet,
-    Platform,
-} from "react-native";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
-import { MaterialIcon, MaterialIconName } from "./MaterialIcon";
+import React from 'react';
+import { ActivityIndicator, Platform, Pressable, Text, View, type TextStyle, type ViewStyle } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../constants';
+import { layout, useColors, useThemedStyles, type ColorPalette } from '../../theme';
+import { MaterialIcon, type MaterialIconName } from './MaterialIcon';
 
 interface ButtonProps {
     title: string;
     onPress: () => void;
-    variant?: "primary" | "secondary" | "outline" | "danger";
-    size?: "sm" | "md" | "lg";
+    variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+    size?: 'sm' | 'md' | 'lg';
     loading?: boolean;
     disabled?: boolean;
     fullWidth?: boolean;
@@ -26,32 +18,101 @@ interface ButtonProps {
     textStyle?: TextStyle;
 }
 
-const VARIANT_BG: Record<NonNullable<ButtonProps["variant"]>, string> = {
-    primary: COLORS.primary,
-    secondary: COLORS.secondaryContainer,
-    outline: COLORS.cardBackground,
-    danger: COLORS.error,
-};
+const SIZE = {
+    sm: 'sizeSm',
+    md: 'sizeMd',
+    lg: 'sizeLg',
+} as const;
 
-const VARIANT_BORDER: Record<NonNullable<ButtonProps["variant"]>, string> = {
-    primary: "transparent",
-    secondary: "transparent",
-    outline: COLORS.primary,
-    danger: "transparent",
-};
+const SURFACE = {
+    primary: 'primary',
+    secondary: 'secondary',
+    outline: 'outline',
+    danger: 'danger',
+} as const;
 
-const VARIANT_SHADOW: Record<NonNullable<ButtonProps["variant"]>, string> = {
-    primary: COLORS.onPrimaryFixedVariant,
-    secondary: COLORS.onSecondaryFixedVariant,
-    outline: "transparent",
-    danger: COLORS.errorText,
-};
+const LABEL = {
+    primary: 'labelPrimary',
+    secondary: 'labelSecondary',
+    outline: 'labelOutline',
+    danger: 'labelDanger',
+} as const;
+
+function createStyles(colors: ColorPalette) {
+    const lip = {
+        borderRadius: BORDER_RADIUS.xl,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        overflow: 'hidden' as const,
+        borderBottomWidth: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: Platform.OS === 'android' ? 4 : 0,
+    };
+    return {
+        pressable: {
+            borderRadius: BORDER_RADIUS.xl,
+            alignSelf: 'stretch' as const,
+        },
+        fullWidth: { width: '100%' as const },
+        sizeSm: { paddingVertical: SPACING[2], paddingHorizontal: SPACING[4], minHeight: 40 },
+        sizeMd: { paddingVertical: SPACING[3], paddingHorizontal: SPACING[6], minHeight: 48 },
+        sizeLg: { paddingVertical: SPACING[4], paddingHorizontal: SPACING[8], minHeight: 56 },
+        primary: {
+            ...lip,
+            backgroundColor: colors.primary,
+            borderBottomColor: colors.onPrimaryFixedVariant,
+            shadowColor: colors.onPrimaryFixedVariant,
+        },
+        secondary: {
+            ...lip,
+            backgroundColor: colors.secondaryContainer,
+            borderBottomColor: colors.onSecondaryFixedVariant,
+            shadowColor: colors.onSecondaryFixedVariant,
+        },
+        danger: {
+            ...lip,
+            backgroundColor: colors.error,
+            borderBottomColor: colors.errorText,
+            shadowColor: colors.errorText,
+        },
+        outline: {
+            ...lip,
+            backgroundColor: colors.cardBackground,
+            borderWidth: 2,
+            borderColor: colors.primary,
+            borderBottomWidth: 2,
+            borderBottomColor: colors.primary,
+            shadowOpacity: 0,
+            elevation: 0,
+        },
+        content: {
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
+            justifyContent: 'center' as const,
+        },
+        iconLeft: { marginRight: SPACING[2] },
+        iconRight: { marginLeft: SPACING[2] },
+        label: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontWeight: '700' as const,
+        },
+        labelPrimary: { color: colors.onPrimary },
+        labelSecondary: { color: colors.onSecondaryContainer },
+        labelOutline: { color: colors.primary },
+        labelDanger: { color: colors.onPrimary },
+        labelSm: { fontSize: TYPOGRAPHY.fontSize.sm },
+        labelMd: { fontSize: TYPOGRAPHY.fontSize.base },
+        labelLg: { fontSize: TYPOGRAPHY.fontSize.lg },
+    };
+}
 
 export const Button: React.FC<ButtonProps> = ({
     title,
     onPress,
-    variant = "primary",
-    size = "md",
+    variant = 'primary',
+    size = 'md',
     loading = false,
     disabled = false,
     fullWidth = false,
@@ -60,162 +121,46 @@ export const Button: React.FC<ButtonProps> = ({
     style,
     textStyle,
 }) => {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const isDisabled = disabled || loading;
+    const iconColor =
+        variant === 'outline' ? colors.primary : variant === 'secondary' ? colors.onSecondaryContainer : colors.onPrimary;
+    const spinnerColor = variant === 'outline' || variant === 'secondary' ? colors.primary : colors.onPrimary;
+    const iconSize = size === 'lg' ? 22 : size === 'sm' ? 16 : 18;
+    const labelSize = size === 'lg' ? styles.labelLg : size === 'sm' ? styles.labelSm : styles.labelMd;
 
-    const rightIconColor =
-        variant === "primary" || variant === "danger" || variant === "secondary"
-            ? COLORS.onPrimary
-            : variant === "outline"
-                ? COLORS.primary
-                : COLORS.onSurface;
-    const rightIconSize = size === "lg" ? 22 : size === "sm" ? 16 : 18;
-
-    const textColor =
-        variant === "primary" || variant === "danger"
-            ? COLORS.onPrimary
-            : variant === "secondary"
-                ? COLORS.onSecondaryContainer
-                : variant === "outline"
-                    ? COLORS.primary
-                    : COLORS.textPrimary;
-
-    const sizePad =
-        size === "lg"
-            ? { paddingVertical: SPACING[4], paddingHorizontal: SPACING[8], minHeight: 56 }
-            : size === "sm"
-                ? { paddingVertical: SPACING[2], paddingHorizontal: SPACING[4], minHeight: 40 }
-                : { paddingVertical: SPACING[3], paddingHorizontal: SPACING[6], minHeight: 48 };
-
-    const textSize =
-        size === "lg"
-            ? TYPOGRAPHY.fontSize.lg
-            : size === "sm"
-                ? TYPOGRAPHY.fontSize.sm
-                : TYPOGRAPHY.fontSize.base;
-
-    // Outer Pressable is transparent hit-target; painted surface is the inner View.
-    // NativeWind remaps Pressable and can drop backgroundColor from style callbacks,
-    // which made primary CTAs render as white-on-white on device.
     return (
         <Pressable
             onPress={onPress}
             disabled={isDisabled}
             style={({ pressed }) => [
                 styles.pressable,
-                fullWidth && styles.fullWidth,
-                {
-                    opacity: isDisabled ? 0.5 : 1,
-                    transform: [{ translateY: pressed && !isDisabled ? 2 : 0 }],
-                },
+                fullWidth ? styles.fullWidth : null,
+                isDisabled ? layout.disabled : null,
+                pressed && !isDisabled ? layout.pressed : null,
                 style,
             ]}
             accessibilityRole="button"
             accessibilityState={{ disabled: isDisabled }}
         >
-            {({ pressed }) => (
-                <View
-                    style={[
-                        styles.surface,
-                        sizePad,
-                        fullWidth && styles.fullWidth,
-                        {
-                            backgroundColor: VARIANT_BG[variant],
-                            borderWidth: variant === "outline" ? 2 : 0,
-                            borderColor: VARIANT_BORDER[variant],
-                            // 3D tactile bottom edge (Stitch btn-3d)
-                            borderBottomWidth: variant === "outline" ? 2 : 4,
-                            borderBottomColor:
-                                variant === "outline"
-                                    ? COLORS.primary
-                                    : VARIANT_SHADOW[variant],
-                            shadowColor: VARIANT_SHADOW[variant],
-                            shadowOffset: {
-                                width: 0,
-                                height: pressed && !isDisabled ? 2 : 4,
-                            },
-                            shadowOpacity: variant === "outline" ? 0 : pressed && !isDisabled ? 0.5 : 1,
-                            shadowRadius: 0,
-                            elevation:
-                                variant === "outline"
-                                    ? 0
-                                    : Platform.OS === "android"
-                                        ? pressed && !isDisabled
-                                            ? 2
-                                            : 4
-                                        : 0,
-                        },
-                    ]}
-                >
-                    {loading ? (
-                        <ActivityIndicator
-                            color={
-                                variant === "primary" || variant === "danger"
-                                    ? COLORS.onPrimary
-                                    : COLORS.primary
-                            }
-                            size="small"
-                        />
-                    ) : (
-                        <View style={styles.content}>
-                            {icon && <View style={styles.iconLeft}>{icon}</View>}
-                            <Text
-                                style={[
-                                    styles.label,
-                                    { color: textColor, fontSize: textSize },
-                                    textStyle,
-                                ]}
-                            >
-                                {title}
-                            </Text>
-                            {iconRight && (
-                                <View style={styles.iconRight}>
-                                    <MaterialIcon
-                                        name={iconRight}
-                                        size={rightIconSize}
-                                        color={rightIconColor}
-                                        weight={700}
-                                        filled
-                                    />
-                                </View>
-                            )}
-                        </View>
-                    )}
-                </View>
-            )}
+            <View style={[styles[SURFACE[variant]], styles[SIZE[size]], fullWidth ? styles.fullWidth : null]}>
+                {loading ? (
+                    <ActivityIndicator color={spinnerColor} size="small" />
+                ) : (
+                    <View style={styles.content}>
+                        {icon ? <View style={styles.iconLeft}>{icon}</View> : null}
+                        <Text style={[styles.label, styles[LABEL[variant]], labelSize, textStyle]}>{title}</Text>
+                        {iconRight ? (
+                            <View style={styles.iconRight}>
+                                <MaterialIcon name={iconRight} size={iconSize} color={iconColor} weight={700} filled />
+                            </View>
+                        ) : null}
+                    </View>
+                )}
+            </View>
         </Pressable>
     );
 };
-
-const styles = StyleSheet.create({
-    pressable: {
-        borderRadius: BORDER_RADIUS.xl,
-        alignSelf: "stretch",
-    },
-    fullWidth: {
-        width: "100%",
-    },
-    surface: {
-        borderRadius: BORDER_RADIUS.xl,
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-    },
-    content: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    iconLeft: {
-        marginRight: SPACING[2],
-    },
-    iconRight: {
-        marginLeft: SPACING[2],
-    },
-    label: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontWeight: "700",
-        color: COLORS.onPrimary,
-    },
-});
 
 export default Button;

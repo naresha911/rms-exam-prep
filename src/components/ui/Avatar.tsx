@@ -1,6 +1,6 @@
-import React from "react";
-import { View, Text, Image, ViewStyle } from "react-native";
-import { COLORS, BORDER_RADIUS, TYPOGRAPHY } from "../../constants";
+import React, { useMemo } from 'react';
+import { Image, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { layout, useColors, useThemedStyles, type ColorPalette } from '../../theme';
 
 interface AvatarProps {
     name?: string;
@@ -10,56 +10,60 @@ interface AvatarProps {
     style?: ViewStyle;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        initials: {
+            color: colors.textInverse,
+            fontWeight: '700' as const,
+        },
+    };
+}
+
 export const Avatar: React.FC<AvatarProps> = ({
-    name = "?",
+    name = '?',
     uri,
     size = 48,
-    backgroundColor = COLORS.primary,
+    backgroundColor,
     style,
 }) => {
+    const colors = useColors();
+    const styles = useThemedStyles(createStyles);
+    const fill = backgroundColor ?? colors.primary;
     const initials = name
-        .split(" ")
+        .split(' ')
         .map((n) => n[0])
         .slice(0, 2)
-        .join("")
+        .join('')
         .toUpperCase();
 
-    if (uri) {
-        return (
-            <Image
-                source={{ uri }}
-                style={{
+    const metrics = useMemo(
+        () =>
+            StyleSheet.create({
+                image: {
                     width: size,
                     height: size,
                     borderRadius: size / 2,
-                }}
-            />
-        );
+                },
+                fallback: {
+                    width: size,
+                    height: size,
+                    borderRadius: size / 2,
+                    backgroundColor: fill,
+                },
+                initials: {
+                    fontSize: size * 0.4,
+                },
+            }),
+        [size, fill],
+    );
+
+    if (uri) {
+        return <Image source={{ uri }} style={metrics.image} />;
     }
 
     return (
-        <View
-            style={[
-                {
-                    width: size,
-                    height: size,
-                    borderRadius: size / 2,
-                    backgroundColor,
-                    alignItems: "center",
-                    justifyContent: "center",
-                },
-                style,
-            ]}
-        >
-            <Text
-                style={{
-                    color: COLORS.textInverse,
-                    fontSize: size * 0.4,
-                    fontWeight: "700",
-                }}
-            >
-                {initials}
-            </Text>
+        <View style={[layout.center, metrics.fallback, style]}>
+            <Text style={[styles.initials, metrics.initials]}>{initials}</Text>
         </View>
     );
 };

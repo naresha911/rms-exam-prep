@@ -1,9 +1,10 @@
 // ProTipCard — compact tip banner reused across feature screens.
 
-import React from "react";
-import { View, Text, StyleSheet, ViewStyle } from "react-native";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from "../../constants";
-import { MaterialIcon, MaterialIconName } from "../ui/MaterialIcon";
+import React from 'react';
+import { Text, View, ViewStyle } from 'react-native';
+import { SHADOWS, SPACING, TYPOGRAPHY } from '../../constants';
+import { layout, useColors, useThemedStyles, type ColorPalette } from '../../theme';
+import { MaterialIcon, MaterialIconName } from '../ui/MaterialIcon';
 
 interface ProTipCardProps {
     title: string;
@@ -12,16 +13,57 @@ interface ProTipCardProps {
     style?: ViewStyle;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            gap: SPACING[3],
+            backgroundColor: colors.surfaceContainerLow,
+            borderWidth: 1,
+            borderColor: colors.primaryFixed,
+            borderRadius: 16,
+            padding: SPACING[3],
+            ...SHADOWS.sm,
+        },
+        iconWrap: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.primaryFixed,
+            flexShrink: 0,
+        },
+        copy: {
+            flex: 1,
+            minWidth: 0,
+        },
+        title: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            color: colors.primary,
+        },
+        body: {
+            marginTop: 2,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurfaceVariant,
+            lineHeight: 16,
+        },
+    };
+}
+
 export const ProTipCard: React.FC<ProTipCardProps> = ({
     title,
     body,
-    icon = "verified",
+    icon = 'verified',
     style,
 }) => {
+    const colors = useColors();
+    const styles = useThemedStyles(createStyles);
+
     return (
-        <View style={[styles.container, style]}>
-            <View style={styles.iconWrap}>
-                <MaterialIcon name={icon} size={22} color={COLORS.primary} />
+        <View style={[layout.row, styles.container, style]}>
+            <View style={[layout.center, styles.iconWrap]}>
+                <MaterialIcon name={icon} size={22} color={colors.primary} />
             </View>
             <View style={styles.copy}>
                 <Text style={styles.title}>{title}</Text>
@@ -30,49 +72,5 @@ export const ProTipCard: React.FC<ProTipCardProps> = ({
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[3],
-        backgroundColor: COLORS.surfaceContainerLow,
-        borderWidth: 1,
-        borderColor: "rgba(70, 72, 212, 0.15)",
-        borderRadius: 16,
-        padding: SPACING[3],
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
-        shadowRadius: 4,
-        elevation: 1,
-    },
-    iconWrap: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "rgba(70, 72, 212, 0.10)",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-    },
-    copy: {
-        flex: 1,
-        minWidth: 0,
-    },
-    title: {
-        fontFamily: "PlusJakartaSans_700Bold",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        fontWeight: "700",
-        color: COLORS.primary,
-    },
-    body: {
-        marginTop: 2,
-        fontFamily: "PlusJakartaSans_400Regular",
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurfaceVariant,
-        lineHeight: 16,
-    },
-});
 
 export default ProTipCard;

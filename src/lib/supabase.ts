@@ -14,6 +14,12 @@ import * as Linking from 'expo-linking';
  * Supabase Redirect URLs should include:
  *   sainikprep://auth/callback
  *   exp://192.168.*.*:8081/--/auth/callback   (Expo Go LAN wildcard)
+ *
+ * The auth/callback route handles sign-in, email confirmation and password
+ * recovery in one place: it reads `type=recovery` off the link and forwards to
+ * /reset-password. Sign-up, magic links and reset emails must therefore all use
+ * AUTH_CALLBACK_URL — a route that is not allowlisted is silently replaced by
+ * the Site URL.
  */
 export const AUTH_CALLBACK_URL =
     Constants.executionEnvironment === ExecutionEnvironment.StoreClient
@@ -95,7 +101,7 @@ export const getSession = async () => {
 // Password reset
 export const resetPassword = async (email: string) => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'sainikprep://reset-password',
+        redirectTo: AUTH_CALLBACK_URL,
     });
     return { data, error };
 };

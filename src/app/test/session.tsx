@@ -1,6 +1,6 @@
 // Mock Test Session — Stitch-aligned active test screen.
 // Sticky header with timer, progress bar, QuestionRenderer (exam mode), bottom nav, submit confirm.
-import { View, Text, ScrollView, Pressable, Alert, BackHandler, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert, BackHandler } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -10,7 +10,8 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
 import { QuestionRenderer, QuestionAssist, testQuestionToRenderItem } from "../../components/questions";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, getExamStructureForStandard, getStandardIdFallback, normalizeStudentStandard } from "../../constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, getExamStructureForStandard, getStandardIdFallback, normalizeStudentStandard } from "../../constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
 import { fetchPracticeQuestions, fetchPaperDetails } from "../../lib/supabase";
 import { completeTestAttempt, getTestSessionQuestions, startTestAttempt } from "../../lib/tests";
 import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
@@ -45,6 +46,8 @@ export default function TestSessionScreen() {
     const examInfo = getExamStructureForStandard(targetClass);
     const preferredLanguage = useAppStore((s) => s.preferences?.preferredLanguage) || "en";
     const autoShowSolution = isAutoShowSolution(useAppStore((s) => s.preferences));
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
 
     // Test configuration
     const [questions, setQuestions] = useState<TestQuestion[]>([]);
@@ -334,10 +337,10 @@ export default function TestSessionScreen() {
             <View style={styles.header}>
                 <Pressable
                     onPress={handlePauseTest}
-                    style={({ pressed }) => [styles.headerBtn, pressed && styles.headerBtnPressed]}
+                    style={({ pressed }) => [styles.headerBtn, pressed && layout.pressed]}
                     accessibilityLabel="Exit test"
                 >
-                    <MaterialIcon name="close" size={22} color={COLORS.onSurface} />
+                    <MaterialIcon name="close" size={22} color={colors.onSurface} />
                 </Pressable>
 
                 <Text style={styles.headerTitle} numberOfLines={1}>
@@ -352,7 +355,7 @@ export default function TestSessionScreen() {
                     <MaterialIcon
                         name="timer"
                         size={16}
-                        color={isLowTime ? COLORS.error : COLORS.onSurfaceVariant}
+                        color={isLowTime ? colors.error : colors.onSurfaceVariant}
                     />
                     <Text style={[
                         styles.timerText,
@@ -377,12 +380,12 @@ export default function TestSessionScreen() {
                         </Text>
                         <Pressable
                             onPress={handleToggleFlag}
-                            style={({ pressed }) => [styles.flagBtn, pressed && styles.headerBtnPressed]}
+                            style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
                         >
                             <MaterialIcon
                                 name="flag"
                                 size={20}
-                                color={flagged.has(currentQuestion.id) ? COLORS.warning : COLORS.onSurfaceVariant}
+                                color={flagged.has(currentQuestion.id) ? colors.warning : colors.onSurfaceVariant}
                                 filled={flagged.has(currentQuestion.id)}
                             />
                         </Pressable>
@@ -431,21 +434,21 @@ export default function TestSessionScreen() {
                     variant="outline"
                     onPress={handlePrev}
                     disabled={currentIndex === 0}
-                    style={{ flex: 1 }}
+                    style={styles.fill}
                 />
-                <View style={{ width: SPACING[3] }} />
+                <View style={styles.navGap} />
                 {currentIndex < questions.length - 1 ? (
                     <Button
                         title="Next"
                         onPress={handleNext}
-                        style={{ flex: 1 }}
+                        style={styles.fill}
                         iconRight="arrow_forward"
                     />
                 ) : (
                     <Button
                         title="Submit"
                         onPress={() => setShowSubmitConfirm(true)}
-                        style={{ flex: 1 }}
+                        style={styles.fill}
                     />
                 )}
             </View>
@@ -464,13 +467,13 @@ export default function TestSessionScreen() {
                                 title="Review"
                                 variant="outline"
                                 onPress={() => setShowSubmitConfirm(false)}
-                                style={{ flex: 1 }}
+                                style={styles.fill}
                             />
-                            <View style={{ width: SPACING[3] }} />
+                            <View style={styles.navGap} />
                             <Button
                                 title="Submit"
                                 onPress={handleSubmitTest}
-                                style={{ flex: 1 }}
+                                style={styles.fill}
                             />
                         </View>
                     </View>
@@ -480,138 +483,139 @@ export default function TestSessionScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: SPACING[4],
-        height: 56,
-        backgroundColor: COLORS.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.outlineVariant,
-    },
-    headerBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    headerBtnPressed: {
-        backgroundColor: COLORS.surfaceVariant,
-    },
-    headerTitle: {
-        flex: 1,
-        textAlign: "center",
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        fontWeight: "700",
-        marginHorizontal: SPACING[2],
-    },
-    timerPill: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        backgroundColor: COLORS.surfaceContainerHigh,
-        paddingHorizontal: SPACING[3],
-        paddingVertical: SPACING[2],
-        borderRadius: BORDER_RADIUS.full,
-    },
-    timerPillLow: {
-        backgroundColor: COLORS.errorLight,
-    },
-    timerText: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurfaceVariant,
-        fontWeight: "700",
-    },
-    timerTextLow: {
-        color: COLORS.error,
-    },
-    scrollContent: {
-        padding: SPACING[4],
-    },
-    progressSection: {
-        marginBottom: SPACING[5],
-    },
-    progressRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: SPACING[2],
-    },
-    questionCount: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurfaceVariant,
-        fontWeight: "600",
-    },
-    flagBtn: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    progressBar: {
-        borderRadius: BORDER_RADIUS.full,
-        overflow: "hidden",
-    },
-    optionsContainer: {
-        gap: SPACING[3],
-    },
-    bottomPadding: {
-        height: SPACING[6],
-    },
-    bottomNav: {
-        flexDirection: "row",
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[4],
-        backgroundColor: COLORS.surface,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.outlineVariant,
-    },
-    modalOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: SPACING[5],
-    },
-    modalCard: {
-        width: "100%",
-        backgroundColor: COLORS.surfaceContainerLowest,
-        borderRadius: BORDER_RADIUS["2xl"],
-        padding: SPACING[6],
-    },
-    modalTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.xl,
-        color: COLORS.onSurface,
-        fontWeight: "800",
-        textAlign: "center",
-        marginBottom: SPACING[3],
-    },
-    modalBody: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.base,
-        color: COLORS.onSurfaceVariant,
-        textAlign: "center",
-        marginBottom: SPACING[5],
-        lineHeight: 24,
-    },
-    modalActions: {
-        flexDirection: "row",
-    },
-});
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        header: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            justifyContent: "space-between" as const,
+            paddingHorizontal: SPACING[4],
+            height: 56,
+            backgroundColor: colors.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outlineVariant,
+        },
+        headerBtn: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        headerTitle: {
+            flex: 1,
+            textAlign: "center" as const,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            marginHorizontal: SPACING[2],
+        },
+        timerPill: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: 4,
+            backgroundColor: colors.surfaceContainerHigh,
+            paddingHorizontal: SPACING[3],
+            paddingVertical: SPACING[2],
+            borderRadius: BORDER_RADIUS.full,
+        },
+        timerPillLow: {
+            backgroundColor: colors.errorLight,
+        },
+        timerText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.onSurfaceVariant,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+        },
+        timerTextLow: {
+            color: colors.error,
+        },
+        scrollContent: {
+            padding: SPACING[4],
+        },
+        progressSection: {
+            marginBottom: SPACING[5],
+        },
+        progressRow: {
+            flexDirection: "row" as const,
+            justifyContent: "space-between" as const,
+            alignItems: "center" as const,
+            marginBottom: SPACING[2],
+        },
+        questionCount: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.onSurfaceVariant,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+        flagBtn: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        progressBar: {
+            borderRadius: BORDER_RADIUS.full,
+            overflow: "hidden" as const,
+        },
+        optionsContainer: {
+            gap: SPACING[3],
+        },
+        bottomPadding: {
+            height: SPACING[6],
+        },
+        bottomNav: {
+            flexDirection: "row" as const,
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[4],
+            backgroundColor: colors.surface,
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+        },
+        fill: { flex: 1 },
+        navGap: { width: SPACING[3] },
+        modalOverlay: {
+            position: "absolute" as const,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: colors.overlay,
+            justifyContent: "center" as const,
+            alignItems: "center" as const,
+            padding: SPACING[5],
+        },
+        modalCard: {
+            width: "100%" as const,
+            backgroundColor: colors.surfaceContainerLowest,
+            borderRadius: BORDER_RADIUS["2xl"],
+            padding: SPACING[6],
+        },
+        modalTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.xl,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            textAlign: "center" as const,
+            marginBottom: SPACING[3],
+        },
+        modalBody: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            color: colors.onSurfaceVariant,
+            textAlign: "center" as const,
+            marginBottom: SPACING[5],
+            lineHeight: 24,
+        },
+        modalActions: {
+            flexDirection: "row" as const,
+        },
+    };
+}

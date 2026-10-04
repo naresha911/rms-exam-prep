@@ -1,14 +1,23 @@
 import '../../global.css';
 
-import { Stack } from 'expo-router';
+import { Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import * as SystemUI from 'expo-system-ui';
 import { View } from 'react-native';
-import { COLORS, normalizeStudentStandard } from '../constants';
+import { normalizeStudentStandard } from '../constants';
+import {
+    createNavigationTheme,
+    layout,
+    useAppearance,
+    useColors,
+    useThemedStyles,
+    type ColorPalette,
+} from '../theme';
 import { useAppStore } from '../store/useAppStore';
 import { supabase, fetchProfile, ensureStudentProfile } from '../lib/supabase';
 import { initAnalytics, identifyUser, trackScreen } from '../lib/analytics';
@@ -26,8 +35,24 @@ import {
 SplashScreen.preventAutoHideAsync().catch(() => { });
 initMathJax();
 
+function createRootStyles(colors: ColorPalette) {
+    return {
+        root: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+    };
+}
+
 export default function RootLayout() {
     const { setUser, setAuthenticated, setLoading } = useAppStore();
+    const colors = useColors();
+    const appearance = useAppearance();
+    const styles = useThemedStyles(createRootStyles);
+    const navigationTheme = useMemo(
+        () => createNavigationTheme(colors, appearance),
+        [colors, appearance]
+    );
 
     const [fontsLoaded] = useFonts({
         PlusJakartaSans_400Regular,
@@ -51,6 +76,10 @@ export default function RootLayout() {
     }, [fontsLoaded]);
 
     const shouldInitialize = fontsLoaded || fontsTimeout;
+
+    useEffect(() => {
+        SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
+    }, [colors.background]);
 
     useEffect(() => {
         if (!shouldInitialize) return;
@@ -173,18 +202,19 @@ export default function RootLayout() {
 
     return (
         <ErrorBoundary>
-            <GestureHandlerRootView style={{ flex: 1 }}>
+            <GestureHandlerRootView style={layout.fill}>
                 <SafeAreaProvider>
-                    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-                        <Stack
-                            screenOptions={{
-                                headerShown: false,
-                                contentStyle: { backgroundColor: COLORS.background },
-                                animation: 'slide_from_right',
-                            }}
-                        />
-                        <StatusBar style="dark" />
-                    </View>
+                    <ThemeProvider value={navigationTheme}>
+                        <View style={styles.root}>
+                            <Stack
+                                screenOptions={{
+                                    headerShown: false,
+                                    animation: 'slide_from_right',
+                                }}
+                            />
+                            <StatusBar style={appearance === 'dark' ? 'light' : 'dark'} />
+                        </View>
+                    </ThemeProvider>
                 </SafeAreaProvider>
             </GestureHandlerRootView>
         </ErrorBoundary>

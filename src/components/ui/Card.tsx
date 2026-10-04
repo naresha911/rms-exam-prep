@@ -1,80 +1,73 @@
-import React from "react";
-import { View, ViewStyle, Platform, TouchableOpacity } from "react-native";
-import { BORDER_RADIUS, COLORS, SPACING, SHADOWS } from "../../constants";
-import { CARD_VARIANTS } from "../../constants/theme";
+import React from 'react';
+import { Platform, TouchableOpacity, View, type ViewStyle } from 'react-native';
+import { BORDER_RADIUS, SHADOWS, SPACING } from '../../constants';
+import { useThemedStyles, type ColorPalette } from '../../theme';
 
 interface CardProps {
     children: React.ReactNode;
-    variant?: "default" | "elevated" | "outlined" | "surface" | "surfaceMuted";
-    padding?: keyof typeof SPACING | "none";
+    variant?: 'default' | 'elevated' | 'outlined' | 'surface' | 'surfaceMuted';
+    padding?: keyof typeof SPACING | 'none';
     style?: ViewStyle;
     onPress?: () => void;
 }
 
+function createStyles(colors: ColorPalette) {
+    const pads: Record<string, ViewStyle> = { pad_none: { padding: 0 } };
+    for (const [key, value] of Object.entries(SPACING)) {
+        pads[`pad_${key}`] = { padding: value };
+    }
+    return {
+        ...pads,
+        base: {
+            borderRadius: BORDER_RADIUS['2xl'],
+            zIndex: 1,
+            elevation: Platform.OS === 'android' ? 2 : 0,
+        },
+        default: {
+            backgroundColor: colors.cardBackground,
+            ...SHADOWS.sm,
+        },
+        elevated: {
+            backgroundColor: colors.cardBackground,
+            ...SHADOWS.md,
+        },
+        outlined: {
+            backgroundColor: colors.cardBackground,
+            borderWidth: 1,
+            borderColor: colors.cardBorder,
+        },
+        surface: {
+            backgroundColor: colors.surfaceContainer,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+        },
+        surfaceMuted: {
+            backgroundColor: colors.surfaceMuted,
+        },
+    };
+}
+
 export const Card: React.FC<CardProps> = ({
     children,
-    variant = "default",
+    variant = 'default',
     padding = 4,
     style,
     onPress,
 }) => {
-    // Map our variant names to theme tokens
-    const getVariantStyle = (): ViewStyle => {
-        switch (variant) {
-            case "elevated":
-                return {
-                    backgroundColor: COLORS.cardBackground,
-                    ...SHADOWS.md,
-                };
-            case "outlined":
-                return {
-                    backgroundColor: COLORS.cardBackground,
-                    borderWidth: 1,
-                    borderColor: COLORS.cardBorder,
-                };
-            case "surface":
-                return {
-                    backgroundColor: COLORS.surfaceContainer,
-                    borderWidth: 1,
-                    borderColor: COLORS.outlineVariant,
-                };
-            case "surfaceMuted":
-                return {
-                    backgroundColor: COLORS.surfaceMuted,
-                };
-            case "default":
-            default:
-                return {
-                    backgroundColor: COLORS.cardBackground,
-                    ...SHADOWS.sm,
-                };
-        }
-    };
+    const styles = useThemedStyles(createStyles);
+    const padKey = `pad_${padding}` as keyof typeof styles;
+    const content = (
+        <View style={[styles.base, styles[variant], styles[padKey], style]}>
+            {children}
+        </View>
+    );
 
-    const paddingValue = padding === "none" ? 0 : SPACING[padding];
-
-    // Use TouchableOpacity for pressable cards, View for static cards
-    const Wrapper = onPress ? TouchableOpacity : View;
-    const wrapperProps = onPress ? { onPress, activeOpacity: 0.7 } : {};
+    if (!onPress) return content;
 
     return (
-        <Wrapper
-            {...wrapperProps}
-            style={[
-                {
-                    // Card radius matches Stitch "Large Containers" (1rem / 16px or 24px)
-                    borderRadius: BORDER_RADIUS["2xl"],
-                    padding: paddingValue,
-                    // Force visibility with zIndex and elevation
-                    zIndex: 1,
-                    elevation: Platform.OS === "android" ? 2 : 0,
-                },
-                getVariantStyle(),
-                style,
-            ]}
-        >
-            {children}
-        </Wrapper>
+        <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+            {content}
+        </TouchableOpacity>
     );
 };
 

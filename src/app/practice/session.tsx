@@ -1,7 +1,7 @@
 // Practice Session — Stitch-aligned MCQ practice screen.
 // Sticky header, progress bar, QuestionRenderer (practice mode), inline feedback, sticky CTA.
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../components/ui/Button";
@@ -13,8 +13,89 @@ import { QuestionRenderer, QuestionAssist } from "../../components/questions";
 import { fetchPracticeQuestions, toggleBookmark, reportQuestion } from "../../lib/supabase";
 import { PracticeQuestion } from "../../types";
 import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS, SUBJECTS, getStandardIdFallback } from "../../constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS, SUBJECTS, getStandardIdFallback } from "../../constants";
+import { useColors, useThemedStyles, type ColorPalette } from "../../theme";
 import { trackEvent, trackPracticeCompletion, EVENTS } from "../../lib/analytics";
+
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        header: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            justifyContent: "space-between" as const,
+            paddingHorizontal: SPACING[4],
+            height: 56,
+            backgroundColor: colors.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outlineVariant,
+        },
+        headerBtn: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        headerBtnPressed: {
+            backgroundColor: colors.surfaceVariant,
+        },
+        headerTitle: {
+            flex: 1,
+            textAlign: "center" as const,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurface,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            marginHorizontal: SPACING[2],
+        },
+        headerActions: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: SPACING[1],
+        },
+        scrollContent: {
+            padding: SPACING[4],
+            paddingBottom: SPACING[4],
+        },
+        progressSection: {
+            marginBottom: SPACING[5],
+        },
+        progressRow: {
+            flexDirection: "row" as const,
+            justifyContent: "space-between" as const,
+            alignItems: "center" as const,
+            marginBottom: SPACING[2],
+        },
+        questionCount: {
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.onSurfaceVariant,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+        },
+        progressBar: {
+            borderRadius: BORDER_RADIUS.full,
+            overflow: "hidden" as const,
+        },
+        optionsContainer: {
+            gap: SPACING[3],
+            marginBottom: SPACING[4],
+        },
+        bottomPadding: {
+            height: SPACING[6],
+        },
+        ctaBar: {
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[4],
+            backgroundColor: colors.surface,
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+        },
+    };
+}
 
 export default function PracticeSessionScreen() {
     const router = useRouter();
@@ -24,6 +105,8 @@ export default function PracticeSessionScreen() {
         count: string;
     }>();
     const { user, addXP, updateDailyProgress, updateStreak, checkDailyGoal, unlockBadge, setLastPracticeActivity, preferences } = useAppStore();
+    const colors = useColors();
+    const styles = useThemedStyles(createStyles);
 
     const [loading, setLoading] = useState(true);
     const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -198,12 +281,11 @@ export default function PracticeSessionScreen() {
 
     if (questions.length === 0) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+            <SafeAreaView style={styles.container}>
                 <Stack.Screen
                     options={{
                         headerShown: true,
                         title: "Practice",
-                        headerStyle: { backgroundColor: COLORS.background },
                         headerShadowVisible: false,
                     }}
                 />
@@ -226,10 +308,10 @@ export default function PracticeSessionScreen() {
             <View style={styles.header}>
                 <Pressable
                     onPress={() => router.back()}
-                    style={({ pressed }) => [styles.headerBtn, pressed && styles.headerBtnPressed]}
+                    style={({ pressed }) => [styles.headerBtn, pressed ? styles.headerBtnPressed : null]}
                     accessibilityLabel="Exit practice"
                 >
-                    <MaterialIcon name="close" size={24} color={COLORS.onSurface} />
+                    <MaterialIcon name="close" size={24} color={colors.onSurface} />
                 </Pressable>
 
                 <Text style={styles.headerTitle} numberOfLines={1}>
@@ -239,21 +321,21 @@ export default function PracticeSessionScreen() {
                 <View style={styles.headerActions}>
                     <Pressable
                         onPress={handleToggleBookmark}
-                        style={({ pressed }) => [styles.headerBtn, pressed && styles.headerBtnPressed]}
+                        style={({ pressed }) => [styles.headerBtn, pressed ? styles.headerBtnPressed : null]}
                         accessibilityLabel={isBookmarked ? "Remove bookmark" : "Bookmark question"}
                     >
                         <MaterialIcon
                             name={isBookmarked ? "bookmark" : "bookmark_border"}
                             size={22}
-                            color={isBookmarked ? COLORS.primary : COLORS.onSurfaceVariant}
+                            color={isBookmarked ? colors.primary : colors.onSurfaceVariant}
                         />
                     </Pressable>
                     <Pressable
                         onPress={handleReport}
-                        style={({ pressed }) => [styles.headerBtn, pressed && styles.headerBtnPressed]}
+                        style={({ pressed }) => [styles.headerBtn, pressed ? styles.headerBtnPressed : null]}
                         accessibilityLabel="Report issue"
                     >
-                        <MaterialIcon name="flag" size={22} color={COLORS.onSurfaceVariant} />
+                        <MaterialIcon name="flag" size={22} color={colors.onSurfaceVariant} />
                     </Pressable>
                 </View>
             </View>
@@ -329,81 +411,3 @@ export default function PracticeSessionScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: SPACING[4],
-        height: 56,
-        backgroundColor: COLORS.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.outlineVariant,
-    },
-    headerBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    headerBtnPressed: {
-        backgroundColor: COLORS.surfaceVariant,
-    },
-    headerTitle: {
-        flex: 1,
-        textAlign: "center",
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        fontWeight: "700",
-        marginHorizontal: SPACING[2],
-    },
-    headerActions: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[1],
-    },
-    scrollContent: {
-        padding: SPACING[4],
-        paddingBottom: SPACING[4],
-    },
-    progressSection: {
-        marginBottom: SPACING[5],
-    },
-    progressRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: SPACING[2],
-    },
-    questionCount: {
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurfaceVariant,
-        fontWeight: "600",
-    },
-    progressBar: {
-        borderRadius: BORDER_RADIUS.full,
-        overflow: "hidden",
-    },
-    optionsContainer: {
-        gap: SPACING[3],
-        marginBottom: SPACING[4],
-    },
-    bottomPadding: {
-        height: SPACING[6],
-    },
-    ctaBar: {
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[4],
-        backgroundColor: COLORS.surface,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.outlineVariant,
-    },
-});

@@ -1,10 +1,11 @@
 // Sectional Tests Screen - List of section-based tests
-import { View, Text, ScrollView, Pressable, Alert } from "react-native";
+import { Pressable, ScrollView, Text, View, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
 import { useAppStore } from "../../store/useAppStore";
-import { COLORS, SPACING, TYPOGRAPHY, getExamStructureForStandard, normalizeStudentStandard } from "../../constants";
+import { SPACING, TYPOGRAPHY, getExamStructureForStandard, normalizeStudentStandard } from "../../constants";
+import { layout, useThemedStyles, type ColorPalette } from "../../theme";
 
 const SECTION_ICONS: Record<string, string> = {
     'Language': '📖',
@@ -16,9 +17,105 @@ const SECTION_ICONS: Record<string, string> = {
     'Social Science': '🏛️',
 };
 
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        header: {
+            padding: SPACING[4],
+            borderBottomWidth: 1,
+            borderBottomColor: colors.cardBorder,
+        },
+        backBtn: { padding: SPACING[2] },
+        backIcon: { fontSize: 24, color: colors.textPrimary },
+        headerTitle: {
+            flex: 1,
+            fontSize: TYPOGRAPHY.fontSize.xl,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.textPrimary,
+            textAlign: "center" as const,
+            marginRight: 40,
+        },
+        scroll: { padding: SPACING[5] },
+        intro: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textSecondary,
+            marginBottom: SPACING[5],
+        },
+        cardPress: { marginBottom: SPACING[3] },
+        iconTile: {
+            width: 56,
+            height: 56,
+            borderRadius: 12,
+            backgroundColor: colors.primaryFixed,
+        },
+        iconTileWarning: {
+            backgroundColor: colors.warningLight,
+        },
+        iconGlyph: { fontSize: 28 },
+        sectionCopy: { flex: 1, marginLeft: SPACING[3] },
+        sectionName: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.textPrimary,
+        },
+        sectionMeta: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textSecondary,
+            marginTop: 4,
+        },
+        marksValue: {
+            fontSize: TYPOGRAPHY.fontSize.xl,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+            color: colors.primary,
+        },
+        marksLabel: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textTertiary,
+        },
+        startRow: {
+            marginTop: SPACING[3],
+            paddingTop: SPACING[3],
+            borderTopWidth: 1,
+            borderTopColor: colors.cardBorder,
+            justifyContent: "flex-end" as const,
+        },
+        startChip: {
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[2],
+            backgroundColor: colors.primary,
+            borderRadius: 20,
+        },
+        startChipText: {
+            color: colors.textInverse,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+        },
+        speedTitle: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.textPrimary,
+            marginTop: SPACING[4],
+            marginBottom: SPACING[3],
+        },
+        speedArrow: { color: colors.primary, fontSize: 20 },
+    };
+}
+
 export default function SectionalTestsScreen() {
     const router = useRouter();
     const { user } = useAppStore();
+    const styles = useThemedStyles(createStyles);
     const examInfo = getExamStructureForStandard(user?.target_class);
     const targetClass = normalizeStudentStandard(user?.target_class);
 
@@ -42,45 +139,22 @@ export default function SectionalTestsScreen() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
-            {/* Header */}
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: SPACING[4],
-                    borderBottomWidth: 1,
-                    borderBottomColor: COLORS.cardBorder,
-                }}
-            >
-                <Pressable onPress={() => router.back()} style={{ padding: SPACING[2] }}>
-                    <Text style={{ fontSize: 24 }}>←</Text>
-                </Pressable>
-                <Text
-                    style={{
-                        flex: 1,
-                        fontSize: TYPOGRAPHY.fontSize.xl,
-                        fontWeight: "700",
-                        color: COLORS.textPrimary,
-                        textAlign: "center",
-                        marginRight: 40,
-                    }}
+        <SafeAreaView style={styles.screen}>
+            <View style={[layout.row, styles.header]}>
+                <Pressable
+                    onPress={() => router.back()}
+                    style={({ pressed }) => [styles.backBtn, pressed && layout.pressed]}
                 >
-                    📝 Sectional Tests
-                </Text>
+                    <Text style={styles.backIcon}>←</Text>
+                </Pressable>
+                <Text style={styles.headerTitle}>📝 Sectional Tests</Text>
             </View>
 
             <ScrollView
-                contentContainerStyle={{ padding: SPACING[5] }}
+                contentContainerStyle={styles.scroll}
                 showsVerticalScrollIndicator={false}
             >
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.base,
-                        color: COLORS.textSecondary,
-                        marginBottom: SPACING[5],
-                    }}
-                >
+                <Text style={styles.intro}>
                     Practice individual subjects to strengthen your weak areas.
                 </Text>
 
@@ -88,92 +162,36 @@ export default function SectionalTestsScreen() {
                     <Pressable
                         key={idx}
                         onPress={() => handleStartSection(section.name, section.questions, section.marks)}
-                        style={{ marginBottom: SPACING[3] }}
+                        style={({ pressed }) => [styles.cardPress, pressed && layout.pressed]}
                     >
                         <Card>
-                            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                <View
-                                    style={{
-                                        width: 56,
-                                        height: 56,
-                                        borderRadius: 12,
-                                        backgroundColor: COLORS.primaryLight + "30",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <Text style={{ fontSize: 28 }}>
+                            <View style={layout.row}>
+                                <View style={[layout.center, styles.iconTile]}>
+                                    <Text style={styles.iconGlyph}>
                                         {SECTION_ICONS[section.name] || "📚"}
                                     </Text>
                                 </View>
-                                <View style={{ flex: 1, marginLeft: SPACING[3] }}>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.lg,
-                                            fontWeight: "700",
-                                            color: COLORS.textPrimary,
-                                        }}
-                                    >
-                                        {section.name}
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            fontSize: TYPOGRAPHY.fontSize.sm,
-                                            color: COLORS.textSecondary,
-                                            marginTop: 4,
-                                        }}
-                                    >
+                                <View style={styles.sectionCopy}>
+                                    <Text style={styles.sectionName}>{section.name}</Text>
+                                    <Text style={styles.sectionMeta}>
                                         {section.questions} questions • {marksToTime(section.marks)} min
                                     </Text>
                                 </View>
-                                <View style={{ alignItems: "center" }}>
-                                    <Text style={{ fontSize: TYPOGRAPHY.fontSize.xl, fontWeight: "800", color: COLORS.primary }}>
-                                        {section.marks}
-                                    </Text>
-                                    <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.textTertiary }}>
-                                        marks
-                                    </Text>
+                                <View style={layout.center}>
+                                    <Text style={styles.marksValue}>{section.marks}</Text>
+                                    <Text style={styles.marksLabel}>marks</Text>
                                 </View>
                             </View>
-                            <View
-                                style={{
-                                    marginTop: SPACING[3],
-                                    paddingTop: SPACING[3],
-                                    borderTopWidth: 1,
-                                    borderTopColor: COLORS.cardBorder,
-                                    flexDirection: "row",
-                                    justifyContent: "flex-end",
-                                }}
-                            >
-                                <View
-                                    style={{
-                                        paddingHorizontal: SPACING[4],
-                                        paddingVertical: SPACING[2],
-                                        backgroundColor: COLORS.primary,
-                                        borderRadius: 20,
-                                    }}
-                                >
-                                    <Text style={{ color: COLORS.textInverse, fontWeight: "700", fontSize: TYPOGRAPHY.fontSize.sm }}>
-                                        Start Test →
-                                    </Text>
+                            <View style={[layout.row, styles.startRow]}>
+                                <View style={styles.startChip}>
+                                    <Text style={styles.startChipText}>Start Test →</Text>
                                 </View>
                             </View>
                         </Card>
                     </Pressable>
                 ))}
 
-                {/* Speed Test Option */}
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize.lg,
-                        fontWeight: "700",
-                        color: COLORS.textPrimary,
-                        marginTop: SPACING[4],
-                        marginBottom: SPACING[3],
-                    }}
-                >
-                    ⚡ Speed Tests
-                </Text>
+                <Text style={styles.speedTitle}>⚡ Speed Tests</Text>
                 <Pressable
                     onPress={() => {
                         Alert.alert(
@@ -193,43 +211,18 @@ export default function SectionalTestsScreen() {
                             ]
                         );
                     }}
-                    style={{ marginBottom: SPACING[3] }}
+                    style={({ pressed }) => [styles.cardPress, pressed && layout.pressed]}
                 >
                     <Card>
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <View
-                                style={{
-                                    width: 56,
-                                    height: 56,
-                                    borderRadius: 12,
-                                    backgroundColor: COLORS.warningLight,
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <Text style={{ fontSize: 28 }}>⚡</Text>
+                        <View style={layout.row}>
+                            <View style={[layout.center, styles.iconTile, styles.iconTileWarning]}>
+                                <Text style={styles.iconGlyph}>⚡</Text>
                             </View>
-                            <View style={{ flex: 1, marginLeft: SPACING[3] }}>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.lg,
-                                        fontWeight: "700",
-                                        color: COLORS.textPrimary,
-                                    }}
-                                >
-                                    Quick Speed Test
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontSize: TYPOGRAPHY.fontSize.sm,
-                                        color: COLORS.textSecondary,
-                                        marginTop: 4,
-                                    }}
-                                >
-                                    10 questions • 5 minutes
-                                </Text>
+                            <View style={styles.sectionCopy}>
+                                <Text style={styles.sectionName}>Quick Speed Test</Text>
+                                <Text style={styles.sectionMeta}>10 questions • 5 minutes</Text>
                             </View>
-                            <Text style={{ color: COLORS.primary, fontSize: 20 }}>→</Text>
+                            <Text style={styles.speedArrow}>→</Text>
                         </View>
                     </Card>
                 </Pressable>

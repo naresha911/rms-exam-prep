@@ -18,13 +18,112 @@ import {
     loadLocalPaperSession,
 } from "@/lib/papers";
 import { useAppStore } from "@/store/useAppStore";
-import { COLORS, getExamStructureForStandard, normalizeStudentStandard } from "@/constants";
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY, getExamStructureForStandard, normalizeStudentStandard } from "@/constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
 import { PaperAttemptSummary, PaperWithQuestions } from "@/types";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { t } from "@/lib/i18n";
 
+function createStyles(colors: ColorPalette) {
+    return {
+        screen: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        header: {
+            padding: SPACING[4],
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outlineVariant,
+        },
+        backBtn: { padding: SPACING[2] },
+        headerTitle: {
+            flex: 1,
+            textAlign: "center" as const,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.onSurface,
+        },
+        headerSpacer: { width: 40 },
+        body: {
+            flex: 1,
+            padding: SPACING[5],
+        },
+        hero: { alignItems: "center" as const },
+        title: {
+            marginTop: SPACING[3],
+            textAlign: "center" as const,
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+            color: colors.onSurface,
+        },
+        subtitle: {
+            marginTop: SPACING[1],
+            textAlign: "center" as const,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.onSurfaceVariant,
+        },
+        detailsCard: { marginTop: SPACING[6], marginBottom: SPACING[4] },
+        infoList: { gap: SPACING[3] },
+        infoLabel: {
+            marginLeft: SPACING[3],
+            flex: 1,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.onSurfaceVariant,
+        },
+        infoValue: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            color: colors.onSurface,
+        },
+        chips: {
+            flexWrap: "wrap" as const,
+            gap: SPACING[2],
+            marginBottom: SPACING[4],
+        },
+        chip: {
+            borderRadius: BORDER_RADIUS.full,
+            backgroundColor: colors.surfaceContainerHigh,
+            paddingHorizontal: SPACING[3],
+            paddingVertical: SPACING[1],
+        },
+        chipText: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            color: colors.onSurfaceVariant,
+        },
+        instructionsCard: {
+            backgroundColor: colors.primaryFixed,
+            marginBottom: SPACING[3],
+        },
+        instructionsRow: { alignItems: "flex-start" as const },
+        instructionsBody: { marginLeft: SPACING[2], flex: 1 },
+        instructionsTitle: {
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.primary,
+        },
+        instructionsText: {
+            marginTop: SPACING[1],
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            lineHeight: 20,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.onSurfaceVariant,
+        },
+        actionButton: { marginBottom: SPACING[3] },
+        spinner: { marginTop: SPACING[2] },
+    };
+}
+
 export default function PaperDetailScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { paperId } = useLocalSearchParams<{ paperId: string }>();
     const { user, onboardingData } = useAppStore();
     const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
@@ -149,7 +248,7 @@ export default function PaperDetailScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-background">
+            <SafeAreaView style={styles.screen}>
                 <LoadingSpinner message={t("papers.loadingDetail")} />
             </SafeAreaView>
         );
@@ -157,7 +256,7 @@ export default function PaperDetailScreen() {
 
     if (error || !paper) {
         return (
-            <SafeAreaView className="flex-1 bg-background">
+            <SafeAreaView style={styles.screen}>
                 <EmptyState
                     title={t("papers.unavailable")}
                     description={error || t("papers.notFound")}
@@ -177,28 +276,32 @@ export default function PaperDetailScreen() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-            <View className="flex-row items-center border-b border-outline-variant p-4">
-                <Pressable onPress={() => router.back()} className="p-2" accessibilityLabel={t("common.back")}>
-                    <MaterialIcon name="arrow_back" size={24} color={COLORS.onSurface} />
+        <SafeAreaView style={styles.screen} edges={["top"]}>
+            <View style={[layout.row, styles.header]}>
+                <Pressable
+                    onPress={() => router.back()}
+                    style={({ pressed }) => [styles.backBtn, pressed && layout.pressed]}
+                    accessibilityLabel={t("common.back")}
+                >
+                    <MaterialIcon name="arrow_back" size={24} color={colors.onSurface} />
                 </Pressable>
-                <Text className="flex-1 text-center text-lg font-bold text-onSurface" numberOfLines={1}>
+                <Text style={styles.headerTitle} numberOfLines={1}>
                     {paper.title}
                 </Text>
-                <View className="w-10" />
+                <View style={styles.headerSpacer} />
             </View>
 
-            <View className="flex-1 p-5">
-                <View className="items-center">
+            <View style={styles.body}>
+                <View style={styles.hero}>
                     <MascotDisplay expression="encouraging" size={120} />
                 </View>
-                <Text className="mt-3 text-center text-2xl font-extrabold text-onSurface">{paper.title}</Text>
-                <Text className="mt-1 text-center text-base text-onSurfaceVariant">
+                <Text style={styles.title}>{paper.title}</Text>
+                <Text style={styles.subtitle}>
                     {t("papers.detailSubtitle", { class: targetClass })}
                 </Text>
 
-                <Card variant="elevated" style={{ marginTop: 24, marginBottom: 16 }}>
-                    <View className="gap-3">
+                <Card variant="elevated" style={styles.detailsCard}>
+                    <View style={styles.infoList}>
                         <InfoRow icon="calendar_today" label={t("papers.year")} value={String(paper.year)} />
                         <InfoRow icon="school" label={t("papers.class")} value={`Class ${targetClass}`} />
                         <InfoRow icon="help" label={t("papers.questions")} value={String(questionCount)} />
@@ -218,21 +321,21 @@ export default function PaperDetailScreen() {
                 </Card>
 
                 {sections.length > 0 && (
-                    <View className="mb-4 flex-row flex-wrap gap-2">
+                    <View style={[layout.row, styles.chips]}>
                         {sections.map((section) => (
-                            <View key={section} className="rounded-full bg-surface-container-high px-3 py-1">
-                                <Text className="text-xs font-semibold text-onSurfaceVariant">{section}</Text>
+                            <View key={section} style={styles.chip}>
+                                <Text style={styles.chipText}>{section}</Text>
                             </View>
                         ))}
                     </View>
                 )}
 
-                <Card variant="surface" style={{ backgroundColor: COLORS.primaryFixed, marginBottom: 12 }}>
-                    <View className="flex-row items-start">
-                        <MaterialIcon name="info" size={22} color={COLORS.primary} />
-                        <View className="ml-2 flex-1">
-                            <Text className="font-bold text-primary">{t("papers.officialPractice")}</Text>
-                            <Text className="mt-1 text-sm leading-5 text-onSurfaceVariant">
+                <Card variant="surface" style={styles.instructionsCard}>
+                    <View style={[layout.row, styles.instructionsRow]}>
+                        <MaterialIcon name="info" size={22} color={colors.primary} />
+                        <View style={styles.instructionsBody}>
+                            <Text style={styles.instructionsTitle}>{t("papers.officialPractice")}</Text>
+                            <Text style={styles.instructionsText}>
                                 {inProgress
                                     ? t("papers.resumeHint")
                                     : t("papers.persistHint")}
@@ -254,8 +357,8 @@ export default function PaperDetailScreen() {
                         fullWidth
                         onPress={openPdf}
                         disabled={pdfBusy}
-                        icon={<MaterialIcon name="assignment" size={20} color={COLORS.primary} />}
-                        style={{ marginBottom: 12 }}
+                        icon={<MaterialIcon name="assignment" size={20} color={colors.primary} />}
+                        style={styles.actionButton}
                     />
                 ) : null}
 
@@ -267,11 +370,11 @@ export default function PaperDetailScreen() {
                         onPress={() =>
                             router.push(`/papers/${paper.id}/result?attemptId=${summary!.attempt_id}`)
                         }
-                        style={{ marginBottom: 12 }}
+                        style={styles.actionButton}
                     />
                 ) : null}
 
-                <View className="flex-1" />
+                <View style={layout.fill} />
 
                 <Button
                     title={
@@ -289,7 +392,7 @@ export default function PaperDetailScreen() {
                     disabled={starting}
                     iconRight="arrow_forward"
                 />
-                {starting ? <ActivityIndicator style={{ marginTop: 8 }} color={COLORS.primary} /> : null}
+                {starting ? <ActivityIndicator style={styles.spinner} color={colors.primary} /> : null}
             </View>
         </SafeAreaView>
     );
@@ -304,11 +407,14 @@ function InfoRow({
     label: string;
     value: string;
 }) {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
+
     return (
-        <View className="flex-row items-center">
-            <MaterialIcon name={icon} size={20} color={COLORS.onSurfaceVariant} />
-            <Text className="ml-3 flex-1 text-base text-onSurfaceVariant">{label}</Text>
-            <Text className="text-base font-semibold text-onSurface">{value}</Text>
+        <View style={layout.row}>
+            <MaterialIcon name={icon} size={20} color={colors.onSurfaceVariant} />
+            <Text style={styles.infoLabel}>{label}</Text>
+            <Text style={styles.infoValue}>{value}</Text>
         </View>
     );
 }

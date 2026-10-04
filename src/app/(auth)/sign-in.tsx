@@ -1,6 +1,6 @@
 // Sign In Screen — Stitch-aligned authentication screen.
 import { useState } from "react";
-import { View, Text, Pressable, Alert, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { View, Text, Pressable, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/Button";
@@ -9,10 +9,105 @@ import { MascotDisplay } from "@/components/shared/MascotDisplay";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useAppStore } from "@/store/useAppStore";
 import { signIn, ensureStudentProfile, fetchProfile } from "@/lib/supabase";
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, normalizeStudentStandard } from "@/constants";
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, normalizeStudentStandard } from "@/constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
+
+function createStyles(colors: ColorPalette) {
+    return {
+        container: {
+            backgroundColor: colors.background,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingHorizontal: SPACING[6],
+        },
+        mascotWrap: {
+            alignItems: "center" as const,
+            marginTop: SPACING[4],
+            marginBottom: SPACING[4],
+        },
+        title: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            color: colors.onSurface,
+            textAlign: "center" as const,
+            marginBottom: SPACING[1],
+        },
+        subtitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurfaceVariant,
+            textAlign: "center" as const,
+            marginBottom: SPACING[6],
+        },
+        form: {
+            gap: SPACING[4],
+        },
+        forgotBtn: {
+            alignSelf: "flex-end" as const,
+            marginTop: SPACING[2],
+        },
+        forgotText: {
+            color: colors.primary,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+        },
+        signInBtnWrap: {
+            marginTop: SPACING[6],
+        },
+        divider: {
+            marginVertical: SPACING[6],
+        },
+        dividerLine: {
+            flex: 1,
+            height: 1,
+            backgroundColor: colors.outlineVariant,
+        },
+        dividerText: {
+            color: colors.onSurfaceVariant,
+            paddingHorizontal: SPACING[3],
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+        },
+        socialRow: {
+            gap: SPACING[3],
+        },
+        socialBtn: {
+            flex: 1,
+            gap: SPACING[2],
+            paddingVertical: SPACING[3],
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            borderRadius: BORDER_RADIUS["2xl"],
+            backgroundColor: colors.surface,
+        },
+        socialBtnText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.onSurface,
+        },
+        spacer: {
+            height: SPACING[6],
+        },
+        signupRow: {
+            justifyContent: "center" as const,
+            marginTop: SPACING[4],
+            paddingBottom: SPACING[6],
+        },
+        signupLabel: {
+            color: colors.onSurfaceVariant,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+        },
+        signupLink: {
+            color: colors.primary,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+        },
+    };
+}
 
 export default function SignInScreen() {
     const router = useRouter();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { setAuthenticated, setUser } = useAppStore();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -74,9 +169,9 @@ export default function SignInScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        <SafeAreaView style={[layout.fill, styles.container]} edges={["top", "bottom"]}>
             <KeyboardAvoidingView
-                style={styles.flex}
+                style={layout.fill}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
                 <ScrollView
@@ -84,18 +179,15 @@ export default function SignInScreen() {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Mascot */}
                     <View style={styles.mascotWrap}>
                         <MascotDisplay expression="happy" size={100} />
                     </View>
 
-                    {/* Header */}
                     <Text style={styles.title}>Welcome back!</Text>
                     <Text style={styles.subtitle}>
                         Continue your Sainik School prep
                     </Text>
 
-                    {/* Form */}
                     <View style={styles.form}>
                         <Input
                             label="Email"
@@ -116,7 +208,6 @@ export default function SignInScreen() {
                         />
                     </View>
 
-                    {/* Forgot Password */}
                     <Pressable
                         onPress={() => router.push("/(auth)/forgot-password")}
                         style={styles.forgotBtn}
@@ -124,7 +215,6 @@ export default function SignInScreen() {
                         <Text style={styles.forgotText}>Forgot Password?</Text>
                     </Pressable>
 
-                    {/* Sign In Button */}
                     <View style={styles.signInBtnWrap}>
                         <Button
                             title="Sign In"
@@ -135,36 +225,32 @@ export default function SignInScreen() {
                         />
                     </View>
 
-                    {/* Divider */}
-                    <View style={styles.divider}>
+                    <View style={[layout.row, styles.divider]}>
                         <View style={styles.dividerLine} />
                         <Text style={styles.dividerText}>or continue with</Text>
                         <View style={styles.dividerLine} />
                     </View>
 
-                    {/* Social Login */}
-                    <View style={styles.socialRow}>
+                    <View style={[layout.row, styles.socialRow]}>
                         <Pressable
-                            style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed]}
+                            style={({ pressed }) => [layout.row, layout.center, styles.socialBtn, pressed ? layout.pressed : null]}
                             onPress={() => handleSocialLogin("Google")}
                         >
-                            <MaterialIcon name="email" size={20} color={COLORS.onSurface} />
+                            <MaterialIcon name="email" size={20} color={colors.onSurface} />
                             <Text style={styles.socialBtnText}>Google</Text>
                         </Pressable>
                         <Pressable
-                            style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed]}
+                            style={({ pressed }) => [layout.row, layout.center, styles.socialBtn, pressed ? layout.pressed : null]}
                             onPress={() => handleSocialLogin("Apple")}
                         >
-                            <MaterialIcon name="smart_toy" size={20} color={COLORS.onSurface} />
+                            <MaterialIcon name="smart_toy" size={20} color={colors.onSurface} />
                             <Text style={styles.socialBtnText}>Apple</Text>
                         </Pressable>
                     </View>
 
-                    {/* Spacer */}
                     <View style={styles.spacer} />
 
-                    {/* Sign Up Link */}
-                    <View style={styles.signupRow}>
+                    <View style={[layout.row, styles.signupRow]}>
                         <Text style={styles.signupLabel}>New here? </Text>
                         <Pressable onPress={() => router.push("/(auth)/sign-up")}>
                             <Text style={styles.signupLink}>Create an account</Text>
@@ -175,108 +261,3 @@ export default function SignInScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    flex: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingHorizontal: SPACING[6],
-    },
-    mascotWrap: {
-        alignItems: "center",
-        marginTop: SPACING[4],
-        marginBottom: SPACING[4],
-    },
-    title: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize["2xl"],
-        color: COLORS.onSurface,
-        textAlign: "center",
-        marginBottom: SPACING[1],
-    },
-    subtitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurfaceVariant,
-        textAlign: "center",
-        marginBottom: SPACING[6],
-    },
-    form: {
-        gap: SPACING[4],
-    },
-    forgotBtn: {
-        alignSelf: "flex-end",
-        marginTop: SPACING[2],
-    },
-    forgotText: {
-        color: COLORS.primary,
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-    },
-    signInBtnWrap: {
-        marginTop: SPACING[6],
-    },
-    divider: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginVertical: SPACING[6],
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: COLORS.outlineVariant,
-    },
-    dividerText: {
-        color: COLORS.onSurfaceVariant,
-        paddingHorizontal: SPACING[3],
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-    },
-    socialRow: {
-        flexDirection: "row",
-        gap: SPACING[3],
-    },
-    socialBtn: {
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: SPACING[2],
-        paddingVertical: SPACING[3],
-        borderWidth: 1,
-        borderColor: COLORS.outlineVariant,
-        borderRadius: BORDER_RADIUS["2xl"],
-        backgroundColor: COLORS.surface,
-    },
-    socialBtnPressed: {
-        opacity: 0.7,
-    },
-    socialBtnText: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        color: COLORS.onSurface,
-    },
-    spacer: {
-        height: SPACING[6],
-    },
-    signupRow: {
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: SPACING[4],
-        paddingBottom: SPACING[6],
-    },
-    signupLabel: {
-        color: COLORS.onSurfaceVariant,
-        fontFamily: TYPOGRAPHY.fontFamily.regular,
-    },
-    signupLink: {
-        color: COLORS.primary,
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-    },
-});

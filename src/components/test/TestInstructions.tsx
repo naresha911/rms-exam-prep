@@ -1,9 +1,10 @@
 // TestInstructions — pre-test instructions display
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../constants';
+import { layout, useThemedStyles, type ColorPalette } from '../../theme';
 import { Button } from '../ui/Button';
 import { MascotDisplay } from '../shared/MascotDisplay';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, EXAM_STRUCTURE } from '../../constants';
 
 interface Section {
     name: string;
@@ -23,6 +24,117 @@ interface TestInstructionsProps {
     loading?: boolean;
 }
 
+function createStyles(colors: ColorPalette) {
+    return {
+        scroll: { padding: SPACING[5] },
+        header: {
+            alignItems: 'center' as const,
+            marginBottom: SPACING[5],
+        },
+        title: {
+            fontSize: TYPOGRAPHY.fontSize['2xl'],
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+            color: colors.textPrimary,
+            textAlign: 'center' as const,
+            marginTop: SPACING[3],
+        },
+        subtitle: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textSecondary,
+            marginTop: 4,
+            textAlign: 'center' as const,
+        },
+        summaryRow: {
+            gap: SPACING[3],
+            marginBottom: SPACING[5],
+        },
+        summaryCard: {
+            flex: 1,
+            backgroundColor: colors.primaryFixed,
+            borderRadius: BORDER_RADIUS.xl,
+            padding: SPACING[3],
+            alignItems: 'center' as const,
+        },
+        summaryIcon: { fontSize: 20 },
+        summaryValue: {
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+            fontFamily: TYPOGRAPHY.fontFamily.extrabold,
+            color: colors.primary,
+            marginTop: 4,
+        },
+        summaryLabel: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textSecondary,
+        },
+        sectionCard: {
+            backgroundColor: colors.cardBackground,
+            borderRadius: BORDER_RADIUS.xl,
+            padding: SPACING[4],
+            marginBottom: SPACING[4],
+            borderWidth: 1,
+            borderColor: colors.cardBorder,
+        },
+        sectionTitle: {
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: TYPOGRAPHY.fontWeight.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.textPrimary,
+            marginBottom: SPACING[3],
+        },
+        sectionRow: {
+            paddingVertical: SPACING[2],
+        },
+        sectionDivider: {
+            borderBottomWidth: 1,
+            borderBottomColor: colors.cardBorder,
+        },
+        sectionName: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.textPrimary,
+            fontWeight: TYPOGRAPHY.fontWeight.medium,
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+        },
+        sectionMeta: {
+            gap: SPACING[4],
+        },
+        sectionMetaText: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textSecondary,
+        },
+        instructionsCard: {
+            backgroundColor: colors.backgroundSecondary,
+            borderRadius: BORDER_RADIUS.xl,
+            padding: SPACING[4],
+            marginBottom: SPACING[5],
+        },
+        instructionRow: {
+            gap: SPACING[2],
+            marginBottom: SPACING[2],
+        },
+        instructionIndex: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textSecondary,
+            lineHeight: 20,
+        },
+        instructionText: {
+            flex: 1,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            fontFamily: TYPOGRAPHY.fontFamily.regular,
+            color: colors.textSecondary,
+            lineHeight: 20,
+        },
+        startButton: {
+            marginBottom: SPACING[3],
+        },
+    };
+}
+
 export const TestInstructions: React.FC<TestInstructionsProps> = ({
     title,
     durationMinutes,
@@ -34,6 +146,7 @@ export const TestInstructions: React.FC<TestInstructionsProps> = ({
     onCancel,
     loading = false,
 }) => {
+    const styles = useThemedStyles(createStyles);
     const instructions = [
         `The test contains ${totalQuestions} questions worth ${totalMarks} marks.`,
         `Total time allowed is ${durationMinutes} minutes.`,
@@ -46,138 +159,71 @@ export const TestInstructions: React.FC<TestInstructionsProps> = ({
         'Submit the test before time expires or when you are done.',
         'Once submitted, answers cannot be changed.',
     ];
+    const summary = [
+        { label: 'Questions', value: totalQuestions.toString(), icon: '❓' },
+        { label: 'Marks', value: totalMarks.toString(), icon: '📊' },
+        { label: 'Duration', value: `${durationMinutes}m`, icon: '⏱️' },
+    ];
 
     return (
-        <ScrollView contentContainerStyle={{ padding: SPACING[5] }} showsVerticalScrollIndicator={false}>
-            {/* Header */}
-            <View style={{ alignItems: 'center', marginBottom: SPACING[5] }}>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+            <View style={styles.header}>
                 <MascotDisplay expression="studying" size={80} />
-                <Text
-                    style={{
-                        fontSize: TYPOGRAPHY.fontSize['2xl'],
-                        fontWeight: '800',
-                        color: COLORS.textPrimary,
-                        textAlign: 'center',
-                        marginTop: SPACING[3],
-                    }}
-                >
-                    {title}
-                </Text>
-                <Text style={{ fontSize: TYPOGRAPHY.fontSize.base, color: COLORS.textSecondary, marginTop: 4, textAlign: 'center' }}>
-                    Read the instructions carefully before starting
-                </Text>
+                <Text style={styles.title}>{title}</Text>
+                <Text style={styles.subtitle}>Read the instructions carefully before starting</Text>
             </View>
 
-            {/* Test summary */}
-            <View
-                style={{
-                    flexDirection: 'row',
-                    gap: SPACING[3],
-                    marginBottom: SPACING[5],
-                }}
-            >
-                {[
-                    { label: 'Questions', value: totalQuestions.toString(), icon: '❓' },
-                    { label: 'Marks', value: totalMarks.toString(), icon: '📊' },
-                    { label: 'Duration', value: `${durationMinutes}m`, icon: '⏱️' },
-                ].map((item) => (
-                    <View
-                        key={item.label}
-                        style={{
-                            flex: 1,
-                            backgroundColor: COLORS.primaryFixed,
-                            borderRadius: BORDER_RADIUS.xl,
-                            padding: SPACING[3],
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Text style={{ fontSize: 20 }}>{item.icon}</Text>
-                        <Text style={{ fontSize: TYPOGRAPHY.fontSize.lg, fontWeight: '800', color: COLORS.primary, marginTop: 4 }}>
-                            {item.value}
-                        </Text>
-                        <Text style={{ fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.textSecondary }}>
-                            {item.label}
-                        </Text>
+            <View style={[layout.row, styles.summaryRow]}>
+                {summary.map((item) => (
+                    <View key={item.label} style={styles.summaryCard}>
+                        <Text style={styles.summaryIcon}>{item.icon}</Text>
+                        <Text style={styles.summaryValue}>{item.value}</Text>
+                        <Text style={styles.summaryLabel}>{item.label}</Text>
                     </View>
                 ))}
             </View>
 
-            {/* Section breakdown */}
-            {sections && sections.length > 0 && (
-                <View
-                    style={{
-                        backgroundColor: COLORS.cardBackground,
-                        borderRadius: BORDER_RADIUS.xl,
-                        padding: SPACING[4],
-                        marginBottom: SPACING[4],
-                        borderWidth: 1,
-                        borderColor: COLORS.cardBorder,
-                    }}
-                >
-                    <Text style={{ fontSize: TYPOGRAPHY.fontSize.base, fontWeight: '700', color: COLORS.textPrimary, marginBottom: SPACING[3] }}>
-                        📋 Section Breakdown
-                    </Text>
+            {sections && sections.length > 0 ? (
+                <View style={styles.sectionCard}>
+                    <Text style={styles.sectionTitle}>📋 Section Breakdown</Text>
                     {sections.map((section, idx) => (
                         <View
                             key={section.name}
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                paddingVertical: SPACING[2],
-                                borderBottomWidth: idx < sections.length - 1 ? 1 : 0,
-                                borderBottomColor: COLORS.cardBorder,
-                            }}
+                            style={[
+                                layout.rowBetween,
+                                styles.sectionRow,
+                                idx < sections.length - 1 ? styles.sectionDivider : null,
+                            ]}
                         >
-                            <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textPrimary, fontWeight: '500' }}>
-                                {section.name}
-                            </Text>
-                            <View style={{ flexDirection: 'row', gap: SPACING[4] }}>
-                                <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary }}>
-                                    {section.questions} Q
-                                </Text>
-                                <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary }}>
-                                    {section.marks} M
-                                </Text>
+                            <Text style={styles.sectionName}>{section.name}</Text>
+                            <View style={[layout.row, styles.sectionMeta]}>
+                                <Text style={styles.sectionMetaText}>{section.questions} Q</Text>
+                                <Text style={styles.sectionMetaText}>{section.marks} M</Text>
                             </View>
                         </View>
                     ))}
                 </View>
-            )}
+            ) : null}
 
-            {/* General instructions */}
-            <View
-                style={{
-                    backgroundColor: COLORS.backgroundSecondary,
-                    borderRadius: BORDER_RADIUS.xl,
-                    padding: SPACING[4],
-                    marginBottom: SPACING[5],
-                }}
-            >
-                <Text style={{ fontSize: TYPOGRAPHY.fontSize.base, fontWeight: '700', color: COLORS.textPrimary, marginBottom: SPACING[3] }}>
-                    📌 Instructions
-                </Text>
+            <View style={styles.instructionsCard}>
+                <Text style={styles.sectionTitle}>📌 Instructions</Text>
                 {instructions.map((instruction, idx) => (
-                    <View key={idx} style={{ flexDirection: 'row', gap: SPACING[2], marginBottom: SPACING[2] }}>
-                        <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary, lineHeight: 20 }}>
-                            {idx + 1}.
-                        </Text>
-                        <Text style={{ fontSize: TYPOGRAPHY.fontSize.sm, color: COLORS.textSecondary, flex: 1, lineHeight: 20 }}>
-                            {instruction}
-                        </Text>
+                    <View key={idx} style={[layout.row, styles.instructionRow]}>
+                        <Text style={styles.instructionIndex}>{idx + 1}.</Text>
+                        <Text style={styles.instructionText}>{instruction}</Text>
                     </View>
                 ))}
             </View>
 
-            {/* CTA Buttons */}
             <Button
                 title={loading ? 'Loading...' : '🚀 Start Test'}
                 onPress={onStart}
                 loading={loading}
                 fullWidth
                 size="lg"
-                style={{ marginBottom: SPACING[3] }}
+                style={styles.startButton}
             />
-            {onCancel && (
+            {onCancel ? (
                 <Button
                     title="← Go Back"
                     variant="secondary"
@@ -185,7 +231,7 @@ export const TestInstructions: React.FC<TestInstructionsProps> = ({
                     fullWidth
                     size="lg"
                 />
-            )}
+            ) : null}
         </ScrollView>
     );
 };

@@ -1,5 +1,5 @@
 // Setup Cadet Profile — immersive profile setup / edit screen (Stitch mock).
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     View,
     Text,
@@ -23,13 +23,13 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useAppStore } from "@/store/useAppStore";
 import { updateProfile, saveOnboardingData, supabase } from "@/lib/supabase";
 import {
-    COLORS,
     SPACING,
     TYPOGRAPHY,
     BORDER_RADIUS,
     DREAM_SAINIK_SCHOOLS,
     normalizeStudentStandard,
 } from "@/constants";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
 
 type TargetClass = "5" | "8";
 type ExamMedium = "en" | "hi";
@@ -39,9 +39,274 @@ const TARGET_CLASS_OPTIONS: { value: TargetClass; label: string }[] = [
     { value: "8", label: "Class 8 (VIII)" },
 ];
 
+function createStyles(colors: ColorPalette) {
+    return {
+        root: {
+            backgroundColor: colors.background,
+        },
+        loadingRoot: {
+            backgroundColor: colors.background,
+        },
+        scrollContent: {
+            flexGrow: 1,
+        },
+        header: {
+            paddingHorizontal: SPACING[6],
+            paddingBottom: SPACING[16],
+            overflow: "hidden" as const,
+            minHeight: 220,
+        },
+        headerRow: {
+            alignItems: "flex-end" as const,
+            justifyContent: "space-between" as const,
+            zIndex: 1,
+        },
+        headerCopy: {
+            flex: 1,
+            paddingBottom: SPACING[2],
+            paddingRight: SPACING[2],
+        },
+        academyPill: {
+            alignSelf: "flex-start" as const,
+            gap: 6,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+            borderRadius: BORDER_RADIUS.full,
+            backgroundColor: colors.overlay,
+            borderWidth: 1,
+            borderColor: colors.primaryLight,
+            marginBottom: SPACING[2],
+        },
+        academyPillText: {
+            color: colors.primaryLight,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: 10,
+            letterSpacing: 0.8,
+            textTransform: "uppercase" as const,
+        },
+        headerTitle: {
+            color: colors.onPrimary,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize["2xl"],
+            lineHeight: 30,
+            letterSpacing: -0.3,
+        },
+        headerSubtitle: {
+            marginTop: SPACING[2],
+            color: colors.onPrimary,
+            opacity: 0.92,
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            lineHeight: 18,
+            maxWidth: 190,
+        },
+        mascotHalo: {
+            width: 112,
+            height: 112,
+            marginRight: -4,
+            marginBottom: -8,
+        },
+        mascotRing: {
+            width: 104,
+            height: 104,
+            borderRadius: 52,
+            backgroundColor: colors.overlayLight,
+            borderWidth: 2,
+            borderColor: colors.onPrimary,
+            overflow: "hidden" as const,
+        },
+        formSheet: {
+            flex: 1,
+            backgroundColor: colors.cardBackground,
+            marginTop: -32,
+            borderTopLeftRadius: BORDER_RADIUS["3xl"],
+            borderTopRightRadius: BORDER_RADIUS["3xl"],
+            paddingHorizontal: SPACING[6],
+            paddingTop: SPACING[6],
+            paddingBottom: SPACING[6],
+            gap: SPACING[5],
+            shadowColor: colors.overlay,
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 8,
+        },
+        fieldBlock: {
+            gap: SPACING[2],
+        },
+        label: {
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            color: colors.textTertiary,
+            letterSpacing: 0.8,
+            textTransform: "uppercase" as const,
+        },
+        required: {
+            color: colors.error,
+        },
+        optionalHint: {
+            color: colors.primary,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            textTransform: "none" as const,
+            letterSpacing: 0,
+        },
+        selectField: {
+            justifyContent: "space-between" as const,
+            minHeight: 52,
+            paddingHorizontal: SPACING[4],
+            borderRadius: BORDER_RADIUS["2xl"],
+            borderWidth: 1,
+            borderColor: colors.cardBorder,
+            backgroundColor: colors.surfaceMuted,
+        },
+        selectFieldError: {
+            borderColor: colors.error,
+        },
+        selectWithIcon: {
+            flex: 1,
+            gap: SPACING[2],
+            marginRight: SPACING[2],
+        },
+        selectText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.onSurface,
+        },
+        selectTextFlex: {
+            flex: 1,
+        },
+        selectPlaceholder: {
+            color: colors.textTertiary,
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+        },
+        errorText: {
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.error,
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+        },
+        clearDream: {
+            alignSelf: "flex-start" as const,
+            marginTop: 2,
+        },
+        clearDreamText: {
+            color: colors.primary,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+        },
+        langRow: {
+            gap: 10,
+        },
+        langCard: {
+            flex: 1,
+            gap: 10,
+            padding: SPACING[3],
+            borderRadius: BORDER_RADIUS["2xl"],
+            borderWidth: 1,
+            borderColor: colors.cardBorder,
+            backgroundColor: colors.cardBackground,
+        },
+        langCardSelected: {
+            borderWidth: 2,
+            borderColor: colors.primary,
+            backgroundColor: colors.primaryFixed,
+        },
+        radioOuter: {
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            borderWidth: 2,
+            borderColor: colors.outlineVariant,
+        },
+        radioOuterSelected: {
+            borderColor: colors.primary,
+        },
+        radioInner: {
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: colors.primary,
+        },
+        langCopy: {
+            flex: 1,
+        },
+        langTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            color: colors.onSurface,
+        },
+        langTitleSelected: {
+            color: colors.onPrimaryFixed,
+        },
+        langSub: {
+            marginTop: 2,
+            fontFamily: TYPOGRAPHY.fontFamily.medium,
+            fontSize: 10,
+            color: colors.textTertiary,
+        },
+        footer: {
+            position: "absolute" as const,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: SPACING[6],
+            paddingTop: SPACING[4],
+            backgroundColor: colors.cardBackground,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.cardBorder,
+            shadowColor: colors.overlay,
+            shadowOffset: { width: 0, height: -8 },
+            shadowOpacity: 0.06,
+            shadowRadius: 20,
+            elevation: 12,
+        },
+        modalBackdrop: {
+            backgroundColor: colors.overlay,
+            justifyContent: "flex-end" as const,
+        },
+        modalSheet: {
+            maxHeight: "55%" as const,
+            backgroundColor: colors.cardBackground,
+            borderTopLeftRadius: BORDER_RADIUS["3xl"],
+            borderTopRightRadius: BORDER_RADIUS["3xl"],
+            paddingHorizontal: SPACING[5],
+            paddingTop: SPACING[5],
+            paddingBottom: SPACING[8],
+        },
+        modalTitle: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: TYPOGRAPHY.fontSize.lg,
+            color: colors.onSurface,
+            marginBottom: SPACING[3],
+        },
+        modalOption: {
+            justifyContent: "space-between" as const,
+            paddingVertical: SPACING[4],
+            paddingHorizontal: SPACING[3],
+            borderRadius: BORDER_RADIUS.xl,
+            marginBottom: SPACING[1],
+        },
+        modalOptionSelected: {
+            backgroundColor: colors.primaryFixed,
+        },
+        modalOptionText: {
+            flex: 1,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.sm,
+            color: colors.onSurface,
+            paddingRight: SPACING[2],
+        },
+        modalOptionTextSelected: {
+            color: colors.onPrimaryFixed,
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+        },
+    };
+}
+
 export default function ProfileSetupScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
     const { user, setUser, preferences, updatePreferences, setOnboardingData, onboardingData } =
         useAppStore();
 
@@ -61,6 +326,16 @@ export default function ProfileSetupScreen() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [classPickerOpen, setClassPickerOpen] = useState(false);
     const [dreamPickerOpen, setDreamPickerOpen] = useState(false);
+
+    const insetStyles = useMemo(
+        () =>
+            StyleSheet.create({
+                scroll: { paddingBottom: 112 + insets.bottom },
+                headerPad: { paddingTop: insets.top + SPACING[6] },
+                footerPad: { paddingBottom: Math.max(insets.bottom, SPACING[4]) },
+            }),
+        [insets.bottom, insets.top]
+    );
 
     useEffect(() => {
         let cancelled = false;
@@ -152,7 +427,7 @@ export default function ProfileSetupScreen() {
 
     if (hydrating) {
         return (
-            <SafeAreaView style={styles.loadingRoot} edges={["top", "bottom"]}>
+            <SafeAreaView style={[layout.fill, styles.loadingRoot]} edges={["top", "bottom"]}>
                 <LoadingSpinner message="Loading cadet profile..." />
             </SafeAreaView>
         );
@@ -162,43 +437,39 @@ export default function ProfileSetupScreen() {
         TARGET_CLASS_OPTIONS.find((o) => o.value === targetClass)?.label || "Select target class";
 
     return (
-        <View style={styles.root}>
+        <View style={[layout.fill, styles.root]}>
             <KeyboardAvoidingView
-                style={styles.flex}
+                style={layout.fill}
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
                 <ScrollView
-                    style={styles.flex}
-                    contentContainerStyle={[
-                        styles.scrollContent,
-                        { paddingBottom: 112 + insets.bottom },
-                    ]}
+                    style={layout.fill}
+                    contentContainerStyle={[styles.scrollContent, insetStyles.scroll]}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Immersive header */}
-                    <View style={[styles.header, { paddingTop: insets.top + SPACING[6] }]}>
+                    <View style={[styles.header, insetStyles.headerPad]}>
                         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
                             <Svg width="100%" height="100%">
                                 <Defs>
                                     <LinearGradient id="profileSetupGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <Stop offset="0%" stopColor="#2e1065" />
-                                        <Stop offset="45%" stopColor="#4338ca" />
-                                        <Stop offset="100%" stopColor="#4f46e5" />
+                                        <Stop offset="0%" stopColor={colors.gradientEnd} />
+                                        <Stop offset="45%" stopColor={colors.primary} />
+                                        <Stop offset="100%" stopColor={colors.gradientStart} />
                                     </LinearGradient>
                                 </Defs>
                                 <Rect width="100%" height="100%" fill="url(#profileSetupGrad)" />
-                                <Circle cx="92%" cy="8%" r="72" fill="#A78BFA" opacity={0.22} />
-                                <Circle cx="18%" cy="18%" r="3" fill="#FDE68A" opacity={0.85} />
-                                <Circle cx="72%" cy="28%" r="2" fill="#FFFFFF" opacity={0.55} />
-                                <Circle cx="38%" cy="78%" r="3" fill="#DDD6FE" opacity={0.35} />
+                                <Circle cx="92%" cy="8%" r="72" fill={colors.primaryLight} opacity={0.22} />
+                                <Circle cx="18%" cy="18%" r="3" fill={colors.xpGold} opacity={0.85} />
+                                <Circle cx="72%" cy="28%" r="2" fill={colors.onPrimary} opacity={0.55} />
+                                <Circle cx="38%" cy="78%" r="3" fill={colors.primaryFixedDim} opacity={0.35} />
                             </Svg>
                         </View>
 
-                        <View style={styles.headerRow}>
+                        <View style={[layout.row, styles.headerRow]}>
                             <View style={styles.headerCopy}>
-                                <View style={styles.academyPill}>
-                                    <MaterialIcon name="shield" size={14} color="#FCD34D" filled />
+                                <View style={[layout.row, styles.academyPill]}>
+                                    <MaterialIcon name="shield" size={14} color={colors.xpGold} filled />
                                     <Text style={styles.academyPillText}>AISSEE Cadet Academy</Text>
                                 </View>
                                 <Text style={styles.headerTitle}>
@@ -208,15 +479,14 @@ export default function ProfileSetupScreen() {
                                     Configure your credentials to begin training with Vijay!
                                 </Text>
                             </View>
-                            <View style={styles.mascotHalo}>
-                                <View style={styles.mascotRing}>
+                            <View style={[layout.center, styles.mascotHalo]}>
+                                <View style={[layout.center, styles.mascotRing]}>
                                     <MascotDisplay expression="waving" size={88} />
                                 </View>
                             </View>
                         </View>
                     </View>
 
-                    {/* Overlapping form */}
                     <View style={styles.formSheet}>
                         <View style={styles.fieldBlock}>
                             <Text style={styles.label}>
@@ -232,7 +502,7 @@ export default function ProfileSetupScreen() {
                                 error={errors.fullName}
                                 autoCapitalize="words"
                                 leftIcon={
-                                    <MaterialIcon name="badge" size={22} color={COLORS.textTertiary} />
+                                    <MaterialIcon name="badge" size={22} color={colors.textTertiary} />
                                 }
                             />
                         </View>
@@ -243,9 +513,11 @@ export default function ProfileSetupScreen() {
                             </Text>
                             <Pressable
                                 onPress={() => setClassPickerOpen(true)}
-                                style={[
+                                style={({ pressed }) => [
+                                    layout.row,
                                     styles.selectField,
                                     errors.targetClass ? styles.selectFieldError : null,
+                                    pressed ? layout.pressed : null,
                                 ]}
                                 accessibilityRole="button"
                                 accessibilityLabel="Select target class"
@@ -253,12 +525,12 @@ export default function ProfileSetupScreen() {
                                 <Text
                                     style={[
                                         styles.selectText,
-                                        !targetClass && styles.selectPlaceholder,
+                                        !targetClass ? styles.selectPlaceholder : null,
                                     ]}
                                 >
                                     {selectedClassLabel}
                                 </Text>
-                                <MaterialIcon name="expand_more" size={22} color={COLORS.textTertiary} />
+                                <MaterialIcon name="expand_more" size={22} color={colors.textTertiary} />
                             </Pressable>
                             {!!errors.targetClass && (
                                 <Text style={styles.errorText}>{errors.targetClass}</Text>
@@ -280,7 +552,7 @@ export default function ProfileSetupScreen() {
                                 error={errors.currentSchool}
                                 autoCapitalize="words"
                                 leftIcon={
-                                    <MaterialIcon name="school" size={22} color={COLORS.textTertiary} />
+                                    <MaterialIcon name="school" size={22} color={colors.textTertiary} />
                                 }
                             />
                         </View>
@@ -292,34 +564,38 @@ export default function ProfileSetupScreen() {
                             </Text>
                             <Pressable
                                 onPress={() => setDreamPickerOpen(true)}
-                                style={styles.selectField}
+                                style={({ pressed }) => [
+                                    layout.row,
+                                    styles.selectField,
+                                    pressed ? layout.pressed : null,
+                                ]}
                                 accessibilityRole="button"
                                 accessibilityLabel="Select dream Sainik School"
                             >
-                                <View style={styles.selectWithIcon}>
+                                <View style={[layout.row, styles.selectWithIcon]}>
                                     <MaterialIcon
                                         name="account_balance"
                                         size={22}
-                                        color={COLORS.textTertiary}
+                                        color={colors.textTertiary}
                                     />
                                     <Text
                                         style={[
                                             styles.selectText,
                                             styles.selectTextFlex,
-                                            !dreamSchool && styles.selectPlaceholder,
+                                            !dreamSchool ? styles.selectPlaceholder : null,
                                         ]}
                                         numberOfLines={1}
                                     >
                                         {dreamSchool || "Select a school"}
                                     </Text>
                                 </View>
-                                <MaterialIcon name="expand_more" size={22} color={COLORS.textTertiary} />
+                                <MaterialIcon name="expand_more" size={22} color={colors.textTertiary} />
                             </Pressable>
                             {!!dreamSchool && (
                                 <Pressable
                                     onPress={() => setDreamSchool("")}
                                     hitSlop={8}
-                                    style={styles.clearDream}
+                                    style={({ pressed }) => [styles.clearDream, pressed ? layout.pressed : null]}
                                 >
                                     <Text style={styles.clearDreamText}>Clear selection</Text>
                                 </Pressable>
@@ -328,20 +604,23 @@ export default function ProfileSetupScreen() {
 
                         <View style={styles.fieldBlock}>
                             <Text style={styles.label}>Exam Medium Language</Text>
-                            <View style={styles.langRow}>
+                            <View style={[layout.row, styles.langRow]}>
                                 <Pressable
                                     onPress={() => setExamMedium("en")}
-                                    style={[
+                                    style={({ pressed }) => [
+                                        layout.row,
                                         styles.langCard,
-                                        examMedium === "en" && styles.langCardSelected,
+                                        examMedium === "en" ? styles.langCardSelected : null,
+                                        pressed ? layout.pressed : null,
                                     ]}
                                     accessibilityRole="radio"
                                     accessibilityState={{ selected: examMedium === "en" }}
                                 >
                                     <View
                                         style={[
+                                            layout.center,
                                             styles.radioOuter,
-                                            examMedium === "en" && styles.radioOuterSelected,
+                                            examMedium === "en" ? styles.radioOuterSelected : null,
                                         ]}
                                     >
                                         {examMedium === "en" ? <View style={styles.radioInner} /> : null}
@@ -350,7 +629,7 @@ export default function ProfileSetupScreen() {
                                         <Text
                                             style={[
                                                 styles.langTitle,
-                                                examMedium === "en" && styles.langTitleSelected,
+                                                examMedium === "en" ? styles.langTitleSelected : null,
                                             ]}
                                         >
                                             English Medium
@@ -361,17 +640,20 @@ export default function ProfileSetupScreen() {
 
                                 <Pressable
                                     onPress={() => setExamMedium("hi")}
-                                    style={[
+                                    style={({ pressed }) => [
+                                        layout.row,
                                         styles.langCard,
-                                        examMedium === "hi" && styles.langCardSelected,
+                                        examMedium === "hi" ? styles.langCardSelected : null,
+                                        pressed ? layout.pressed : null,
                                     ]}
                                     accessibilityRole="radio"
                                     accessibilityState={{ selected: examMedium === "hi" }}
                                 >
                                     <View
                                         style={[
+                                            layout.center,
                                             styles.radioOuter,
-                                            examMedium === "hi" && styles.radioOuterSelected,
+                                            examMedium === "hi" ? styles.radioOuterSelected : null,
                                         ]}
                                     >
                                         {examMedium === "hi" ? <View style={styles.radioInner} /> : null}
@@ -380,7 +662,7 @@ export default function ProfileSetupScreen() {
                                         <Text
                                             style={[
                                                 styles.langTitle,
-                                                examMedium === "hi" && styles.langTitleSelected,
+                                                examMedium === "hi" ? styles.langTitleSelected : null,
                                             ]}
                                         >
                                             हिन्दी (Hindi)
@@ -393,8 +675,7 @@ export default function ProfileSetupScreen() {
                     </View>
                 </ScrollView>
 
-                {/* Sticky CTA */}
-                <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, SPACING[4]) }]}>
+                <View style={[styles.footer, insetStyles.footerPad]}>
                     <Button
                         title="Complete Mission Briefing"
                         onPress={handleSave}
@@ -454,9 +735,12 @@ function PickerModal({
     onSelect: (key: string) => void;
     onClose: () => void;
 }) {
+    const styles = useThemedStyles(createStyles);
+    const colors = useColors();
+
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <Pressable style={styles.modalBackdrop} onPress={onClose}>
+            <Pressable style={[layout.fill, styles.modalBackdrop]} onPress={onClose}>
                 <Pressable style={styles.modalSheet} onPress={(e) => e.stopPropagation()}>
                     <Text style={styles.modalTitle}>{title}</Text>
                     <FlatList
@@ -467,18 +751,23 @@ function PickerModal({
                             return (
                                 <Pressable
                                     onPress={() => onSelect(item.key)}
-                                    style={[styles.modalOption, selected && styles.modalOptionSelected]}
+                                    style={({ pressed }) => [
+                                        layout.row,
+                                        styles.modalOption,
+                                        selected ? styles.modalOptionSelected : null,
+                                        pressed ? layout.pressed : null,
+                                    ]}
                                 >
                                     <Text
                                         style={[
                                             styles.modalOptionText,
-                                            selected && styles.modalOptionTextSelected,
+                                            selected ? styles.modalOptionTextSelected : null,
                                         ]}
                                     >
                                         {item.label}
                                     </Text>
                                     {selected ? (
-                                        <MaterialIcon name="check" size={20} color={COLORS.primary} />
+                                        <MaterialIcon name="check" size={20} color={colors.primary} />
                                     ) : null}
                                 </Pressable>
                             );
@@ -489,285 +778,3 @@ function PickerModal({
         </Modal>
     );
 }
-
-const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-        backgroundColor: "#f8f9ff",
-    },
-    flex: { flex: 1 },
-    loadingRoot: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    scrollContent: {
-        flexGrow: 1,
-    },
-    header: {
-        paddingHorizontal: SPACING[6],
-        paddingBottom: SPACING[16],
-        overflow: "hidden",
-        minHeight: 220,
-    },
-    headerRow: {
-        flexDirection: "row",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        zIndex: 1,
-    },
-    headerCopy: {
-        flex: 1,
-        paddingBottom: SPACING[2],
-        paddingRight: SPACING[2],
-    },
-    academyPill: {
-        alignSelf: "flex-start",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: BORDER_RADIUS.full,
-        backgroundColor: "rgba(49, 46, 129, 0.6)",
-        borderWidth: 1,
-        borderColor: "rgba(129, 140, 248, 0.35)",
-        marginBottom: SPACING[2],
-    },
-    academyPillText: {
-        color: "#C7D2FE",
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: 10,
-        letterSpacing: 0.8,
-        textTransform: "uppercase",
-    },
-    headerTitle: {
-        color: COLORS.textInverse,
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize["2xl"],
-        lineHeight: 30,
-        letterSpacing: -0.3,
-    },
-    headerSubtitle: {
-        marginTop: SPACING[2],
-        color: "rgba(224, 231, 255, 0.92)",
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        lineHeight: 18,
-        maxWidth: 190,
-    },
-    mascotHalo: {
-        width: 112,
-        height: 112,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: -4,
-        marginBottom: -8,
-    },
-    mascotRing: {
-        width: 104,
-        height: 104,
-        borderRadius: 52,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "rgba(255,255,255,0.22)",
-        borderWidth: 2,
-        borderColor: "rgba(255,255,255,0.45)",
-        overflow: "hidden",
-    },
-    formSheet: {
-        flex: 1,
-        backgroundColor: COLORS.cardBackground,
-        marginTop: -32,
-        borderTopLeftRadius: BORDER_RADIUS["3xl"],
-        borderTopRightRadius: BORDER_RADIUS["3xl"],
-        paddingHorizontal: SPACING[6],
-        paddingTop: SPACING[6],
-        paddingBottom: SPACING[6],
-        gap: SPACING[5],
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    fieldBlock: {
-        gap: SPACING[2],
-    },
-    label: {
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        color: COLORS.textTertiary,
-        letterSpacing: 0.8,
-        textTransform: "uppercase",
-    },
-    required: {
-        color: COLORS.error,
-    },
-    optionalHint: {
-        color: COLORS.primary,
-        fontFamily: TYPOGRAPHY.fontFamily.semibold,
-        textTransform: "none",
-        letterSpacing: 0,
-    },
-    selectField: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        minHeight: 52,
-        paddingHorizontal: SPACING[4],
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.cardBorder,
-        backgroundColor: COLORS.surfaceMuted,
-    },
-    selectFieldError: {
-        borderColor: COLORS.error,
-    },
-    selectWithIcon: {
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING[2],
-        marginRight: SPACING[2],
-    },
-    selectText: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurface,
-    },
-    selectTextFlex: {
-        flex: 1,
-    },
-    selectPlaceholder: {
-        color: COLORS.textTertiary,
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-    },
-    errorText: {
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.error,
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-    },
-    clearDream: {
-        alignSelf: "flex-start",
-        marginTop: 2,
-    },
-    clearDreamText: {
-        color: COLORS.primary,
-        fontFamily: TYPOGRAPHY.fontFamily.semibold,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-    },
-    langRow: {
-        flexDirection: "row",
-        gap: 10,
-    },
-    langCard: {
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-        padding: SPACING[3],
-        borderRadius: BORDER_RADIUS["2xl"],
-        borderWidth: 1,
-        borderColor: COLORS.cardBorder,
-        backgroundColor: COLORS.cardBackground,
-    },
-    langCardSelected: {
-        borderWidth: 2,
-        borderColor: COLORS.primary,
-        backgroundColor: "rgba(70, 72, 212, 0.08)",
-    },
-    radioOuter: {
-        width: 18,
-        height: 18,
-        borderRadius: 9,
-        borderWidth: 2,
-        borderColor: COLORS.outlineVariant,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    radioOuterSelected: {
-        borderColor: COLORS.primary,
-    },
-    radioInner: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: COLORS.primary,
-    },
-    langCopy: {
-        flex: 1,
-    },
-    langTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: COLORS.onSurface,
-    },
-    langTitleSelected: {
-        color: COLORS.onPrimaryFixed,
-    },
-    langSub: {
-        marginTop: 2,
-        fontFamily: TYPOGRAPHY.fontFamily.medium,
-        fontSize: 10,
-        color: COLORS.textTertiary,
-    },
-    footer: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        paddingHorizontal: SPACING[6],
-        paddingTop: SPACING[4],
-        backgroundColor: "rgba(255,255,255,0.96)",
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: COLORS.cardBorder,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -8 },
-        shadowOpacity: 0.06,
-        shadowRadius: 20,
-        elevation: 12,
-    },
-    modalBackdrop: {
-        flex: 1,
-        backgroundColor: COLORS.overlay,
-        justifyContent: "flex-end",
-    },
-    modalSheet: {
-        maxHeight: "55%",
-        backgroundColor: COLORS.cardBackground,
-        borderTopLeftRadius: BORDER_RADIUS["3xl"],
-        borderTopRightRadius: BORDER_RADIUS["3xl"],
-        paddingHorizontal: SPACING[5],
-        paddingTop: SPACING[5],
-        paddingBottom: SPACING[8],
-    },
-    modalTitle: {
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-        fontSize: TYPOGRAPHY.fontSize.lg,
-        color: COLORS.onSurface,
-        marginBottom: SPACING[3],
-    },
-    modalOption: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: SPACING[4],
-        paddingHorizontal: SPACING[3],
-        borderRadius: BORDER_RADIUS.xl,
-        marginBottom: SPACING[1],
-    },
-    modalOptionSelected: {
-        backgroundColor: COLORS.primaryFixed,
-    },
-    modalOptionText: {
-        flex: 1,
-        fontFamily: TYPOGRAPHY.fontFamily.semibold,
-        fontSize: TYPOGRAPHY.fontSize.sm,
-        color: COLORS.onSurface,
-        paddingRight: SPACING[2],
-    },
-    modalOptionTextSelected: {
-        color: COLORS.onPrimaryFixed,
-        fontFamily: TYPOGRAPHY.fontFamily.bold,
-    },
-});
