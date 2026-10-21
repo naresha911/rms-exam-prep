@@ -296,10 +296,10 @@ export function getSubjectsForStandard(standard: string | null | undefined) {
 
 /**
  * Fallback standards table ids when name lookup fails.
- * Live DB uses id 5 = Class 5 and id 8 = Class 8 (papers.standard_id matches these).
+ * Live DB uses id 1 = "5th" (Class 5) and id 2 = "8th" (Class 8); tests/papers.standard_id match these.
  */
 export function getStandardIdFallback(standard: string | null | undefined): number {
-    return normalizeStudentStandard(standard) === '8' ? 8 : 5;
+    return normalizeStudentStandard(standard) === '8' ? 2 : 1;
 }
 
 // Practice question counts

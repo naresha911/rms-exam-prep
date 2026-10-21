@@ -23,6 +23,7 @@ interface PaperCardProps {
     statusLabel?: string;
     isLatest?: boolean;
     latestLabel?: string;
+    badgeLabel?: string;
     metrics?: {
         scoreLabel?: string;
         durationLabel?: string;
@@ -185,6 +186,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
     statusLabel,
     isLatest,
     latestLabel = "Latest Exam",
+    badgeLabel,
     metrics,
     accent = "none",
     primaryAction,
@@ -212,6 +214,11 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                     <View style={[layout.row, styles.latestChip]}>
                         <MaterialIcon name="auto_awesome" size={13} color={colors.primary} />
                         <Text style={styles.latestText}>{latestLabel}</Text>
+                    </View>
+                ) : null}
+                {badgeLabel ? (
+                    <View style={[layout.row, styles.latestChip]}>
+                        <Text style={styles.latestText}>{badgeLabel}</Text>
                     </View>
                 ) : null}
             </View>

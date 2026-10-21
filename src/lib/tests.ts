@@ -41,22 +41,27 @@ export function getTestListStatus(
 }
 
 export async function fetchTestsPage(
-    standardId: number,
-    options?: { from?: number; to?: number }
+    standardId: number | null,
+    options?: { from?: number; to?: number; admin?: boolean }
 ) {
     const from = options?.from ?? 0;
     const to = options?.to ?? 19;
-    const { data, error } = await supabase
+    let query = supabase
         .from('tests')
         .select(`
             *,
             test_sections (id, name, section_order, default_marks, time_limit_seconds),
             test_questions (count)
         `)
-        .eq('standard_id', standardId)
-        .eq('is_published', true)
         .order('created_at', { ascending: false })
         .range(from, to);
+
+    if (!options?.admin) {
+        if (standardId != null) query = query.eq('standard_id', standardId);
+        query = query.eq('is_published', true);
+    }
+
+    const { data, error } = await query;
 
     return {
         data: ((data || []) as any[]).map(mapTestRow),
@@ -64,17 +69,19 @@ export async function fetchTestsPage(
     };
 }
 
-export async function fetchTestMeta(testId: string) {
-    const { data, error } = await supabase
+export async function fetchTestMeta(testId: string, admin = false) {
+    let query = supabase
         .from('tests')
         .select(`
             *,
             test_sections (*),
             test_questions (count)
         `)
-        .eq('id', testId)
-        .eq('is_published', true)
-        .maybeSingle();
+        .eq('id', testId);
+
+    if (!admin) query = query.eq('is_published', true);
+
+    const { data, error } = await query.maybeSingle();
 
     if (error || !data) {
         return { data: null as TestWithSections | null, error };
@@ -268,13 +275,15 @@ function mapNestedTestDetails(test: any, preferredLanguage: string): TestSession
         .filter(Boolean) as TestSessionQuestion[];
 }
 
-export async function getTestSessionQuestions(testId: string, preferredLanguage = 'en') {
-    const rpc = await supabase.rpc('get_test_session_questions', { p_test_id: testId });
-    if (!rpc.error && rpc.data) {
-        return { ...mapRpcQuestions(rpc.data, preferredLanguage), error: null };
+export async function getTestSessionQuestions(testId: string, preferredLanguage = 'en', admin = false) {
+    if (!admin) {
+        const rpc = await supabase.rpc('get_test_session_questions', { p_test_id: testId });
+        if (!rpc.error && rpc.data) {
+            return { ...mapRpcQuestions(rpc.data, preferredLanguage), error: null };
+        }
     }
 
-    const nested = await supabase
+    let nestedQuery = supabase
         .from('tests')
         .select(`
             *,
@@ -291,12 +300,14 @@ export async function getTestSessionQuestions(testId: string, preferredLanguage 
                 )
             )
         `)
-        .eq('id', testId)
-        .eq('is_published', true)
-        .maybeSingle();
+        .eq('id', testId);
+
+    if (!admin) nestedQuery = nestedQuery.eq('is_published', true);
+
+    const nested = await nestedQuery.maybeSingle();
 
     if (nested.error || !nested.data) {
-        return { test: null as Test | null, questions: [] as TestSessionQuestion[], error: nested.error || rpc.error };
+        return { test: null as Test | null, questions: [] as TestSessionQuestion[], error: nested.error };
     }
 
     return {

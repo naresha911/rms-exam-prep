@@ -126,6 +126,7 @@ export default function PaperDetailScreen() {
     const colors = useColors();
     const { paperId } = useLocalSearchParams<{ paperId: string }>();
     const { user, onboardingData } = useAppStore();
+    const isAdmin = user?.role === 'admin';
     const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
     const examInfo = getExamStructureForStandard(targetClass);
 
@@ -148,7 +149,7 @@ export default function PaperDetailScreen() {
         setLoading(true);
         setError(null);
         try {
-            const { data, error: queryError } = await fetchPaperDetails(paperId);
+            const { data, error: queryError } = await fetchPaperDetails(paperId, isAdmin);
             if (queryError || !data) throw queryError || new Error("Paper not found");
             setPaper(data as PaperWithQuestions);
 
@@ -166,7 +167,7 @@ export default function PaperDetailScreen() {
         } finally {
             setLoading(false);
         }
-    }, [paperId]);
+    }, [paperId, isAdmin]);
 
     useEffect(() => {
         loadPaper();

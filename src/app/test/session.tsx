@@ -45,6 +45,7 @@ export default function TestSessionScreen() {
     const targetClass = normalizeStudentStandard(params.class as string);
     const examInfo = getExamStructureForStandard(targetClass);
     const preferredLanguage = useAppStore((s) => s.preferences?.preferredLanguage) || "en";
+    const isAdmin = useAppStore((s) => s.user?.role === 'admin');
     const autoShowSolution = isAutoShowSolution(useAppStore((s) => s.preferences));
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
@@ -110,7 +111,8 @@ export default function TestSessionScreen() {
             if (selectedTestId) {
                 const { test, questions: sessionQuestions, error } = await getTestSessionQuestions(
                     selectedTestId,
-                    preferredLanguage
+                    preferredLanguage,
+                    isAdmin
                 );
                 if (error) throw error;
                 const duration = test?.duration_minutes || examInfo.durationMinutes;

@@ -136,6 +136,7 @@ export default function MockTestDetailScreen() {
     const colors = useColors();
     const { testId } = useLocalSearchParams<{ testId: string }>();
     const { user, onboardingData } = useAppStore();
+    const isAdmin = user?.role === 'admin';
     const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
     const examInfo = getExamStructureForStandard(targetClass);
 
@@ -159,7 +160,7 @@ export default function MockTestDetailScreen() {
         setLoading(true);
         setError(null);
         try {
-            const { data, error: queryError } = await fetchTestMeta(testId);
+            const { data, error: queryError } = await fetchTestMeta(testId, isAdmin);
             if (queryError || !data) throw queryError || new Error("Test not found");
             setTest(data);
 
@@ -174,7 +175,7 @@ export default function MockTestDetailScreen() {
         } finally {
             setLoading(false);
         }
-    }, [testId]);
+    }, [testId, isAdmin]);
 
     useEffect(() => {
         loadTest();

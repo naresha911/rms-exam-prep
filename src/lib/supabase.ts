@@ -367,8 +367,8 @@ export const fetchPapers = async (standardId: number, year?: number) => {
 
 // Fetch one published paper and its ordered questions. Paper attempts are not
 // part of the current schema, so this helper only reads paper content.
-export const fetchPaperDetails = async (paperId: string) => {
-    const { data: paper, error: paperError } = await supabase
+export const fetchPaperDetails = async (paperId: string, admin = false) => {
+    let query = supabase
         .from('papers')
         .select(`
             *,
@@ -384,9 +384,11 @@ export const fetchPaperDetails = async (paperId: string) => {
                 )
             )
         `)
-        .eq('id', paperId)
-        .eq('is_published', true)
-        .single();
+        .eq('id', paperId);
+
+    if (!admin) query = query.eq('is_published', true);
+
+    const { data: paper, error: paperError } = await query.maybeSingle();
 
     if (paperError || !paper) {
         return { data: null, error: paperError };

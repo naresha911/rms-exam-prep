@@ -71,6 +71,7 @@ export default function MockTestsScreen() {
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
     const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
+    const isAdmin = user?.role === 'admin';
 
     useEffect(() => {
         const lang = preferences?.preferredLanguage === "hi" ? "hi" : "en";
@@ -96,15 +97,16 @@ export default function MockTestsScreen() {
             setError(null);
 
             try {
-                const sid =
-                    append && standardId != null
+                const sid = isAdmin
+                    ? null
+                    : append && standardId != null
                         ? standardId
                         : await fetchStandardIdForClass(targetClass);
-                if (sid == null) throw new Error("Standard not found");
+                if (!isAdmin && sid == null) throw new Error("Standard not found");
                 setStandardId(sid);
 
-                if (!append && !isRefresh) {
-                    const cached = await getCachedTestCatalogue(sid);
+                if (!append && !isRefresh && !isAdmin) {
+                    const cached = await getCachedTestCatalogue(sid as number);
                     if (cached?.length) {
                         setTests(cached);
                         setLoading(false);
@@ -113,14 +115,14 @@ export default function MockTestsScreen() {
 
                 const from = append ? tests.length : 0;
                 const to = from + PAGE_SIZE - 1;
-                const { data, error: queryError } = await fetchTestsPage(sid, { from, to });
+                const { data, error: queryError } = await fetchTestsPage(sid, { from, to, admin: isAdmin });
                 if (queryError) throw queryError;
 
                 const page = data || [];
                 setHasMore(page.length === PAGE_SIZE);
                 const nextTests = append ? [...tests, ...page] : page;
                 setTests(nextTests);
-                await setCachedTestCatalogue(sid, nextTests);
+                if (!isAdmin && sid != null) await setCachedTestCatalogue(sid, nextTests);
 
                 const { data: attemptSummaries } = await fetchMyTestAttemptSummaries();
                 const map: Record<string, TestAttemptSummary> = {};
@@ -139,7 +141,7 @@ export default function MockTestsScreen() {
                 setLoadingMore(false);
             }
         },
-        [standardId, targetClass, tests]
+        [standardId, targetClass, tests, isAdmin]
     );
 
     useEffect(() => {
@@ -349,6 +351,11 @@ export default function MockTestsScreen() {
                                     statusLabel={statusLabel(status)}
                                     isLatest={test.id === latestTest?.id}
                                     latestLabel={t("tests.latestMock")}
+                                    badgeLabel={
+                                        isAdmin
+                                            ? `${test.standard_id === 1 ? '5th' : test.standard_id === 2 ? '8th' : test.standard_id}${test.is_published ? '' : ' • Unpublished'}`
+                                            : undefined
+                                    }
                                     metrics={cardMetrics(status, summary)}
                                     accent={actions.accent}
                                     primaryAction={actions.primary}

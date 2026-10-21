@@ -231,18 +231,21 @@ export async function fetchStandardIdForClass(targetClass: string): Promise<numb
 }
 
 export async function fetchPapersPage(
-    standardId: number,
-    options?: { year?: number; from?: number; to?: number }
+    standardId: number | null,
+    options?: { year?: number; from?: number; to?: number; admin?: boolean }
 ) {
     const from = options?.from ?? 0;
     const to = options?.to ?? 19;
     let query = supabase
         .from('papers')
         .select('*')
-        .eq('standard_id', standardId)
-        .eq('is_published', true)
         .order('year', { ascending: false })
         .range(from, to);
+
+    if (!options?.admin) {
+        if (standardId != null) query = query.eq('standard_id', standardId);
+        query = query.eq('is_published', true);
+    }
 
     if (options?.year) {
         query = query.eq('year', options.year);
@@ -260,7 +263,7 @@ export async function fetchPaperSectionStats(paperIds: string[]) {
     return { data: (data || []) as PaperSectionStat[], error };
 }
 
-export async function getPaperSessionQuestions(paperId: string) {
+export async function getPaperSessionQuestions(paperId: string, admin = false) {
     const { data, error } = await supabase.rpc('get_paper_session_questions', {
         p_paper_id: paperId,
     });
@@ -336,13 +339,15 @@ export async function fetchPaperAttemptWithAnswers(attemptId: string) {
     };
 }
 
-export async function fetchPaperMeta(paperId: string) {
-    const { data, error } = await supabase
+export async function fetchPaperMeta(paperId: string, admin = false) {
+    let query = supabase
         .from('papers')
         .select('*')
-        .eq('id', paperId)
-        .eq('is_published', true)
-        .single();
+        .eq('id', paperId);
+
+    if (!admin) query = query.eq('is_published', true);
+
+    const { data, error } = await query.maybeSingle();
     return { data: data as Paper | null, error };
 }
 

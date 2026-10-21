@@ -72,6 +72,7 @@ export default function PapersScreen() {
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
     const targetClass = normalizeStudentStandard(user?.target_class || onboardingData.targetClass);
+    const isAdmin = user?.role === 'admin';
 
     useEffect(() => {
         const lang = preferences?.preferredLanguage === "hi" ? "hi" : "en";
@@ -100,14 +101,16 @@ export default function PapersScreen() {
             try {
                 // Always re-resolve on initial/refresh so a stale wrong id (e.g. old
                 // fallback 1) cannot stick after a code or standards change.
-                const sid = append && standardId != null
-                    ? standardId
-                    : await fetchStandardIdForClass(targetClass);
-                if (sid == null) throw new Error("Standard not found");
+                const sid = isAdmin
+                    ? null
+                    : append && standardId != null
+                        ? standardId
+                        : await fetchStandardIdForClass(targetClass);
+                if (!isAdmin && sid == null) throw new Error("Standard not found");
                 setStandardId(sid);
 
-                if (!append && !isRefresh) {
-                    const cached = await getCachedPaperCatalogue(sid);
+                if (!append && !isRefresh && !isAdmin) {
+                    const cached = await getCachedPaperCatalogue(sid as number);
                     if (cached?.length) {
                         setPapers(cached);
                         setLoading(false);
@@ -116,14 +119,14 @@ export default function PapersScreen() {
 
                 const from = append ? papers.length : 0;
                 const to = from + PAGE_SIZE - 1;
-                const { data, error: queryError } = await fetchPapersPage(sid, { from, to });
+                const { data, error: queryError } = await fetchPapersPage(sid, { from, to, admin: isAdmin });
                 if (queryError) throw queryError;
 
                 const page = (data || []) as Paper[];
                 setHasMore(page.length === PAGE_SIZE);
                 const nextPapers = append ? [...papers, ...page] : page;
                 setPapers(nextPapers);
-                await setCachedPaperCatalogue(sid, nextPapers);
+                if (!isAdmin && sid != null) await setCachedPaperCatalogue(sid, nextPapers);
 
                 const ids = nextPapers.map((p) => p.id);
                 const [{ data: attemptSummaries }, { data: stats }] = await Promise.all([
@@ -154,7 +157,7 @@ export default function PapersScreen() {
                 setLoadingMore(false);
             }
         },
-        [papers, standardId, targetClass]
+        [papers, standardId, targetClass, isAdmin]
     );
 
     useEffect(() => {
@@ -364,6 +367,11 @@ export default function PapersScreen() {
                                     statusLabel={statusLabel(status)}
                                     isLatest={paper.id === latestPaper?.id}
                                     latestLabel={t("papers.latestExam")}
+                                    badgeLabel={
+                                        isAdmin
+                                            ? `${paper.standard_id === 1 ? '5th' : paper.standard_id === 2 ? '8th' : paper.standard_id}${paper.is_published ? '' : ' • Unpublished'}`
+                                            : undefined
+                                    }
                                     metrics={cardMetrics(status, summary)}
                                     accent={actions.accent}
                                     primaryAction={actions.primary}

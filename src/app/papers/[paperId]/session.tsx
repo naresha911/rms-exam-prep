@@ -41,6 +41,7 @@ export default function PaperSessionScreen() {
     const router = useRouter();
     const { paperId } = useLocalSearchParams<{ paperId: string; attemptId?: string }>();
     const { preferences } = useAppStore();
+    const isAdmin = useAppStore((s) => s.user?.role === 'admin');
     const preferredLanguage = preferences?.preferredLanguage || "en";
     const autoShowSolution = isAutoShowSolution(preferences);
     const styles = useThemedStyles(createStyles);
@@ -213,7 +214,7 @@ export default function PaperSessionScreen() {
             try {
                 await flushOfflineAnswerQueue();
 
-                const remote = await getPaperSessionQuestions(paperId);
+                const remote = await getPaperSessionQuestions(paperId, isAdmin);
                 if (remote.error || !remote.data) {
                     const local = await loadLocalPaperSession(paperId);
                     if (!local) throw remote.error || new Error("Paper unavailable offline");
