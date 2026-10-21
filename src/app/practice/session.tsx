@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../../components/ui/Button";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
@@ -14,7 +14,8 @@ import { fetchPracticeQuestions, toggleBookmark, reportQuestion } from "../../li
 import { PracticeQuestion } from "../../types";
 import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS, XP_REWARDS, SUBJECTS, getStandardIdFallback } from "../../constants";
-import { useColors, useThemedStyles, type ColorPalette } from "../../theme";
+import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 import { trackEvent, trackPracticeCompletion, EVENTS } from "../../lib/analytics";
 
 function createStyles(colors: ColorPalette) {
@@ -32,6 +33,9 @@ function createStyles(colors: ColorPalette) {
             backgroundColor: colors.surface,
             borderBottomWidth: 1,
             borderBottomColor: colors.outlineVariant,
+        },
+        headerTablet: {
+            paddingHorizontal: SPACING[6],
         },
         headerBtn: {
             width: 40,
@@ -60,6 +64,14 @@ function createStyles(colors: ColorPalette) {
         scrollContent: {
             padding: SPACING[4],
             paddingBottom: SPACING[4],
+            alignItems: "center" as const,
+        },
+        scrollContentTablet: {
+            padding: SPACING[6],
+        },
+        contentColumn: {
+            width: "100%" as const,
+            maxWidth: 720,
         },
         progressSection: {
             marginBottom: SPACING[5],
@@ -89,10 +101,15 @@ function createStyles(colors: ColorPalette) {
         },
         ctaBar: {
             paddingHorizontal: SPACING[4],
-            paddingVertical: SPACING[4],
+            paddingTop: SPACING[4],
             backgroundColor: colors.surface,
             borderTopWidth: 1,
             borderTopColor: colors.outlineVariant,
+        },
+        ctaBarInner: {
+            width: "100%" as const,
+            maxWidth: 720,
+            alignSelf: "center" as const,
         },
     };
 }
@@ -107,6 +124,8 @@ export default function PracticeSessionScreen() {
     const { user, addXP, updateDailyProgress, updateStreak, checkDailyGoal, unlockBadge, setLastPracticeActivity, preferences } = useAppStore();
     const colors = useColors();
     const styles = useThemedStyles(createStyles);
+    const insets = useSafeAreaInsets();
+    const { isTablet } = useResponsive();
 
     const [loading, setLoading] = useState(true);
     const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -305,7 +324,7 @@ export default function PracticeSessionScreen() {
             <Stack.Screen options={{ headerShown: false }} />
 
             {/* Stitch-style sticky header */}
-            <View style={styles.header}>
+            <View style={[styles.header, isTablet ? styles.headerTablet : null]}>
                 <Pressable
                     onPress={() => router.back()}
                     style={({ pressed }) => [styles.headerBtn, pressed ? styles.headerBtnPressed : null]}
@@ -342,71 +361,79 @@ export default function PracticeSessionScreen() {
 
             {/* Main scrollable content */}
             <ScrollView
-                contentContainerStyle={styles.scrollContent}
+                style={layout.fill}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    isTablet ? styles.scrollContentTablet : null,
+                ]}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* Progress section */}
-                <View style={styles.progressSection}>
-                    <View style={styles.progressRow}>
-                        <Text style={styles.questionCount}>
-                            Question {currentIndex + 1} of {questions.length}
-                        </Text>
+                <View style={styles.contentColumn}>
+                    {/* Progress section */}
+                    <View style={styles.progressSection}>
+                        <View style={styles.progressRow}>
+                            <Text style={styles.questionCount}>
+                                Question {currentIndex + 1} of {questions.length}
+                            </Text>
+                        </View>
+                        <GradientProgressBar progress={progress} height={8} style={styles.progressBar} />
                     </View>
-                    <GradientProgressBar progress={progress} height={8} style={styles.progressBar} />
-                </View>
 
-                {/* Question presentation — shared variants via QuestionRenderer */}
-                <View style={styles.optionsContainer}>
-                    <QuestionRenderer
-                        question={currentQuestion}
-                        mode="practice"
-                        selectionMode="option_key"
-                        selectedValue={selectedOption}
+                    {/* Question presentation — shared variants via QuestionRenderer */}
+                    <View style={styles.optionsContainer}>
+                        <QuestionRenderer
+                            question={currentQuestion}
+                            mode="practice"
+                            selectionMode="option_key"
+                            selectedValue={selectedOption}
+                            revealed={showFeedback}
+                            onSelect={handleSelectOption}
+                            questionNumber={currentIndex + 1}
+                            showBookmark={false}
+                            showFooter={false}
+                            debugSource="PracticeSession"
+                        />
+                    </View>
+
+                    <QuestionAssist
+                        key={currentQuestion.id}
+                        hint={currentQuestion.hint}
+                        solution={currentQuestion.explanation}
+                        solutionDiagramUri={currentQuestion.explanation_diagram_path}
+                        answered={showFeedback}
                         revealed={showFeedback}
-                        onSelect={handleSelectOption}
-                        questionNumber={currentIndex + 1}
-                        showBookmark={false}
-                        showFooter={false}
-                        debugSource="PracticeSession"
+                        isCorrect={isCorrect}
+                        correctOptionLabel={currentQuestion.options.find((opt) => opt.is_correct)?.option_key?.toUpperCase()}
+                        autoShowSolution={isAutoShowSolution(preferences)}
                     />
+
+                    {/* Bottom padding for sticky CTA */}
+                    <View style={styles.bottomPadding} />
                 </View>
-
-                <QuestionAssist
-                    key={currentQuestion.id}
-                    hint={currentQuestion.hint}
-                    solution={currentQuestion.explanation}
-                    solutionDiagramUri={currentQuestion.explanation_diagram_path}
-                    answered={showFeedback}
-                    revealed={showFeedback}
-                    isCorrect={isCorrect}
-                    correctOptionLabel={currentQuestion.options.find((opt) => opt.is_correct)?.option_key?.toUpperCase()}
-                    autoShowSolution={isAutoShowSolution(preferences)}
-                />
-
-                {/* Bottom padding for sticky CTA */}
-                <View style={styles.bottomPadding} />
             </ScrollView>
 
             {/* Stitch-style sticky bottom CTA */}
-            <View style={styles.ctaBar}>
-                {showFeedback ? (
-                    <Button
-                        title={isLastQuestion ? "See Results" : "Next Question"}
-                        onPress={handleNext}
-                        fullWidth
-                        size="lg"
-                        iconRight="arrow_forward"
-                    />
-                ) : (
-                    <Button
-                        title="Check Answer"
-                        onPress={handleSubmit}
-                        fullWidth
-                        size="lg"
-                        disabled={!selectedOption}
-                    />
-                )}
+            <View style={[styles.ctaBar, { paddingBottom: Math.max(insets.bottom, SPACING[4]) }]}>
+                <View style={styles.ctaBarInner}>
+                    {showFeedback ? (
+                        <Button
+                            title={isLastQuestion ? "See Results" : "Next Question"}
+                            onPress={handleNext}
+                            fullWidth
+                            size="lg"
+                            iconRight="arrow_forward"
+                        />
+                    ) : (
+                        <Button
+                            title="Check Answer"
+                            onPress={handleSubmit}
+                            fullWidth
+                            size="lg"
+                            disabled={!selectedOption}
+                        />
+                    )}
+                </View>
             </View>
         </SafeAreaView>
     );

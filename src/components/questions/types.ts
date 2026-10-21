@@ -105,6 +105,8 @@ export interface QuestionCardShellProps {
     showBookmark?: boolean;
     onToggleBookmark?: () => void;
     stem?: ReactNode;
+    /** Prompt/equation/diagram/lists that stay inside the question card. */
+    context?: ReactNode;
     children?: ReactNode;
     footerStatus?: QuestionSolveStatus | null;
     footerMarks?: number | null;

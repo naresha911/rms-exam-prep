@@ -48,17 +48,22 @@ export const McqDiagram: React.FC<SharedQuestionProps> = (props) => {
         (props.solveStatus === 'correct' || props.solveStatus === 'incorrect');
 
     return (
-        <QuestionCardShell {...shell} stem={<StemText>{props.question.question_text || ''}</StemText>}>
-            <View style={styles.well}>
-                <View style={styles.plate}>
-                    {path ? (
-                        <Image source={{ uri: path }} style={styles.diagram} resizeMode="contain" />
-                    ) : (
-                        <Text style={styles.caption}>Diagram unavailable</Text>
-                    )}
+        <QuestionCardShell
+            {...shell}
+            stem={<StemText>{props.question.question_text || ''}</StemText>}
+            context={
+                <View style={styles.well}>
+                    <View style={styles.plate}>
+                        {path ? (
+                            <Image source={{ uri: path }} style={styles.diagram} resizeMode="contain" />
+                        ) : (
+                            <Text style={styles.caption}>Diagram unavailable</Text>
+                        )}
+                    </View>
+                    <Text style={styles.caption}>Figure</Text>
                 </View>
-                <Text style={styles.caption}>Figure</Text>
-            </View>
+            }
+        >
             <OptionGrid
                 options={props.question.options}
                 selectedValue={props.selectedValue}

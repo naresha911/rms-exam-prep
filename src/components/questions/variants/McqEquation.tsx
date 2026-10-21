@@ -32,27 +32,32 @@ export const McqEquation: React.FC<SharedQuestionProps> = (props) => {
     const stemText = props.question.question_text || 'Solve the given arithmetic equation:';
 
     return (
-        <QuestionCardShell {...shell} stem={<StemText>{stemText}</StemText>}>
-            <View style={styles.equationBox}>
-                {equation?.left && equation?.right ? (
-                    <View style={styles.equationRow}>
-                        <FractionView node={equation.left} />
-                        <Text style={styles.operator}>{equation.operator || '+'}</Text>
-                        <FractionView node={equation.right} />
-                        <Text style={styles.operator}>=</Text>
-                        <Text style={styles.unknown}>?</Text>
-                    </View>
-                ) : (
-                    <LatexText
-                        content={equation?.text || props.question.question_text || ''}
-                        color={colors.onSurface}
-                        fontSize={20}
-                        fontFamily={TYPOGRAPHY.fontFamily.bold}
-                        fontWeight="700"
-                        align="center"
-                    />
-                )}
-            </View>
+        <QuestionCardShell
+            {...shell}
+            stem={<StemText>{stemText}</StemText>}
+            context={
+                <View style={styles.equationBox}>
+                    {equation?.left && equation?.right ? (
+                        <View style={styles.equationRow}>
+                            <FractionView node={equation.left} />
+                            <Text style={styles.operator}>{equation.operator || '+'}</Text>
+                            <FractionView node={equation.right} />
+                            <Text style={styles.operator}>=</Text>
+                            <Text style={styles.unknown}>?</Text>
+                        </View>
+                    ) : (
+                        <LatexText
+                            content={equation?.text || props.question.question_text || ''}
+                            color={colors.onSurface}
+                            fontSize={20}
+                            fontFamily={TYPOGRAPHY.fontFamily.bold}
+                            fontWeight="700"
+                            align="center"
+                        />
+                    )}
+                </View>
+            }
+        >
             <OptionGrid
                 options={props.question.options}
                 selectedValue={props.selectedValue}

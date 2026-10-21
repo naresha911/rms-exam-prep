@@ -8,7 +8,17 @@ import type {
 } from './types';
 
 const LONG_OPTION_CHARS = 42;
-const CODE_LIKE_RE = /[→←↑↓]|^[A-Z0-9\s\-_/\\]+$|coding|decode|symbol/i;
+const CODE_SYMBOL_RE = /[→←↑↓]/;
+const CODE_WORD_RE = /\b(?:coding|decode|symbol)\b/i;
+const ALL_CAPS_CODE_RE = /^[A-Z0-9\s\-_/\\]+$/;
+
+function looksCodeLike(value: string): boolean {
+    return (
+        CODE_SYMBOL_RE.test(value) ||
+        CODE_WORD_RE.test(value) ||
+        ALL_CAPS_CODE_RE.test(value)
+    );
+}
 
 function avgOptionLength(options: QuestionOption[]): number {
     if (!options.length) return 0;
@@ -17,10 +27,10 @@ function avgOptionLength(options: QuestionOption[]): number {
 }
 
 function optionsLookCodeLike(options: QuestionOption[], stem?: string): boolean {
-    if (stem && CODE_LIKE_RE.test(stem)) return true;
+    if (stem && looksCodeLike(stem)) return true;
     return options.some((o) => {
         const t = o.option_text ?? '';
-        return t.length > 0 && t.length < 28 && CODE_LIKE_RE.test(t);
+        return t.length > 0 && t.length < 28 && looksCodeLike(t);
     });
 }
 

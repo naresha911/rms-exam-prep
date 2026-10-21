@@ -148,7 +148,15 @@ From Math Mock #01:
 
 - **Solved • Correct:** may show 2×2 option preview with correct option highlighted.
 - **Solved • Incorrect / Unattempted:** may **hide** options; show status + CTA only (`Review` / `Solve Now`).
-- Full option grids appear when the card is the primary interaction surface (Math #02, Intelligence mocks).
+- Full option rows appear when the card is the primary interaction surface (Math #02, Intelligence mocks).
+
+### Responsive layout (phone + tablet)
+
+- **Phone (< 768dp):** page padding 16, content capped at 640; question card + full-width option rows.
+- **Tablet portrait (≥ 768dp):** page padding 24, content capped at 720; stem 19px, option text 17px, option row min height 64, letter badge 40.
+- **Wide (≥ 1024dp):** two-pane exam layout — main column capped at ~760 with a 300px question-palette rail on the right (mock tests). Practice and papers keep the centered column.
+- **Bottom bars:** always pad with `Math.max(insets.bottom, SPACING[4])` so Previous/Next/Submit clear the Android navigation bar.
+- `app.json` remains portrait-locked; the two-pane rail activates from available width, not orientation.
 
 ### Footer status recipes
 
@@ -188,34 +196,38 @@ From Math Mock #01:
 **Anatomy:**
 
 1. Shared chrome header + stem.
-2. **2×2 grid** of option pills.
+2. **Full-width stacked option rows** (one per line, 12px gap).
 3. Footer status / CTA.
 
 **Option styling:**
 
-- Default: `surface-container-low`, `on-surface-variant`, label `A. …`.
-- Correct (review): emerald/success container + border + `check_circle`.
-- Compact preview may omit letter circles and use inline `A. text`.
+- Default: `surface-container-low` row, 1.5px `outline-variant` border, letter badge `surface-container-high`, text `on-surface`, trailing unchecked radio.
+- Selected: `primary-fixed` row, `primary` border, filled `primary` letter badge, filled radio.
+- Correct (review): `success-light` row + `success` border + `check_circle`.
+- Incorrect (review): `error-light` row + `error` border + `cancel`; other options use the muted `disabled` state.
+- Options render **outside** the question card, as sibling full-width rows.
 
-**Maps to:** `mcq_single`, `true_false` (True/False as two or four keys).
+**Maps to:** `mcq_single`, `true_false` (True/False as two keys).
 
 ---
 
 ### 3.2 `mcq_text_stack`
 
-**Purpose:** Longer option text, coding-decoding strings, direction answers.
+**Purpose:** Longer option text, coding-decoding strings, direction answers. After the shared row redesign this is visually identical to `mcq_text_grid`; the resolver keeps the distinction to flag code-like content.
 
 **Anatomy:**
 
 1. Stem (may bold/highlight codes with `primary` + wider tracking).
 2. **Stacked full-width rows** (~touch-target height).
-3. Leading letter circle + option text + trailing radio / check icon.
+3. Leading letter badge + option text + trailing radio / check / cancel icon.
+4. Options stay outside the question card.
 
 **Option styling:**
 
-- Default: `surface-container-low`, letter circle on `surface-container-high`.
-- Selected: `surface-container` + primary letter circle + `check_circle` / filled radio.
-- Unselected radio: `radio_button_unchecked` in `outline-variant`.
+- Default: `surface-container-low`, letter badge on `surface-container-high`.
+- Selected: `primary-fixed` + primary border + filled letter badge + filled radio.
+- Unselected radio: `radio_button_unchecked` in `outline`.
+- As with 3.1: correct → `check_circle`, incorrect → `cancel`, other options muted.
 
 **Maps to:** `mcq_single` when option text is long or code-like.
 
@@ -424,7 +436,8 @@ Filters in mocks (All / Easy / Medium / Hard / Unattempted / Saved, or type chip
 
 | Area | Current state |
 |------|----------------|
-| Session UI | Practice, mock, and paper sessions all use plain MCQ via [`AnswerCard`](../src/components/practice/AnswerCard.tsx) |
+| Session UI | Practice, mock, and paper sessions use the shared `QuestionRenderer`; text MCQs render full-width rows via `AnswerCard` outside the question card. |
+| Responsive sessions | Centered max-width column on tablets; mock tests add a question-palette rail from 1024dp; all bottom bars respect safe-area insets. |
 | Paper support | [`src/lib/papers.ts`](../src/lib/papers.ts) allows `mcq_single` \| `true_false` \| `assertion_reason` but renders them identically |
 | Fetch | Practice/mock fetch hard-filters `mcq_single` in [`src/lib/supabase.ts`](../src/lib/supabase.ts) |
 | Matching / diagrams | Typed (`matching`, `has_diagram`, option images) but unused in live UI |

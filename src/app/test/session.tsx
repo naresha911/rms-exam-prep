@@ -2,16 +2,18 @@
 // Sticky header with timer, progress bar, QuestionRenderer (exam mode), bottom nav, submit confirm.
 import { View, Text, ScrollView, Pressable, Alert, BackHandler } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Button } from "../../components/ui/Button";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
 import { MaterialIcon } from "../../components/ui/MaterialIcon";
+import { QuestionPalette, type PaletteState } from "../../components/test/QuestionPalette";
 import { QuestionRenderer, QuestionAssist, testQuestionToRenderItem } from "../../components/questions";
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS, getExamStructureForStandard, getStandardIdFallback, normalizeStudentStandard } from "../../constants";
 import { layout, useColors, useThemedStyles, type ColorPalette } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 import { fetchPracticeQuestions, fetchPaperDetails } from "../../lib/supabase";
 import { completeTestAttempt, getTestSessionQuestions, startTestAttempt } from "../../lib/tests";
 import { useAppStore, isAutoShowSolution } from "../../store/useAppStore";
@@ -49,6 +51,8 @@ export default function TestSessionScreen() {
     const autoShowSolution = isAutoShowSolution(useAppStore((s) => s.preferences));
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
+    const insets = useSafeAreaInsets();
+    const { isTablet, isWide } = useResponsive();
 
     // Test configuration
     const [questions, setQuestions] = useState<TestQuestion[]>([]);
@@ -309,6 +313,17 @@ export default function TestSessionScreen() {
     const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
     const isLowTime = timeRemaining < 300;
 
+    const paletteStates = useMemo(() => {
+        const result: Record<number, PaletteState> = {};
+        questions.forEach((question, index) => {
+            if (flagged.has(question.id)) result[index] = "marked";
+            else if (answers[question.id]) result[index] = "answered";
+            else if (index < currentIndex) result[index] = "skipped";
+            else result[index] = "unanswered";
+        });
+        return result;
+    }, [questions, flagged, answers, currentIndex]);
+
     if (loading) {
         return (
             <SafeAreaView style={styles.container}>
@@ -336,7 +351,7 @@ export default function TestSessionScreen() {
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             {/* Stitch-style sticky header */}
-            <View style={styles.header}>
+            <View style={[styles.header, isTablet ? styles.headerTablet : null]}>
                 <Pressable
                     onPress={handlePauseTest}
                     style={({ pressed }) => [styles.headerBtn, pressed && layout.pressed]}
@@ -368,91 +383,114 @@ export default function TestSessionScreen() {
                 </View>
             </View>
 
-            {/* Main scrollable canvas */}
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
-                {/* Progress section */}
-                <View style={styles.progressSection}>
-                    <View style={styles.progressRow}>
-                        <Text style={styles.questionCount}>
-                            Question {currentIndex + 1} of {questions.length}
-                        </Text>
-                        <Pressable
-                            onPress={handleToggleFlag}
-                            style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
-                        >
-                            <MaterialIcon
-                                name="flag"
-                                size={20}
-                                color={flagged.has(currentQuestion.id) ? colors.warning : colors.onSurfaceVariant}
-                                filled={flagged.has(currentQuestion.id)}
+            <View style={[styles.body, isWide ? styles.bodyWide : null]}>
+                <View style={[styles.mainColumn, isWide ? styles.mainColumnWide : null]}>
+                    {/* Main scrollable canvas */}
+                    <ScrollView
+                        style={layout.fill}
+                        contentContainerStyle={[
+                            styles.scrollContent,
+                            isTablet ? styles.scrollContentTablet : null,
+                        ]}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <View style={styles.contentColumn}>
+                            {/* Progress section */}
+                            <View style={styles.progressSection}>
+                                <View style={styles.progressRow}>
+                                    <Text style={styles.questionCount}>
+                                        Question {currentIndex + 1} of {questions.length}
+                                    </Text>
+                                    <Pressable
+                                        onPress={handleToggleFlag}
+                                        style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
+                                    >
+                                        <MaterialIcon
+                                            name="flag"
+                                            size={20}
+                                            color={flagged.has(currentQuestion.id) ? colors.warning : colors.onSurfaceVariant}
+                                            filled={flagged.has(currentQuestion.id)}
+                                        />
+                                    </Pressable>
+                                </View>
+                                <GradientProgressBar progress={progress} height={6} style={styles.progressBar} />
+                            </View>
+
+                            {/* Question presentation — shared variants via QuestionRenderer */}
+                            <View style={styles.optionsContainer}>
+                                <QuestionRenderer
+                                    question={testQuestionToRenderItem(currentQuestion)}
+                                    mode="exam"
+                                    selectionMode="option_id"
+                                    selectedValue={selectedOptionId ?? null}
+                                    revealed={!!revealedById[currentQuestion.id]}
+                                    onSelect={handleSelectOption}
+                                    questionNumber={currentIndex + 1}
+                                    showBookmark={false}
+                                    showFooter={false}
+                                    debugSource="TestSession"
+                                />
+                                <QuestionAssist
+                                    key={currentQuestion.id}
+                                    hint={currentQuestion.hint}
+                                    solution={currentQuestion.explanation}
+                                    solutionDiagramUri={currentQuestion.explanation_diagram_path}
+                                    answered={!!selectedOptionId}
+                                    revealed={!!revealedById[currentQuestion.id]}
+                                    isCorrect={
+                                        !!selectedOptionId &&
+                                        currentQuestion.options.some((o) => o.is_correct && o.id === selectedOptionId)
+                                    }
+                                    correctOptionLabel={currentQuestion.options.find((o) => o.is_correct)?.option_key?.toUpperCase()}
+                                    autoShowSolution={autoShowSolution}
+                                    onReveal={handleRevealCurrent}
+                                />
+                            </View>
+
+                            <View style={styles.bottomPadding} />
+                        </View>
+                    </ScrollView>
+
+                    {/* Stitch-style sticky bottom nav */}
+                    <View style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, SPACING[4]) }]}>
+                        <View style={styles.bottomNavInner}>
+                            <Button
+                                title="Previous"
+                                variant="outline"
+                                onPress={handlePrev}
+                                disabled={currentIndex === 0}
+                                style={styles.fill}
                             />
-                        </Pressable>
+                            <View style={styles.navGap} />
+                            {currentIndex < questions.length - 1 ? (
+                                <Button
+                                    title="Next"
+                                    onPress={handleNext}
+                                    style={styles.fill}
+                                    iconRight="arrow_forward"
+                                />
+                            ) : (
+                                <Button
+                                    title="Submit"
+                                    onPress={() => setShowSubmitConfirm(true)}
+                                    style={styles.fill}
+                                />
+                            )}
+                        </View>
                     </View>
-                    <GradientProgressBar progress={progress} height={6} style={styles.progressBar} />
                 </View>
 
-                {/* Question presentation — shared variants via QuestionRenderer */}
-                <View style={styles.optionsContainer}>
-                    <QuestionRenderer
-                        question={testQuestionToRenderItem(currentQuestion)}
-                        mode="exam"
-                        selectionMode="option_id"
-                        selectedValue={selectedOptionId ?? null}
-                        revealed={!!revealedById[currentQuestion.id]}
-                        onSelect={handleSelectOption}
-                        questionNumber={currentIndex + 1}
-                        showBookmark={false}
-                        showFooter={false}
-                        debugSource="TestSession"
-                    />
-                    <QuestionAssist
-                        key={currentQuestion.id}
-                        hint={currentQuestion.hint}
-                        solution={currentQuestion.explanation}
-                        solutionDiagramUri={currentQuestion.explanation_diagram_path}
-                        answered={!!selectedOptionId}
-                        revealed={!!revealedById[currentQuestion.id]}
-                        isCorrect={
-                            !!selectedOptionId &&
-                            currentQuestion.options.some((o) => o.is_correct && o.id === selectedOptionId)
-                        }
-                        correctOptionLabel={currentQuestion.options.find((o) => o.is_correct)?.option_key?.toUpperCase()}
-                        autoShowSolution={autoShowSolution}
-                        onReveal={handleRevealCurrent}
-                    />
-                </View>
-
-                <View style={styles.bottomPadding} />
-            </ScrollView>
-
-            {/* Stitch-style sticky bottom nav */}
-            <View style={styles.bottomNav}>
-                <Button
-                    title="Previous"
-                    variant="outline"
-                    onPress={handlePrev}
-                    disabled={currentIndex === 0}
-                    style={styles.fill}
-                />
-                <View style={styles.navGap} />
-                {currentIndex < questions.length - 1 ? (
-                    <Button
-                        title="Next"
-                        onPress={handleNext}
-                        style={styles.fill}
-                        iconRight="arrow_forward"
-                    />
-                ) : (
-                    <Button
-                        title="Submit"
-                        onPress={() => setShowSubmitConfirm(true)}
-                        style={styles.fill}
-                    />
-                )}
+                {isWide ? (
+                    <View style={styles.paletteRail}>
+                        <QuestionPalette
+                            total={questions.length}
+                            current={currentIndex + 1}
+                            states={paletteStates}
+                            onQuestionPress={setCurrentIndex}
+                        />
+                    </View>
+                ) : null}
             </View>
 
             {/* Submit confirmation modal */}
@@ -501,6 +539,36 @@ function createStyles(colors: ColorPalette) {
             borderBottomWidth: 1,
             borderBottomColor: colors.outlineVariant,
         },
+        headerTablet: {
+            paddingHorizontal: SPACING[6],
+        },
+        body: {
+            flex: 1,
+        },
+        bodyWide: {
+            flexDirection: "row" as const,
+            justifyContent: "center" as const,
+            gap: SPACING[6],
+        },
+        mainColumn: {
+            flex: 1,
+        },
+        mainColumnWide: {
+            flex: 1,
+            maxWidth: 760,
+        },
+        paletteRail: {
+            width: 300,
+            maxHeight: 460,
+            marginTop: SPACING[4],
+            marginRight: SPACING[6],
+            alignSelf: "flex-start" as const,
+            backgroundColor: colors.surfaceContainerLowest,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            borderRadius: BORDER_RADIUS.xl,
+            overflow: "hidden" as const,
+        },
         headerBtn: {
             width: 40,
             height: 40,
@@ -540,6 +608,14 @@ function createStyles(colors: ColorPalette) {
         },
         scrollContent: {
             padding: SPACING[4],
+            alignItems: "center" as const,
+        },
+        scrollContentTablet: {
+            padding: SPACING[6],
+        },
+        contentColumn: {
+            width: "100%" as const,
+            maxWidth: 720,
         },
         progressSection: {
             marginBottom: SPACING[5],
@@ -574,12 +650,17 @@ function createStyles(colors: ColorPalette) {
             height: SPACING[6],
         },
         bottomNav: {
-            flexDirection: "row" as const,
             paddingHorizontal: SPACING[4],
-            paddingVertical: SPACING[4],
+            paddingTop: SPACING[4],
             backgroundColor: colors.surface,
             borderTopWidth: 1,
             borderTopColor: colors.outlineVariant,
+        },
+        bottomNavInner: {
+            flexDirection: "row" as const,
+            width: "100%" as const,
+            maxWidth: 720,
+            alignSelf: "center" as const,
         },
         fill: { flex: 1 },
         navGap: { width: SPACING[3] },

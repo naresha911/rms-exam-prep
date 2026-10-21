@@ -76,23 +76,28 @@ export const MatchingLists: React.FC<SharedQuestionProps> = (props) => {
         (props.solveStatus === 'correct' || props.solveStatus === 'incorrect');
 
     return (
-        <QuestionCardShell {...shell} stem={<StemText>{props.question.question_text || ''}</StemText>}>
-            {showMatrix ? (
-                <View style={styles.matrix}>
-                    <View style={styles.column}>
-                        <Text style={styles.columnLabel}>List-I</Text>
-                        {listI.map((item) => (
-                            <MiniCard key={item.key} item={item} />
-                        ))}
+        <QuestionCardShell
+            {...shell}
+            stem={<StemText>{props.question.question_text || ''}</StemText>}
+            context={
+                showMatrix ? (
+                    <View style={styles.matrix}>
+                        <View style={styles.column}>
+                            <Text style={styles.columnLabel}>List-I</Text>
+                            {listI.map((item) => (
+                                <MiniCard key={item.key} item={item} />
+                            ))}
+                        </View>
+                        <View style={styles.column}>
+                            <Text style={styles.columnLabel}>List-II</Text>
+                            {listII.map((item) => (
+                                <MiniCard key={item.key} item={item} />
+                            ))}
+                        </View>
                     </View>
-                    <View style={styles.column}>
-                        <Text style={styles.columnLabel}>List-II</Text>
-                        {listII.map((item) => (
-                            <MiniCard key={item.key} item={item} />
-                        ))}
-                    </View>
-                </View>
-            ) : null}
+                ) : null
+            }
+        >
             <OptionStack
                 options={props.question.options}
                 selectedValue={props.selectedValue}
@@ -101,7 +106,6 @@ export const MatchingLists: React.FC<SharedQuestionProps> = (props) => {
                 revealed={props.revealed}
                 browseRevealed={browseRevealed}
                 onSelect={props.onSelect}
-                showRadio={false}
             />
         </QuestionCardShell>
     );

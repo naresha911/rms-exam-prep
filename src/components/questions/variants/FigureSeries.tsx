@@ -71,23 +71,28 @@ export const FigureSeries: React.FC<SharedQuestionProps> = (props) => {
     );
 
     return (
-        <QuestionCardShell {...shell} stem={<StemText>{props.question.question_text || ''}</StemText>}>
-            {cells.length > 0 ? (
-                <View style={styles.panel}>
-                    <Text style={styles.label}>Problem Figures</Text>
-                    <View style={styles.row}>
-                        {cells.map((uri, index) => (
-                            <View key={`${uri}-${index}`} style={styles.cell}>
-                                {uri ? (
-                                    <Image source={{ uri }} style={styles.image} resizeMode="contain" />
-                                ) : (
-                                    <MaterialIcon name="help" size={28} color={colors.primary} />
-                                )}
-                            </View>
-                        ))}
+        <QuestionCardShell
+            {...shell}
+            stem={<StemText>{props.question.question_text || ''}</StemText>}
+            context={
+                cells.length > 0 ? (
+                    <View style={styles.panel}>
+                        <Text style={styles.label}>Problem Figures</Text>
+                        <View style={styles.row}>
+                            {cells.map((uri, index) => (
+                                <View key={`${uri}-${index}`} style={styles.cell}>
+                                    {uri ? (
+                                        <Image source={{ uri }} style={styles.image} resizeMode="contain" />
+                                    ) : (
+                                        <MaterialIcon name="help" size={28} color={colors.primary} />
+                                    )}
+                                </View>
+                            ))}
+                        </View>
                     </View>
-                </View>
-            ) : null}
+                ) : null
+            }
+        >
             <View style={styles.optionGrid}>
                 {sortedOptions.map((option) => (
                     <View key={option.id} style={styles.optionCell}>

@@ -38,12 +38,6 @@ export function deriveOptionState({
         return 'disabled';
     }
 
-    if (showCorrectness) {
-        if (option.is_correct) return 'correct';
-        if (isSelected) return 'incorrect';
-        return 'disabled';
-    }
-
     if (isSelected) return 'selected';
     return 'default';
 }

@@ -79,32 +79,16 @@ export const AssertionReason: React.FC<SharedQuestionProps> = (props) => {
         <QuestionCardShell
             {...shell}
             stem={<StemText>Choose the correct option about Assertion (A) and Reason (R).</StemText>}
-        >
-            <View style={styles.well}>
-                <View style={styles.block}>
-                    <View style={[styles.chip, styles.chipA]}>
-                        <Text style={[styles.chipText, styles.chipAText]}>A</Text>
-                    </View>
-                    <View style={styles.copy}>
-                        <Text style={styles.label}>Assertion (A)</Text>
-                        <LatexText
-                            content={assertion}
-                            color={colors.onSurface}
-                            fontSize={15}
-                            fontFamily={TYPOGRAPHY.fontFamily.medium}
-                            lineHeight={22}
-                        />
-                    </View>
-                </View>
-                {reason ? (
+            context={
+                <View style={styles.well}>
                     <View style={styles.block}>
-                        <View style={[styles.chip, styles.chipR]}>
-                            <Text style={[styles.chipText, styles.chipRText]}>R</Text>
+                        <View style={[styles.chip, styles.chipA]}>
+                            <Text style={[styles.chipText, styles.chipAText]}>A</Text>
                         </View>
                         <View style={styles.copy}>
-                            <Text style={styles.label}>Reason (R)</Text>
+                            <Text style={styles.label}>Assertion (A)</Text>
                             <LatexText
-                                content={reason}
+                                content={assertion}
                                 color={colors.onSurface}
                                 fontSize={15}
                                 fontFamily={TYPOGRAPHY.fontFamily.medium}
@@ -112,8 +96,26 @@ export const AssertionReason: React.FC<SharedQuestionProps> = (props) => {
                             />
                         </View>
                     </View>
-                ) : null}
-            </View>
+                    {reason ? (
+                        <View style={styles.block}>
+                            <View style={[styles.chip, styles.chipR]}>
+                                <Text style={[styles.chipText, styles.chipRText]}>R</Text>
+                            </View>
+                            <View style={styles.copy}>
+                                <Text style={styles.label}>Reason (R)</Text>
+                                <LatexText
+                                    content={reason}
+                                    color={colors.onSurface}
+                                    fontSize={15}
+                                    fontFamily={TYPOGRAPHY.fontFamily.medium}
+                                    lineHeight={22}
+                                />
+                            </View>
+                        </View>
+                    ) : null}
+                </View>
+            }
+        >
             <OptionStack
                 options={props.question.options}
                 selectedValue={props.selectedValue}
@@ -122,7 +124,6 @@ export const AssertionReason: React.FC<SharedQuestionProps> = (props) => {
                 revealed={props.revealed}
                 browseRevealed={browseRevealed}
                 onSelect={props.onSelect}
-                showRadio={false}
             />
         </QuestionCardShell>
     );

@@ -18,6 +18,7 @@ import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { QuestionRenderer, QuestionAssist, paperQuestionToRenderItem } from "@/components/questions";
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from "@/constants";
 import { layout, useColors, useThemedStyles, type ColorPalette } from "@/theme";
+import { useResponsive } from "@/hooks/useResponsive";
 import { useAppStore, isAutoShowSolution } from "@/store/useAppStore";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import {
@@ -46,6 +47,7 @@ export default function PaperSessionScreen() {
     const autoShowSolution = isAutoShowSolution(preferences);
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
+    const { isTablet } = useResponsive();
 
     const [paper, setPaper] = useState<Paper | null>(null);
     const [questions, setQuestions] = useState<PaperSessionQuestion[]>([]);
@@ -437,7 +439,7 @@ export default function PaperSessionScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-            <View style={styles.header}>
+            <View style={[styles.header, isTablet ? styles.headerTablet : null]}>
                 <Pressable
                     onPress={handlePauseExit}
                     style={({ pressed }) => [styles.iconBtn, pressed && layout.pressed]}
@@ -471,7 +473,12 @@ export default function PaperSessionScreen() {
                 </View>
             )}
 
-            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            <ScrollView
+                style={layout.fill}
+                contentContainerStyle={[styles.content, isTablet ? styles.contentTablet : null]}
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.contentColumn}>
                 <Text style={styles.marksLabel}>
                     {current.marks} {t("papers.marks")}
                     {current.negative_marks > 0
@@ -513,9 +520,11 @@ export default function PaperSessionScreen() {
                         <Text style={styles.unsupported}>{t("papers.unsupportedType")}</Text>
                     )}
                 </View>
+                </View>
             </ScrollView>
 
             <View style={styles.footer}>
+                <View style={styles.footerInner}>
                 <Pressable
                     onPress={handleToggleFlag}
                     style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
@@ -550,6 +559,7 @@ export default function PaperSessionScreen() {
                         style={styles.fill}
                     />
                 )}
+                </View>
             </View>
 
             {showSubmitConfirm && (
@@ -595,6 +605,9 @@ function createStyles(colors: ColorPalette) {
             borderBottomColor: colors.outlineVariant,
             gap: SPACING[2],
         },
+        headerTablet: {
+            paddingHorizontal: SPACING[6],
+        },
         iconBtn: { padding: SPACING[1] },
         headerCenter: { flex: 1 },
         headerTitle: { ...TYPOGRAPHY.labelLg, color: colors.onSurface },
@@ -611,7 +624,13 @@ function createStyles(colors: ColorPalette) {
         timerLow: { backgroundColor: colors.errorLight },
         timerText: { ...TYPOGRAPHY.labelSm, color: colors.primary },
         timerTextLow: { color: colors.error },
-        progressWrap: { paddingHorizontal: SPACING[4], paddingTop: SPACING[2] },
+        progressWrap: {
+            paddingHorizontal: SPACING[4],
+            paddingTop: SPACING[2],
+            width: "100%" as const,
+            maxWidth: 720,
+            alignSelf: "center" as const,
+        },
         warnBanner: {
             marginHorizontal: SPACING[4],
             marginTop: SPACING[2],
@@ -620,18 +639,29 @@ function createStyles(colors: ColorPalette) {
             padding: SPACING[2],
         },
         warnText: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant, fontWeight: TYPOGRAPHY.fontWeight.regular },
-        content: { padding: SPACING[4], paddingBottom: 120 },
+        content: { padding: SPACING[4], paddingBottom: 120, alignItems: "center" as const },
+        contentTablet: { padding: SPACING[6], paddingBottom: 120 },
+        contentColumn: {
+            width: "100%" as const,
+            maxWidth: 720,
+        },
         marksLabel: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant, marginBottom: SPACING[2] },
         unsupported: { marginTop: SPACING[2], color: colors.warning, ...TYPOGRAPHY.labelSm },
         options: { gap: SPACING[1] },
         footer: {
-            flexDirection: "row" as const,
-            alignItems: "center" as const,
-            gap: SPACING[2],
-            padding: SPACING[4],
+            paddingHorizontal: SPACING[4],
+            paddingVertical: SPACING[4],
             borderTopWidth: 1,
             borderTopColor: colors.outlineVariant,
             backgroundColor: colors.surface,
+        },
+        footerInner: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: SPACING[2],
+            width: "100%" as const,
+            maxWidth: 720,
+            alignSelf: "center" as const,
         },
         flagBtn: { padding: SPACING[2] },
         fill: { flex: 1 },
