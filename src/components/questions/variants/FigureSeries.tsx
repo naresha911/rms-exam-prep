@@ -12,15 +12,15 @@ import type { SharedQuestionProps } from '../types';
 function createStyles(colors: ColorPalette) {
     return {
         panel: {
-            backgroundColor: colors.surfaceContainerLow,
+            backgroundColor: colors.surfaceContainerHigh,
             borderRadius: BORDER_RADIUS.xl,
             padding: SPACING[3],
             gap: SPACING[2],
         },
         label: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 12,
-            fontWeight: '700' as const,
+            fontWeight: '600' as const,
             color: colors.onSurfaceVariant,
         },
         row: {

@@ -132,6 +132,8 @@ export const BORDER_RADIUS = {
     md: 8,
     lg: 12,
     xl: 16,
+    /** Question card shell. */
+    card: 20,
     '2xl': 24,
     '3xl': 32,
     full: 9999,

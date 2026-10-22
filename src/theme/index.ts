@@ -4,5 +4,5 @@ export { useAppearance, useColors } from './useColors';
 export { useThemedStyles } from './useThemedStyles';
 export { layout } from './layout';
 export { createNavigationTheme } from './navigation';
-export { optionChrome, difficultyColors } from './semantics';
-export type { OptionChrome, OptionVisualState } from './semantics';
+export { optionChrome, questionChrome, difficultyColors } from './semantics';
+export type { OptionChrome, OptionVisualState, QuestionChrome } from './semantics';

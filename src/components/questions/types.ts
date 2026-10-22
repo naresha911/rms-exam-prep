@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Difficulty, PracticeQuestion, QuestionOption, QuestionType } from '../../types';
+import type { PracticeQuestion, QuestionOption, QuestionType } from '../../types';
 
 /** Presentation variants from docs/question_types_design.md §5 */
 export type QuestionPresentation =
@@ -97,15 +97,19 @@ export interface QuestionContentFlags {
 }
 
 export interface QuestionCardShellProps {
-    questionNumber?: number;
-    difficulty?: Difficulty;
-    source?: string | null;
-    tags?: string[];
+    /** 1-based question number — rendered as a zero-padded numeral chip. */
+    counterNumber?: number;
+    /** Total questions in the session — rendered next to the numeral chip. */
+    counterTotal?: number;
+    /** Right-aligned header action node (e.g. a Mark pill). */
+    headerAction?: ReactNode;
+    /** Optional section band, e.g. "Section A: Mathematics". */
+    sectionLabel?: string;
     isBookmarked?: boolean;
     showBookmark?: boolean;
     onToggleBookmark?: () => void;
     stem?: ReactNode;
-    /** Prompt/equation/diagram/lists that stay inside the question card. */
+    /** Prompt/equation/diagram/lists rendered between stem and options. */
     context?: ReactNode;
     children?: ReactNode;
     footerStatus?: QuestionSolveStatus | null;
@@ -126,6 +130,12 @@ export interface SharedQuestionProps {
     solveStatus?: QuestionSolveStatus;
     onSelect?: (value: string) => void;
     questionNumber?: number;
+    /** Total questions in the session, shown beside the numeral chip. */
+    counterTotal?: number;
+    /** Right-aligned card header action (e.g. Mark pill). */
+    headerAction?: ReactNode;
+    /** Section band label, e.g. "Section A: Mathematics". */
+    sectionLabel?: string;
     showBookmark?: boolean;
     isBookmarked?: boolean;
     onToggleBookmark?: () => void;

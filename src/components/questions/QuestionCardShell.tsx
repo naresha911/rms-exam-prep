@@ -1,14 +1,10 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../constants';
-import {
-    difficultyColors,
-    useColors,
-    useThemedStyles,
-    type ColorPalette,
-} from '../../theme';
+import { questionChrome, useColors, useThemedStyles, type ColorPalette } from '../../theme';
 import { MaterialIcon } from '../ui/MaterialIcon';
 import { useResponsive } from '../../hooks/useResponsive';
+import { t } from '../../lib/i18n';
 import type { QuestionCardShellProps, QuestionSolveStatus } from './types';
 
 const STATUS_ICON: Record<QuestionSolveStatus, 'verified' | 'cancel' | 'help'> = {
@@ -29,22 +25,20 @@ const STATUS_STYLE = {
     unattempted: 'statusUnattempted',
 } as const;
 
-const DOT = {
-    easy: 'dotEasy',
-    medium: 'dotMedium',
-    hard: 'dotHard',
+const STATUS_TEXT_STYLE = {
+    correct: 'statusTextCorrect',
+    incorrect: 'statusTextIncorrect',
+    unattempted: 'statusTextUnattempted',
 } as const;
 
 function createStyles(colors: ColorPalette) {
-    const difficulty = difficultyColors(colors);
+    const chrome = questionChrome(colors);
     return {
-        wrapper: { gap: SPACING[3] },
-        wrapperTablet: { gap: 14 },
         card: {
-            backgroundColor: colors.surfaceContainerLowest,
-            borderRadius: BORDER_RADIUS.xl,
+            backgroundColor: chrome.cardBackground,
+            borderRadius: BORDER_RADIUS.card,
             borderWidth: 1,
-            borderColor: colors.outlineVariant,
+            borderColor: chrome.cardBorder,
             padding: SPACING[4],
             gap: SPACING[3],
         },
@@ -55,83 +49,99 @@ function createStyles(colors: ColorPalette) {
         header: {
             flexDirection: 'row' as const,
             alignItems: 'center' as const,
-            justifyContent: 'space-between' as const,
             gap: SPACING[2],
         },
-        headerLeft: {
+        counterGroup: {
             flex: 1,
             flexDirection: 'row' as const,
-            flexWrap: 'wrap' as const,
             alignItems: 'center' as const,
             gap: SPACING[2],
         },
-        qBadge: {
-            backgroundColor: colors.primaryFixed,
-            paddingHorizontal: 10,
-            paddingVertical: SPACING[1],
-            borderRadius: BORDER_RADIUS.lg,
-        },
-        qBadgeText: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
-            fontSize: 12,
-            fontWeight: '700' as const,
-            color: colors.primary,
-        },
-        pill: {
-            flexDirection: 'row' as const,
+        counterChip: {
+            minWidth: 28,
+            height: 28,
+            borderRadius: 9,
+            paddingHorizontal: 6,
+            backgroundColor: chrome.chipBackground,
             alignItems: 'center' as const,
-            gap: 6,
-            paddingHorizontal: SPACING[2],
-            paddingVertical: SPACING[1],
-            borderRadius: BORDER_RADIUS.lg,
-            maxWidth: 160,
+            justifyContent: 'center' as const,
         },
-        pillNeutral: { backgroundColor: colors.surfaceContainer },
-        pillSource: { backgroundColor: colors.tertiaryFixed },
-        pillHighYield: { backgroundColor: colors.primaryFixedDim },
-        pillText: {
+        counterChipText: {
+            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontSize: 12.5,
+            fontWeight: '700' as const,
+            color: chrome.chipText,
+        },
+        counterText: {
             fontFamily: TYPOGRAPHY.fontFamily.semibold,
-            fontSize: 11,
+            fontSize: 11.5,
             fontWeight: '600' as const,
+            letterSpacing: 1.1,
+            textTransform: 'uppercase' as const,
             color: colors.onSurfaceVariant,
         },
-        pillSourceText: { color: colors.tertiary },
-        pillHighYieldText: { color: colors.primary, fontWeight: '700' as const },
-        dot: { width: 6, height: 6, borderRadius: 3 },
-        dotEasy: { backgroundColor: difficulty.easy.text },
-        dotMedium: { backgroundColor: difficulty.medium.text },
-        dotHard: { backgroundColor: difficulty.hard.text },
+        sectionBand: {
+            flexDirection: 'row' as const,
+            backgroundColor: chrome.bandBackground,
+            borderRadius: BORDER_RADIUS.lg,
+            overflow: 'hidden' as const,
+        },
+        sectionAccent: {
+            width: 3,
+            alignSelf: 'stretch' as const,
+            backgroundColor: chrome.bandAccent,
+        },
+        sectionText: {
+            flex: 1,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: 13.5,
+            fontWeight: '600' as const,
+            color: chrome.bandText,
+            paddingHorizontal: 12,
+            paddingVertical: 9,
+        },
         stemSlot: { gap: SPACING[2] },
         contextSlot: { gap: SPACING[3] },
-        optionsSlot: { gap: SPACING[3] },
-        optionsSlotTablet: { gap: 14 },
+        /** Answer rows sit directly on the card as bordered pills — no tinted inset. */
+        well: {
+            gap: SPACING[2],
+        },
+        wellTablet: {
+            gap: 10,
+        },
         footer: {
             flexDirection: 'row' as const,
             alignItems: 'center' as const,
             justifyContent: 'space-between' as const,
-            paddingTop: SPACING[2],
+            gap: SPACING[2],
+            paddingTop: SPACING[3],
             borderTopWidth: 1,
             borderTopColor: colors.outlineVariant,
         },
-        footerOutside: {
-            flexDirection: 'row' as const,
-            alignItems: 'center' as const,
-            justifyContent: 'space-between' as const,
-            paddingHorizontal: SPACING[1],
-        },
-        statusRow: {
+        statusPill: {
             flexDirection: 'row' as const,
             alignItems: 'center' as const,
             gap: 6,
+            borderRadius: BORDER_RADIUS.full,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
         },
+        statusCorrect: { backgroundColor: colors.successLight },
+        statusIncorrect: { backgroundColor: colors.errorLight },
+        statusUnattempted: { backgroundColor: colors.surfaceContainer },
         statusText: {
             fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 12,
             fontWeight: '600' as const,
         },
-        statusCorrect: { color: colors.success },
-        statusIncorrect: { color: colors['weakness-red'] },
-        statusUnattempted: { color: colors.onSurfaceVariant },
+        statusTextCorrect: { color: colors.successText },
+        statusTextIncorrect: { color: colors.errorText },
+        statusTextUnattempted: { color: colors.onSurfaceVariant },
+        cta: {
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
+            gap: 2,
+        },
         ctaText: {
             fontFamily: TYPOGRAPHY.fontFamily.bold,
             fontSize: 13,
@@ -142,10 +152,10 @@ function createStyles(colors: ColorPalette) {
 }
 
 export const QuestionCardShell: React.FC<QuestionCardShellProps> = ({
-    questionNumber,
-    difficulty,
-    source,
-    tags,
+    counterNumber,
+    counterTotal,
+    headerAction,
+    sectionLabel,
     isBookmarked = false,
     showBookmark = false,
     onToggleBookmark,
@@ -161,99 +171,105 @@ export const QuestionCardShell: React.FC<QuestionCardShellProps> = ({
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
     const { isTablet } = useResponsive();
-    const highYield = tags?.some((tag) => tag.toLowerCase() === 'high_yield' || tag.toLowerCase() === 'high-yield');
     const statusColor =
         footerStatus === 'correct'
             ? colors.success
             : footerStatus === 'incorrect'
-                ? colors['weakness-red']
+                ? colors.error
                 : colors.onSurfaceVariant;
 
-    const footerContent = (
-        <>
-            {footerStatus ? (
-                <View style={styles.statusRow}>
-                    <MaterialIcon name={STATUS_ICON[footerStatus]} size={16} color={statusColor} />
-                    <Text style={[styles.statusText, styles[STATUS_STYLE[footerStatus]]]}>
-                        {STATUS_LABEL[footerStatus]}
-                        {footerStatus === 'correct' && footerMarks != null ? ` (+${footerMarks})` : ''}
-                    </Text>
-                </View>
-            ) : (
-                <View />
-            )}
-            {footerCtaLabel && onFooterCta ? (
-                <Pressable onPress={onFooterCta} hitSlop={6} accessibilityRole="button">
-                    <Text style={styles.ctaText}>{footerCtaLabel}</Text>
-                </Pressable>
-            ) : null}
-        </>
-    );
+    const headerRight = showBookmark ? (
+        <Pressable
+            onPress={onToggleBookmark}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={isBookmarked ? 'Remove bookmark' : 'Bookmark question'}
+        >
+            <MaterialIcon
+                name={isBookmarked ? 'bookmark' : 'bookmark_border'}
+                size={22}
+                color={isBookmarked ? colors['warning-amber'] : colors.outline}
+                filled={isBookmarked}
+            />
+        </Pressable>
+    ) : headerAction ? (
+        headerAction
+    ) : null;
 
-    const hasOptions = children != null;
+    const counterText =
+        counterTotal != null ? t('question.ofTotal', { total: counterTotal }) : null;
+    const counterA11y =
+        counterNumber != null
+            ? t('question.counterA11y', {
+                  current: counterNumber,
+                  total: counterTotal ?? counterNumber,
+              })
+            : (counterText ?? undefined);
+    const hasCounter = counterNumber != null || !!counterText;
 
     return (
-        <View style={[styles.wrapper, isTablet ? styles.wrapperTablet : null]}>
-            <View style={[styles.card, isTablet ? styles.cardTablet : null]}>
+        <View style={[styles.card, isTablet ? styles.cardTablet : null]}>
+            {hasCounter || headerRight ? (
                 <View style={styles.header}>
-                    <View style={styles.headerLeft}>
-                        {questionNumber != null && (
-                            <View style={styles.qBadge}>
-                                <Text style={styles.qBadgeText}>Q{questionNumber}</Text>
-                            </View>
-                        )}
-                        {difficulty ? (
-                            <View style={[styles.pill, styles.pillNeutral]}>
-                                <View style={[styles.dot, styles[DOT[difficulty]]]} />
-                                <Text style={styles.pillText}>
-                                    {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-                                </Text>
-                            </View>
-                        ) : null}
-                        {source ? (
-                            <View style={[styles.pill, styles.pillSource]}>
-                                <Text style={[styles.pillText, styles.pillSourceText]} numberOfLines={1}>
-                                    {source}
-                                </Text>
-                            </View>
-                        ) : null}
-                        {highYield ? (
-                            <View style={[styles.pill, styles.pillHighYield]}>
-                                <Text style={[styles.pillText, styles.pillHighYieldText]}>High Yield</Text>
-                            </View>
-                        ) : null}
-                    </View>
-                    {showBookmark ? (
-                        <Pressable
-                            onPress={onToggleBookmark}
-                            hitSlop={8}
-                            accessibilityRole="button"
-                            accessibilityLabel={isBookmarked ? 'Remove bookmark' : 'Bookmark question'}
+                    {hasCounter ? (
+                        <View
+                            style={styles.counterGroup}
+                            accessible
+                            accessibilityLabel={counterA11y}
                         >
-                            <MaterialIcon
-                                name={isBookmarked ? 'bookmark' : 'bookmark_border'}
-                                size={22}
-                                color={isBookmarked ? colors['warning-amber'] : colors.outline}
-                                filled={isBookmarked}
-                            />
+                            {counterNumber != null ? (
+                                <View style={styles.counterChip}>
+                                    <Text style={styles.counterChipText}>
+                                        {String(counterNumber).padStart(2, '0')}
+                                    </Text>
+                                </View>
+                            ) : null}
+                            {counterText ? (
+                                <Text style={styles.counterText}>{counterText}</Text>
+                            ) : null}
+                        </View>
+                    ) : (
+                        <View style={styles.counterGroup} />
+                    )}
+                    {headerRight}
+                </View>
+            ) : null}
+
+            {sectionLabel ? (
+                <View style={styles.sectionBand}>
+                    <View style={styles.sectionAccent} />
+                    <Text style={styles.sectionText}>{sectionLabel}</Text>
+                </View>
+            ) : null}
+
+            {stem != null ? <View style={styles.stemSlot}>{stem}</View> : null}
+            {context != null ? <View style={styles.contextSlot}>{context}</View> : null}
+            {children != null ? (
+                <View style={[styles.well, isTablet ? styles.wellTablet : null]}>{children}</View>
+            ) : null}
+
+            {showFooter ? (
+                <View style={styles.footer}>
+                    {footerStatus ? (
+                        <View style={[styles.statusPill, styles[STATUS_STYLE[footerStatus]]]}>
+                            <MaterialIcon name={STATUS_ICON[footerStatus]} size={14} color={statusColor} />
+                            <Text style={[styles.statusText, styles[STATUS_TEXT_STYLE[footerStatus]]]}>
+                                {STATUS_LABEL[footerStatus]}
+                                {footerStatus === 'correct' && footerMarks != null ? ` (+${footerMarks})` : ''}
+                            </Text>
+                        </View>
+                    ) : (
+                        <View />
+                    )}
+                    {footerCtaLabel && onFooterCta ? (
+                        <Pressable onPress={onFooterCta} hitSlop={6} accessibilityRole="button">
+                            <View style={styles.cta}>
+                                <Text style={styles.ctaText}>{footerCtaLabel}</Text>
+                                <MaterialIcon name="chevron_right" size={16} color={colors.primary} />
+                            </View>
                         </Pressable>
                     ) : null}
                 </View>
-
-                {stem != null ? <View style={styles.stemSlot}>{stem}</View> : null}
-                {context != null ? <View style={styles.contextSlot}>{context}</View> : null}
-
-                {showFooter && !hasOptions ? <View style={styles.footer}>{footerContent}</View> : null}
-            </View>
-
-            {hasOptions ? (
-                <View style={[styles.optionsSlot, isTablet ? styles.optionsSlotTablet : null]}>
-                    {children}
-                </View>
-            ) : null}
-
-            {showFooter && hasOptions ? (
-                <View style={styles.footerOutside}>{footerContent}</View>
             ) : null}
         </View>
     );

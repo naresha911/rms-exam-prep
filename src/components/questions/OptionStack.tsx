@@ -1,9 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
-import { SPACING } from '../../constants';
-import { useColors, useThemedStyles, type ColorPalette } from '../../theme';
-import { AnswerCard, type AnswerState } from '../practice/AnswerCard';
-import { MaterialIcon } from '../ui/MaterialIcon';
+import { useThemedStyles, type ColorPalette } from '../../theme';
+import { OptionRow, type OptionRowState } from './OptionRow';
 import { useResponsive } from '../../hooks/useResponsive';
 import type { QuestionOption } from '../../types';
 import type { QuestionUiMode, SelectionMode } from './types';
@@ -18,17 +16,16 @@ export interface OptionStackProps {
     revealed?: boolean;
     browseRevealed?: boolean;
     onSelect?: (value: string) => void;
-    showRadio?: boolean;
 }
 
 function createStyles(_colors: ColorPalette) {
     return {
-        stack: { gap: SPACING[3] },
-        stackTablet: { gap: 14 },
+        stack: { gap: 8 },
+        stackTablet: { gap: 10 },
     };
 }
 
-/** Full-width rows. The radio sits inside the row so it does not cover the answer. */
+/** Full-width rows inside the question card's answer well. */
 export const OptionStack: React.FC<OptionStackProps> = ({
     options,
     selectedValue,
@@ -37,10 +34,8 @@ export const OptionStack: React.FC<OptionStackProps> = ({
     revealed,
     browseRevealed,
     onSelect,
-    showRadio = true,
 }) => {
     const styles = useThemedStyles(createStyles);
-    const colors = useColors();
     const { isTablet } = useResponsive();
     const sorted = [...options].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
 
@@ -55,17 +50,13 @@ export const OptionStack: React.FC<OptionStackProps> = ({
                     mode,
                     revealed,
                     browseRevealed,
-                }) as AnswerState;
+                }) as OptionRowState;
                 const interactive = mode !== 'browse' || !!onSelect;
                 const disabledReveal =
                     (mode === 'browse' && browseRevealed) || (mode !== 'browse' && !!revealed);
-                const isSelected = selectedValue === value;
-                const showResultIcon = state === 'correct' || state === 'incorrect';
-                const showSelectionRadio =
-                    showRadio && !showResultIcon && state !== 'disabled' && mode !== 'browse';
 
                 return (
-                    <AnswerCard
+                    <OptionRow
                         key={option.id}
                         label={option.option_key.toUpperCase()}
                         text={option.option_text || ''}
@@ -74,16 +65,6 @@ export const OptionStack: React.FC<OptionStackProps> = ({
                             interactive && !disabledReveal && onSelect
                                 ? () => onSelect(value)
                                 : undefined
-                        }
-                        trailing={
-                            showSelectionRadio ? (
-                                <MaterialIcon
-                                    name={isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}
-                                    size={22}
-                                    color={isSelected ? colors.primary : colors.outline}
-                                    filled={isSelected}
-                                />
-                            ) : null
                         }
                     />
                 );

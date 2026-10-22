@@ -15,7 +15,7 @@ export function logQuestionPresentation(params: {
         presentationHints?: QuestionRenderItem['presentationHints'];
     };
     mode?: QuestionUiMode;
-    presentation?: QuestionPresentation | 'legacy_AnswerCard';
+    presentation?: QuestionPresentation;
     selectionMode?: string;
     questionNumber?: number;
     extra?: Record<string, unknown>;

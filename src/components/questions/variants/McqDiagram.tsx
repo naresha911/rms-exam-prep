@@ -3,7 +3,7 @@ import { Image, Text, View } from 'react-native';
 import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../../constants';
 import { useThemedStyles, type ColorPalette } from '../../../theme';
 import { QuestionCardShell } from '../QuestionCardShell';
-import { OptionGrid } from '../OptionGrid';
+import { OptionStack } from '../OptionStack';
 import { StemText } from '../StemText';
 import { shellFromShared } from '../shellHelpers';
 import type { SharedQuestionProps } from '../types';
@@ -11,7 +11,7 @@ import type { SharedQuestionProps } from '../types';
 function createStyles(colors: ColorPalette) {
     return {
         well: {
-            backgroundColor: colors.surfaceContainerLow,
+            backgroundColor: colors.surfaceContainerHigh,
             borderRadius: BORDER_RADIUS.xl,
             padding: SPACING[3],
             alignItems: 'center' as const,
@@ -38,7 +38,7 @@ function createStyles(colors: ColorPalette) {
     };
 }
 
-/** Shared diagram on a light plate, then a 2×2 answer grid. */
+/** Shared diagram on a light plate, then full-width answer rows. */
 export const McqDiagram: React.FC<SharedQuestionProps> = (props) => {
     const styles = useThemedStyles(createStyles);
     const shell = shellFromShared(props);
@@ -64,7 +64,7 @@ export const McqDiagram: React.FC<SharedQuestionProps> = (props) => {
                 </View>
             }
         >
-            <OptionGrid
+            <OptionStack
                 options={props.question.options}
                 selectedValue={props.selectedValue}
                 selectionMode={props.selectionMode}

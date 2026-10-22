@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../../constants';
 import { useColors, useThemedStyles, type ColorPalette } from '../../../theme';
 import { QuestionCardShell } from '../QuestionCardShell';
-import { OptionGrid } from '../OptionGrid';
+import { OptionStack } from '../OptionStack';
 import { StemText } from '../StemText';
 import { LatexText } from '../LatexText';
 import { shellFromShared } from '../shellHelpers';
@@ -20,7 +20,7 @@ function FractionView({ node }: { node: FractionNode }) {
     );
 }
 
-/** Equation or fraction as the focus, with centered 2×2 answers. */
+/** Equation or fraction as the focus, with full-width answer rows. */
 export const McqEquation: React.FC<SharedQuestionProps> = (props) => {
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
@@ -50,15 +50,15 @@ export const McqEquation: React.FC<SharedQuestionProps> = (props) => {
                             content={equation?.text || props.question.question_text || ''}
                             color={colors.onSurface}
                             fontSize={20}
-                            fontFamily={TYPOGRAPHY.fontFamily.bold}
-                            fontWeight="700"
+                            fontFamily={TYPOGRAPHY.fontFamily.semibold}
+                            fontWeight="600"
                             align="center"
                         />
                     )}
                 </View>
             }
         >
-            <OptionGrid
+            <OptionStack
                 options={props.question.options}
                 selectedValue={props.selectedValue}
                 selectionMode={props.selectionMode}
@@ -66,7 +66,6 @@ export const McqEquation: React.FC<SharedQuestionProps> = (props) => {
                 revealed={props.revealed}
                 browseRevealed={browseRevealed}
                 onSelect={props.onSelect}
-                layoutMode="equation"
             />
         </QuestionCardShell>
     );
@@ -75,7 +74,7 @@ export const McqEquation: React.FC<SharedQuestionProps> = (props) => {
 function createStyles(colors: ColorPalette) {
     return {
         equationBox: {
-            backgroundColor: colors.surfaceContainerLow,
+            backgroundColor: colors.surfaceContainerHigh,
             borderRadius: BORDER_RADIUS.xl,
             padding: SPACING[4],
             alignItems: 'center' as const,
@@ -92,9 +91,9 @@ function createStyles(colors: ColorPalette) {
             minWidth: 40,
         },
         fracPart: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 18,
-            fontWeight: '700' as const,
+            fontWeight: '600' as const,
             color: colors.onSurface,
         },
         fracRule: {
@@ -109,9 +108,9 @@ function createStyles(colors: ColorPalette) {
             color: colors.onSurfaceVariant,
         },
         unknown: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 24,
-            fontWeight: '700' as const,
+            fontWeight: '600' as const,
             color: colors.tertiary,
         },
     };

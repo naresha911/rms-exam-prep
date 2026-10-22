@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Button } from "../../components/ui/Button";
+import { NavArrowButton } from "../../components/ui/NavArrowButton";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { GradientProgressBar } from "../../components/shared/GradientProgressBar";
@@ -25,6 +26,7 @@ interface TestQuestion {
     question_type?: "mcq_single" | "true_false" | "assertion_reason" | "matching" | "mcq_multi" | "fill_blank" | "short_answer" | "comprehension";
     has_diagram?: boolean;
     diagram_path?: string | null;
+    section?: string | null;
     options: {
         id: string;
         option_key: string;
@@ -347,6 +349,57 @@ export default function TestSessionScreen() {
     }
 
     const selectedOptionId = answers[currentQuestion.id];
+    const isMarked = flagged.has(currentQuestion.id);
+
+    const resolveSectionLabel = (index: number): string | undefined => {
+        if (testType === "sectional") return sectionName || undefined;
+
+        // Prefer the question's real section (from the test's DB sections) so the band
+        // shows the actual subject instead of a position-based guess.
+        const realSection = questions[index]?.section;
+        if (realSection) {
+            const order: string[] = [];
+            for (const q of questions) {
+                if (q.section && !order.includes(q.section)) order.push(q.section);
+            }
+            const pos = order.indexOf(realSection);
+            return pos >= 0 ? `Section ${String.fromCharCode(65 + pos)}: ${realSection}` : realSection;
+        }
+
+        if (testType === "paper" || !questions.length) return undefined;
+        const sections = examInfo.sections;
+        const totalSectionQuestions = sections.reduce((sum, section) => sum + section.questions, 0);
+        if (!totalSectionQuestions) return undefined;
+        let acc = 0;
+        for (let i = 0; i < sections.length; i++) {
+            acc += Math.round((sections[i].questions / totalSectionQuestions) * questions.length);
+            if (index < acc) {
+                return `Section ${String.fromCharCode(65 + i)}: ${sections[i].name}`;
+            }
+        }
+        return undefined;
+    };
+
+    const markPill = (
+        <Pressable
+            onPress={handleToggleFlag}
+            style={({ pressed }) => [
+                styles.markPill,
+                isMarked && styles.markPillActive,
+                pressed && layout.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={isMarked ? "Remove mark for review" : "Mark for review"}
+        >
+            <MaterialIcon
+                name="flag"
+                size={16}
+                color={isMarked ? colors.warning : colors.onSurfaceVariant}
+                filled={isMarked}
+            />
+            <Text style={[styles.markPillText, isMarked && styles.markPillTextActive]}>Mark</Text>
+        </Pressable>
+    );
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -357,7 +410,7 @@ export default function TestSessionScreen() {
                     style={({ pressed }) => [styles.headerBtn, pressed && layout.pressed]}
                     accessibilityLabel="Exit test"
                 >
-                    <MaterialIcon name="close" size={22} color={colors.onSurface} />
+                    <MaterialIcon name="close" size={22} color={colors.onSessionHeader} />
                 </Pressable>
 
                 <Text style={styles.headerTitle} numberOfLines={1}>
@@ -372,7 +425,7 @@ export default function TestSessionScreen() {
                     <MaterialIcon
                         name="timer"
                         size={16}
-                        color={isLowTime ? colors.error : colors.onSurfaceVariant}
+                        color={isLowTime ? colors.error : colors['warning-amber']}
                     />
                     <Text style={[
                         styles.timerText,
@@ -396,25 +449,13 @@ export default function TestSessionScreen() {
                         keyboardShouldPersistTaps="handled"
                     >
                         <View style={styles.contentColumn}>
-                            {/* Progress section */}
+                            {/* Progress bar */}
                             <View style={styles.progressSection}>
-                                <View style={styles.progressRow}>
-                                    <Text style={styles.questionCount}>
-                                        Question {currentIndex + 1} of {questions.length}
-                                    </Text>
-                                    <Pressable
-                                        onPress={handleToggleFlag}
-                                        style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
-                                    >
-                                        <MaterialIcon
-                                            name="flag"
-                                            size={20}
-                                            color={flagged.has(currentQuestion.id) ? colors.warning : colors.onSurfaceVariant}
-                                            filled={flagged.has(currentQuestion.id)}
-                                        />
-                                    </Pressable>
-                                </View>
-                                <GradientProgressBar progress={progress} height={6} style={styles.progressBar} />
+                                <GradientProgressBar
+                                    progress={progress}
+                                    height={6}
+                                    style={styles.progressBar}
+                                />
                             </View>
 
                             {/* Question presentation — shared variants via QuestionRenderer */}
@@ -427,6 +468,9 @@ export default function TestSessionScreen() {
                                     revealed={!!revealedById[currentQuestion.id]}
                                     onSelect={handleSelectOption}
                                     questionNumber={currentIndex + 1}
+                                    counterTotal={questions.length}
+                                    headerAction={markPill}
+                                    sectionLabel={resolveSectionLabel(currentIndex)}
                                     showBookmark={false}
                                     showFooter={false}
                                     debugSource="TestSession"
@@ -455,27 +499,24 @@ export default function TestSessionScreen() {
                     {/* Stitch-style sticky bottom nav */}
                     <View style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, SPACING[4]) }]}>
                         <View style={styles.bottomNavInner}>
-                            <Button
-                                title="Previous"
-                                variant="outline"
+                            <NavArrowButton
+                                direction="back"
                                 onPress={handlePrev}
                                 disabled={currentIndex === 0}
-                                style={styles.fill}
                             />
-                            <View style={styles.navGap} />
                             {currentIndex < questions.length - 1 ? (
-                                <Button
-                                    title="Next"
-                                    onPress={handleNext}
-                                    style={styles.fill}
-                                    iconRight="arrow_forward"
-                                />
+                                <NavArrowButton direction="forward" onPress={handleNext} />
                             ) : (
-                                <Button
-                                    title="Submit"
+                                <Pressable
                                     onPress={() => setShowSubmitConfirm(true)}
-                                    style={styles.fill}
-                                />
+                                    style={({ pressed }) => [
+                                        styles.submitPill,
+                                        pressed && layout.pressed,
+                                    ]}
+                                    accessibilityRole="button"
+                                >
+                                    <Text style={styles.submitPillText}>Submit</Text>
+                                </Pressable>
                             )}
                         </View>
                     </View>
@@ -535,9 +576,7 @@ function createStyles(colors: ColorPalette) {
             justifyContent: "space-between" as const,
             paddingHorizontal: SPACING[4],
             height: 56,
-            backgroundColor: colors.surface,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.outlineVariant,
+            backgroundColor: colors.sessionHeader,
         },
         headerTablet: {
             paddingHorizontal: SPACING[6],
@@ -581,7 +620,7 @@ function createStyles(colors: ColorPalette) {
             textAlign: "center" as const,
             fontFamily: TYPOGRAPHY.fontFamily.bold,
             fontSize: TYPOGRAPHY.fontSize.lg,
-            color: colors.onSurface,
+            color: colors.onSessionHeader,
             fontWeight: TYPOGRAPHY.fontWeight.bold,
             marginHorizontal: SPACING[2],
         },
@@ -589,7 +628,7 @@ function createStyles(colors: ColorPalette) {
             flexDirection: "row" as const,
             alignItems: "center" as const,
             gap: 4,
-            backgroundColor: colors.surfaceContainerHigh,
+            backgroundColor: colors.sessionHeaderPill,
             paddingHorizontal: SPACING[3],
             paddingVertical: SPACING[2],
             borderRadius: BORDER_RADIUS.full,
@@ -600,7 +639,7 @@ function createStyles(colors: ColorPalette) {
         timerText: {
             fontFamily: TYPOGRAPHY.fontFamily.bold,
             fontSize: TYPOGRAPHY.fontSize.sm,
-            color: colors.onSurfaceVariant,
+            color: colors.onSessionHeader,
             fontWeight: TYPOGRAPHY.fontWeight.bold,
         },
         timerTextLow: {
@@ -620,28 +659,33 @@ function createStyles(colors: ColorPalette) {
         progressSection: {
             marginBottom: SPACING[5],
         },
-        progressRow: {
-            flexDirection: "row" as const,
-            justifyContent: "space-between" as const,
-            alignItems: "center" as const,
-            marginBottom: SPACING[2],
-        },
-        questionCount: {
-            fontFamily: TYPOGRAPHY.fontFamily.medium,
-            fontSize: TYPOGRAPHY.fontSize.sm,
-            color: colors.onSurfaceVariant,
-            fontWeight: TYPOGRAPHY.fontWeight.semibold,
-        },
-        flagBtn: {
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            alignItems: "center" as const,
-            justifyContent: "center" as const,
-        },
         progressBar: {
             borderRadius: BORDER_RADIUS.full,
             overflow: "hidden" as const,
+        },
+        markPill: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: 6,
+            paddingHorizontal: SPACING[3],
+            paddingVertical: 7,
+            borderRadius: BORDER_RADIUS.full,
+            borderWidth: 1,
+            borderColor: colors.outlineVariant,
+            backgroundColor: colors.surfaceContainerLowest,
+        },
+        markPillActive: {
+            backgroundColor: colors.warningLight,
+            borderColor: colors.warningLight,
+        },
+        markPillText: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: 13,
+            fontWeight: TYPOGRAPHY.fontWeight.semibold,
+            color: colors.onSurfaceVariant,
+        },
+        markPillTextActive: {
+            color: colors.warningText,
         },
         optionsContainer: {
             gap: SPACING[3],
@@ -652,15 +696,29 @@ function createStyles(colors: ColorPalette) {
         bottomNav: {
             paddingHorizontal: SPACING[4],
             paddingTop: SPACING[4],
-            backgroundColor: colors.surface,
-            borderTopWidth: 1,
-            borderTopColor: colors.outlineVariant,
+            backgroundColor: colors.background,
         },
         bottomNavInner: {
             flexDirection: "row" as const,
+            alignItems: "center" as const,
+            justifyContent: "space-between" as const,
             width: "100%" as const,
             maxWidth: 720,
             alignSelf: "center" as const,
+        },
+        submitPill: {
+            height: 44,
+            paddingHorizontal: SPACING[6],
+            borderRadius: BORDER_RADIUS.full,
+            backgroundColor: colors.primary,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        submitPillText: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: "600" as const,
+            color: colors.onPrimary,
         },
         fill: { flex: 1 },
         navGap: { width: SPACING[3] },

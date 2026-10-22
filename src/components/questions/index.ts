@@ -31,10 +31,9 @@ export {
 export { paperQuestionToRenderItem, testQuestionToRenderItem } from './adapters';
 export type { MinimalTestQuestion } from './adapters';
 
-export { deriveOptionState, shouldShowCorrectCheck } from './optionState';
+export { deriveOptionState } from './optionState';
 
 export { QuestionCardShell } from './QuestionCardShell';
-export { OptionGrid } from './OptionGrid';
 export { OptionStack } from './OptionStack';
 export { FigureOptionTile } from './FigureOptionTile';
 export { StemText } from './StemText';

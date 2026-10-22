@@ -24,7 +24,7 @@ function parseAssertionReason(stem: string, assertion?: string, reason?: string)
 function createStyles(colors: ColorPalette) {
     return {
         well: {
-            backgroundColor: colors.surfaceContainerLow,
+            backgroundColor: colors.surfaceContainerHigh,
             borderRadius: BORDER_RADIUS.xl,
             padding: SPACING[3],
             gap: SPACING[3],
@@ -52,8 +52,8 @@ function createStyles(colors: ColorPalette) {
         chipRText: { color: colors.onTertiaryContainer },
         copy: { flex: 1, gap: 4 },
         label: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
-            fontWeight: '700' as const,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontWeight: '600' as const,
             fontSize: 12,
             color: colors.onSurfaceVariant,
         },

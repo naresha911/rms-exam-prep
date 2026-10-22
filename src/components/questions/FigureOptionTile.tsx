@@ -13,7 +13,7 @@ import { MaterialIcon } from '../ui/MaterialIcon';
 import { LatexText } from './LatexText';
 import type { QuestionOption } from '../../types';
 import type { QuestionUiMode, SelectionMode } from './types';
-import { deriveOptionState, shouldShowCorrectCheck } from './optionState';
+import { deriveOptionState } from './optionState';
 import { getOptionValue } from './resolvePresentation';
 
 export interface FigureOptionTileProps {
@@ -31,6 +31,7 @@ function createStyles(colors: ColorPalette) {
     const surface = (state: OptionVisualState) => ({
         backgroundColor: chrome[state].background,
         borderColor: chrome[state].border,
+        borderWidth: chrome[state].borderWidth,
     });
     const letter = (state: OptionVisualState) => ({
         backgroundColor: chrome[state].letterBackground,
@@ -41,17 +42,16 @@ function createStyles(colors: ColorPalette) {
         tile: {
             flex: 1,
             minHeight: 112,
-            borderWidth: 2,
-            borderRadius: BORDER_RADIUS.xl,
+            borderRadius: 14,
             padding: SPACING[2],
             alignItems: 'center' as const,
             gap: SPACING[2],
         },
         letter: {
             alignSelf: 'flex-start' as const,
-            width: 28,
-            height: 28,
-            borderRadius: 14,
+            width: 26,
+            height: 26,
+            borderRadius: 8,
             alignItems: 'center' as const,
             justifyContent: 'center' as const,
         },
@@ -131,6 +131,7 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
 }) => {
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
+    const chrome = optionChrome(colors);
     const value = getOptionValue(option, selectionMode);
     const state = deriveOptionState({
         option,
@@ -142,7 +143,6 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
     });
     const disabledReveal =
         (mode === 'browse' && browseRevealed) || (mode !== 'browse' && !!revealed);
-    const showCheck = shouldShowCorrectCheck(option, mode, revealed, browseRevealed);
 
     return (
         <Pressable
@@ -153,7 +153,11 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
                 pressed && !disabledReveal ? layout.pressed : null,
             ]}
             accessibilityRole="button"
-            accessibilityState={{ selected: state === 'selected' }}
+            accessibilityLabel={`${option.option_key.toUpperCase()}. ${option.option_text || ''}`}
+            accessibilityState={{
+                selected: state === 'selected',
+                disabled: state === 'disabled',
+            }}
         >
             <View style={[styles.letter, styles[LETTER[state]]]}>
                 <Text style={[styles.letterText, styles[LETTER_TEXT[state]]]}>
@@ -173,9 +177,13 @@ export const FigureOptionTile: React.FC<FigureOptionTileProps> = ({
                     />
                 )}
             </View>
-            {showCheck ? (
+            {state === 'correct' ? (
                 <View style={styles.check}>
-                    <MaterialIcon name="check_circle" size={18} color={colors.success} filled />
+                    <MaterialIcon name="check_circle" size={18} color={chrome.correct.border} filled />
+                </View>
+            ) : state === 'incorrect' ? (
+                <View style={styles.check}>
+                    <MaterialIcon name="cancel" size={18} color={chrome.incorrect.border} filled />
                 </View>
             ) : null}
         </Pressable>

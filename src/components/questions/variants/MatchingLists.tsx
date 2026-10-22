@@ -14,7 +14,7 @@ function createStyles(colors: ColorPalette) {
         matrix: {
             flexDirection: 'row' as const,
             gap: SPACING[2],
-            backgroundColor: colors.surfaceContainerLow,
+            backgroundColor: colors.surfaceContainerHigh,
             borderRadius: BORDER_RADIUS.xl,
             padding: SPACING[3],
         },
@@ -23,9 +23,9 @@ function createStyles(colors: ColorPalette) {
             gap: SPACING[2],
         },
         columnLabel: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 12,
-            fontWeight: '700' as const,
+            fontWeight: '600' as const,
             color: colors.onSurfaceVariant,
             marginBottom: SPACING[1],
         },
@@ -38,9 +38,9 @@ function createStyles(colors: ColorPalette) {
             gap: 4,
         },
         miniKey: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 12,
-            fontWeight: '700' as const,
+            fontWeight: '600' as const,
             color: colors.primary,
         },
     };

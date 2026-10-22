@@ -60,7 +60,7 @@ function createStyles(colors: ColorPalette) {
     return {
         wrap: { gap: SPACING[4] },
         passagePanel: {
-            backgroundColor: colors.surfaceContainerLow,
+            backgroundColor: colors.surfaceContainerHigh,
             borderRadius: BORDER_RADIUS.xl,
             borderWidth: 1,
             borderColor: colors.outlineVariant,
@@ -68,9 +68,9 @@ function createStyles(colors: ColorPalette) {
             gap: SPACING[2],
         },
         passageLabel: {
-            fontFamily: TYPOGRAPHY.fontFamily.bold,
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
             fontSize: 12,
-            fontWeight: '700' as const,
+            fontWeight: '600' as const,
             color: colors.primary,
             textTransform: 'uppercase' as const,
             letterSpacing: 0.6,

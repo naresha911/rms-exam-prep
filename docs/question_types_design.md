@@ -122,25 +122,53 @@ All leaf variants share this chrome. Reference **token names**, not hex.
 
 | Piece | Behavior |
 |-------|----------|
-| **Card shell** | `surface-container-lowest`, light `shadow-sm`, border `outline-variant` / `surface-container`, padding 16px, column gap ~10–12px |
-| **Header row** | Q# badge + difficulty pill (dot: `success-green` / `warning-amber` / `weakness-red`) + optional source/tag chips + bookmark |
-| **Stem** | ~15px semibold `on-surface` |
-| **Body slot** | Variant-specific (options, equation, diagram, A/R, figures, lists) |
-| **Footer** | Status (Correct / Incorrect / Unattempted) + secondary CTA (Solution / Solve Now / Hint / Explain) |
+| **Card shell** | One card contains counter, section band, stem, context, answer well, and footer — `surface-container-lowest`, border `outline-variant`, radius 20, padding 16px (20 on tablet), column gap 12px |
+| **Header row** | Zero-padded numeral chip (`01`, `primary-fixed` bg, radius 9) + uppercase tracked total (`OF 125`) + optional right action (Mark pill / bookmark) |
+| **Section band** | Optional: `primary-fixed` bg, 3px `primary` left accent, radius 12, `primary` text 13.5px semibold |
+| **Stem** | 17px bold `on-surface` (19px on tablet); drops to semibold once the stem exceeds 140 characters so long passages stay readable |
+| **Body slot** | Variant-specific (equation/diagram/A/R context wells stay in the card) |
+| **Answer well** | Options render inside a tinted inset panel — `surface-container-low`, radius 16, padding 8 (10 on tablet), gap 8 — so the prompt and the answers read as separate zones |
+| **Footer** | Status pill (icon + label on a tinted round pill) + secondary CTA (primary text + chevron) |
 | **Option states** | `default` \| `selected` \| `correct` \| `incorrect` \| `disabled` — align with `ANSWER_STATES` |
 
-### Header chip recipes
+### Surface ladder
 
-| Chip | Tokens |
+The card and its contents form a deliberate three-tone ladder so nothing reads as an undifferentiated slab:
+
+| Layer | Token | Light | Dark |
+|-------|-------|-------|------|
+| Card | `surface-container-lowest` | `#ffffff` | `#161c2c` |
+| Answer well | `surface-container-low` | `#f0f3ff` | `#1c2436` |
+| Option row | `option-surface` + 1px `outline-variant` border | `#ffffff` | `#242c40` |
+| Content well (equation / diagram / A-R / problem figures / passage) | `surface-container-high` | `#dee8ff` | `#2c354c` |
+
+Content wells use `surface-container-high` so they never share a tone with the answer well.
+
+> **Why `option-surface` is its own token.** Material's surface ladder is inverted between appearances: `surface-container-lowest` is the *lightest* surface in light mode but a *dark* one in dark mode. Using it for the option tile would make tiles sit on the well in light mode and sink into it in dark mode. `option-surface` pins the tile to a tone that is always lighter than the well in both appearances.
+
+### Selection affordance
+
+There is **no radio control**. Selection is carried by three simultaneous changes on the row: fill (`primary-fixed`), border weight (2px `primary`), and an inverted filled letter badge. The row therefore reads as chosen at a glance without borrowing another app's radio-and-circle pattern.
+
+### Header recipes
+
+| Piece | Tokens |
 |------|--------|
-| Q# (filled) | `bg-primary` + `on-primary`, or `bg-primary-fixed` + `primary` |
-| Easy | Dot `success-green`; pill `surface-container` / `surface-container-high` |
-| Medium | Dot `warning-amber`; may use `secondary-fixed` |
-| Hard | Dot `weakness-red`; may use `error-container` |
-| Source (e.g. AISSEE 2024) | `tertiary-fixed` + tertiary text, or muted `surface-container` |
-| High Yield | `primary-fixed-dim` tint + bold `primary` |
+| Counter label | 12px bold, `letter-spacing 1.2`, `on-surface-variant`, uppercase |
+| Mark pill (unmarked) | Outline `outline-variant`, `on-surface-variant` flag icon + "Mark" |
+| Mark pill (marked) | `warning-light` bg, `warning-amber` filled flag, `warning-text` label |
 | Bookmark on | Filled icon, `warning-amber` |
 | Bookmark off | Outline icon, `outline-variant` |
+
+### Session header (mock / practice / paper)
+
+| Token | Light | Dark |
+|-------|-------|------|
+| `session-header` | `#111C2D` | `#161C2C` |
+| `on-session-header` | `#F9F9FF` | `#E8EDF8` |
+| `session-header-pill` | `rgba(255,255,255,0.14)` | `rgba(255,255,255,0.10)` |
+
+Timer pill uses `session-header-pill`; its icon is `warning-amber` (→ `error` under 5 minutes).
 
 ### List-card compactness (browse / feed)
 
@@ -153,7 +181,7 @@ From Math Mock #01:
 ### Responsive layout (phone + tablet)
 
 - **Phone (< 768dp):** page padding 16, content capped at 640; question card + full-width option rows.
-- **Tablet portrait (≥ 768dp):** page padding 24, content capped at 720; stem 19px, option text 17px, option row min height 64, letter badge 40.
+- **Tablet portrait (≥ 768dp):** page padding 24, content capped at 720; stem 20px, option text 17px, option row min height 60, letter badge 40.
 - **Wide (≥ 1024dp):** two-pane exam layout — main column capped at ~760 with a 300px question-palette rail on the right (mock tests). Practice and papers keep the centered column.
 - **Bottom bars:** always pad with `Math.max(insets.bottom, SPACING[4])` so Previous/Next/Submit clear the Android navigation bar.
 - `app.json` remains portrait-locked; the two-pane rail activates from available width, not orientation.
@@ -174,8 +202,8 @@ From Math Mock #01:
 
 | Variant ID | Source mock | `QuestionType` | Trigger / content shape |
 |------------|-------------|----------------|-------------------------|
-| `mcq_text_grid` | Math list Q1 | `mcq_single`, `true_false` | Plain text options; 2×2 pills |
-| `mcq_text_stack` | Intelligence Q2/Q4 | `mcq_single` | Longer text / codes; full-width radio rows |
+| `mcq_text_grid` | Math list Q1 | `mcq_single`, `true_false` | Plain text options; full-width rows |
+| `mcq_text_stack` | Intelligence Q2/Q4 | `mcq_single` | Longer text / codes; full-width rows |
 | `mcq_equation` | Math #02 Q1 | `mcq_single` | Stem equation box; fraction option nodes |
 | `mcq_inline_math` | Math #02 Q4 | `mcq_single` | Stem mono chips; 2×2 numeric options |
 | `mcq_diagram` | Math #02 Q2 | `mcq_single` | `has_diagram` / `diagram_path`; 2×2 letter+text |
@@ -201,11 +229,11 @@ From Math Mock #01:
 
 **Option styling:**
 
-- Default: `surface-container-low` row, 1.5px `outline-variant` border, letter badge `surface-container-high`, text `on-surface`, trailing unchecked radio.
-- Selected: `primary-fixed` row, `primary` border, filled `primary` letter badge, filled radio.
+- Options live **inside the question card's answer well** as full-width rows.
+- Default: `option-surface` row, 1px `outline-variant` border, letter badge `surface-container-high` (30px, radius 9), text `on-surface` 15px semibold. No radio — selection is fill-only.
+- Selected: `primary-fixed` row, 2px `primary` border, filled `primary` letter badge, `on-primary-fixed` text.
 - Correct (review): `success-light` row + `success` border + `check_circle`.
-- Incorrect (review): `error-light` row + `error` border + `cancel`; other options use the muted `disabled` state.
-- Options render **outside** the question card, as sibling full-width rows.
+- Incorrect (review): `error-light` row + `error` border + `cancel`; other options use the muted `disabled` state, which recedes into the well (`surface-container-low`).
 
 **Maps to:** `mcq_single`, `true_false` (True/False as two keys).
 
@@ -218,15 +246,13 @@ From Math Mock #01:
 **Anatomy:**
 
 1. Stem (may bold/highlight codes with `primary` + wider tracking).
-2. **Stacked full-width rows** (~touch-target height).
-3. Leading letter badge + option text + trailing radio / check / cancel icon.
-4. Options stay outside the question card.
+2. **Stacked full-width rows** (~touch-target height) **inside the question card**.
+3. Leading letter badge + option text; check / cancel icons in review states.
 
 **Option styling:**
 
-- Default: `surface-container-low`, letter badge on `surface-container-high`.
-- Selected: `primary-fixed` + primary border + filled letter badge + filled radio.
-- Unselected radio: `radio_button_unchecked` in `outline`.
+- Default: `option-surface`, letter badge on `surface-container-high`.
+- Selected: `primary-fixed` + 2px primary border + filled letter badge (no radio).
 - As with 3.1: correct → `check_circle`, incorrect → `cancel`, other options muted.
 
 **Maps to:** `mcq_single` when option text is long or code-like.
@@ -436,7 +462,7 @@ Filters in mocks (All / Easy / Medium / Hard / Unattempted / Saved, or type chip
 
 | Area | Current state |
 |------|----------------|
-| Session UI | Practice, mock, and paper sessions use the shared `QuestionRenderer`; text MCQs render full-width rows via `AnswerCard` outside the question card. |
+| Session UI | Practice, mock, and paper sessions use the shared `QuestionRenderer`; one card holds the counter, section band, stem, and full-width option rows via `AnswerCard`. |
 | Responsive sessions | Centered max-width column on tablets; mock tests add a question-palette rail from 1024dp; all bottom bars respect safe-area insets. |
 | Paper support | [`src/lib/papers.ts`](../src/lib/papers.ts) allows `mcq_single` \| `true_false` \| `assertion_reason` but renders them identically |
 | Fetch | Practice/mock fetch hard-filters `mcq_single` in [`src/lib/supabase.ts`](../src/lib/supabase.ts) |

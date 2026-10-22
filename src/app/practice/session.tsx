@@ -30,9 +30,7 @@ function createStyles(colors: ColorPalette) {
             justifyContent: "space-between" as const,
             paddingHorizontal: SPACING[4],
             height: 56,
-            backgroundColor: colors.surface,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.outlineVariant,
+            backgroundColor: colors.sessionHeader,
         },
         headerTablet: {
             paddingHorizontal: SPACING[6],
@@ -45,14 +43,14 @@ function createStyles(colors: ColorPalette) {
             justifyContent: "center" as const,
         },
         headerBtnPressed: {
-            backgroundColor: colors.surfaceVariant,
+            backgroundColor: colors.sessionHeaderPill,
         },
         headerTitle: {
             flex: 1,
             textAlign: "center" as const,
             fontFamily: TYPOGRAPHY.fontFamily.bold,
             fontSize: TYPOGRAPHY.fontSize.lg,
-            color: colors.onSurface,
+            color: colors.onSessionHeader,
             fontWeight: TYPOGRAPHY.fontWeight.bold,
             marginHorizontal: SPACING[2],
         },
@@ -76,18 +74,6 @@ function createStyles(colors: ColorPalette) {
         progressSection: {
             marginBottom: SPACING[5],
         },
-        progressRow: {
-            flexDirection: "row" as const,
-            justifyContent: "space-between" as const,
-            alignItems: "center" as const,
-            marginBottom: SPACING[2],
-        },
-        questionCount: {
-            fontFamily: TYPOGRAPHY.fontFamily.medium,
-            fontSize: TYPOGRAPHY.fontSize.sm,
-            color: colors.onSurfaceVariant,
-            fontWeight: TYPOGRAPHY.fontWeight.semibold,
-        },
         progressBar: {
             borderRadius: BORDER_RADIUS.full,
             overflow: "hidden" as const,
@@ -102,9 +88,7 @@ function createStyles(colors: ColorPalette) {
         ctaBar: {
             paddingHorizontal: SPACING[4],
             paddingTop: SPACING[4],
-            backgroundColor: colors.surface,
-            borderTopWidth: 1,
-            borderTopColor: colors.outlineVariant,
+            backgroundColor: colors.background,
         },
         ctaBarInner: {
             width: "100%" as const,
@@ -346,7 +330,7 @@ export default function PracticeSessionScreen() {
                         <MaterialIcon
                             name={isBookmarked ? "bookmark" : "bookmark_border"}
                             size={22}
-                            color={isBookmarked ? colors.primary : colors.onSurfaceVariant}
+                            color={isBookmarked ? colors.primaryLight : colors.onSessionHeader}
                         />
                     </Pressable>
                     <Pressable
@@ -354,7 +338,7 @@ export default function PracticeSessionScreen() {
                         style={({ pressed }) => [styles.headerBtn, pressed ? styles.headerBtnPressed : null]}
                         accessibilityLabel="Report issue"
                     >
-                        <MaterialIcon name="flag" size={22} color={colors.onSurfaceVariant} />
+                        <MaterialIcon name="flag" size={22} color={colors.onSessionHeader} />
                     </Pressable>
                 </View>
             </View>
@@ -370,13 +354,8 @@ export default function PracticeSessionScreen() {
                 keyboardShouldPersistTaps="handled"
             >
                 <View style={styles.contentColumn}>
-                    {/* Progress section */}
+                    {/* Progress bar */}
                     <View style={styles.progressSection}>
-                        <View style={styles.progressRow}>
-                            <Text style={styles.questionCount}>
-                                Question {currentIndex + 1} of {questions.length}
-                            </Text>
-                        </View>
                         <GradientProgressBar progress={progress} height={8} style={styles.progressBar} />
                     </View>
 
@@ -390,6 +369,7 @@ export default function PracticeSessionScreen() {
                             revealed={showFeedback}
                             onSelect={handleSelectOption}
                             questionNumber={currentIndex + 1}
+                            counterTotal={questions.length}
                             showBookmark={false}
                             showFooter={false}
                             debugSource="PracticeSession"

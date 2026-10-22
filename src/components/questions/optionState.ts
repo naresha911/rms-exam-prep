@@ -41,14 +41,3 @@ export function deriveOptionState({
     if (isSelected) return 'selected';
     return 'default';
 }
-
-export function shouldShowCorrectCheck(
-    option: QuestionOption,
-    mode: QuestionUiMode,
-    revealed?: boolean,
-    browseRevealed?: boolean
-): boolean {
-    if (!option.is_correct) return false;
-    if (mode === 'browse') return !!browseRevealed;
-    return !!revealed;
-}

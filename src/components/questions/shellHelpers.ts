@@ -1,10 +1,9 @@
 import type { SharedQuestionProps, QuestionSolveStatus } from './types';
 
-/** Map shared props → shell footer / header fields. */
+/** Map shared props → shell header/footer fields. */
 export function shellFromShared(props: SharedQuestionProps) {
     const {
         question,
-        questionNumber,
         showBookmark = false,
         isBookmarked,
         onToggleBookmark,
@@ -15,6 +14,9 @@ export function shellFromShared(props: SharedQuestionProps) {
         revealed,
         mode,
         selectedValue,
+        counterTotal,
+        headerAction,
+        sectionLabel,
     } = props;
 
     let footerStatus: QuestionSolveStatus | null = solveStatus ?? null;
@@ -31,10 +33,10 @@ export function shellFromShared(props: SharedQuestionProps) {
     }
 
     return {
-        questionNumber,
-        difficulty: question.difficulty,
-        source: question.source,
-        tags: question.tags,
+        counterNumber: props.questionNumber,
+        counterTotal,
+        headerAction,
+        sectionLabel,
         showBookmark,
         isBookmarked,
         onToggleBookmark,

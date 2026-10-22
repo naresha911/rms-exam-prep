@@ -11,6 +11,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/Button";
+import { NavArrowButton } from "@/components/ui/NavArrowButton";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientProgressBar } from "@/components/shared/GradientProgressBar";
@@ -445,7 +446,7 @@ export default function PaperSessionScreen() {
                     style={({ pressed }) => [styles.iconBtn, pressed && layout.pressed]}
                     accessibilityLabel={t("common.back")}
                 >
-                    <MaterialIcon name="close" size={22} color={colors.onSurface} />
+                    <MaterialIcon name="close" size={22} color={colors.onSessionHeader} />
                 </Pressable>
                 <View style={styles.headerCenter}>
                     <Text style={styles.headerTitle} numberOfLines={1}>
@@ -456,7 +457,7 @@ export default function PaperSessionScreen() {
                     </Text>
                 </View>
                 <View style={[styles.timerPill, isLowTime && styles.timerLow]}>
-                    <MaterialIcon name="schedule" size={16} color={isLowTime ? colors.error : colors.primary} />
+                    <MaterialIcon name="schedule" size={16} color={isLowTime ? colors.error : colors['warning-amber']} />
                     <Text style={[styles.timerText, isLowTime && styles.timerTextLow]}>
                         {formatTime(timeRemaining)}
                     </Text>
@@ -497,6 +498,8 @@ export default function PaperSessionScreen() {
                             handleSelect(optionId);
                         }}
                         questionNumber={currentIndex + 1}
+                        counterTotal={questions.length}
+                        sectionLabel={current.section || t("papers.generalSection")}
                         showBookmark={false}
                         showFooter={false}
                         debugSource="PaperSession"
@@ -525,39 +528,34 @@ export default function PaperSessionScreen() {
 
             <View style={styles.footer}>
                 <View style={styles.footerInner}>
-                <Pressable
-                    onPress={handleToggleFlag}
-                    style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
-                    accessibilityLabel={t("papers.markReview")}
-                >
-                    <MaterialIcon
-                        name="flag"
-                        size={22}
-                        color={flagged.has(current.question_id) ? colors.warning : colors.onSurfaceVariant}
+                <View style={styles.footerLeftGroup}>
+                    <NavArrowButton
+                        direction="back"
+                        disabled={currentIndex === 0}
+                        onPress={() => goTo(currentIndex - 1)}
                     />
-                </Pressable>
-                <Button
-                    title={t("common.back")}
-                    variant="outline"
-                    size="sm"
-                    disabled={currentIndex === 0}
-                    onPress={() => goTo(currentIndex - 1)}
-                    style={styles.fill}
-                />
+                    <Pressable
+                        onPress={handleToggleFlag}
+                        style={({ pressed }) => [styles.flagBtn, pressed && layout.pressed]}
+                        accessibilityLabel={t("papers.markReview")}
+                    >
+                        <MaterialIcon
+                            name="flag"
+                            size={22}
+                            color={flagged.has(current.question_id) ? colors.warning : colors.onSurfaceVariant}
+                        />
+                    </Pressable>
+                </View>
                 {currentIndex < questions.length - 1 ? (
-                    <Button
-                        title={t("common.next")}
-                        size="sm"
-                        onPress={() => goTo(currentIndex + 1)}
-                        style={styles.fill}
-                    />
+                    <NavArrowButton direction="forward" onPress={() => goTo(currentIndex + 1)} />
                 ) : (
-                    <Button
-                        title={t("tests.submitTest")}
-                        size="sm"
+                    <Pressable
                         onPress={() => setShowSubmitConfirm(true)}
-                        style={styles.fill}
-                    />
+                        style={({ pressed }) => [styles.submitPill, pressed && layout.pressed]}
+                        accessibilityRole="button"
+                    >
+                        <Text style={styles.submitPillText}>{t("tests.submitTest")}</Text>
+                    </Pressable>
                 )}
                 </View>
             </View>
@@ -601,8 +599,7 @@ function createStyles(colors: ColorPalette) {
             alignItems: "center" as const,
             paddingHorizontal: SPACING[4],
             paddingVertical: SPACING[2],
-            borderBottomWidth: 1,
-            borderBottomColor: colors.outlineVariant,
+            backgroundColor: colors.sessionHeader,
             gap: SPACING[2],
         },
         headerTablet: {
@@ -610,19 +607,19 @@ function createStyles(colors: ColorPalette) {
         },
         iconBtn: { padding: SPACING[1] },
         headerCenter: { flex: 1 },
-        headerTitle: { ...TYPOGRAPHY.labelLg, color: colors.onSurface },
-        headerSub: { ...TYPOGRAPHY.labelSm, color: colors.onSurfaceVariant, marginTop: 2 },
+        headerTitle: { ...TYPOGRAPHY.labelLg, color: colors.onSessionHeader },
+        headerSub: { ...TYPOGRAPHY.labelSm, color: colors.onSessionHeader, marginTop: 2 },
         timerPill: {
             flexDirection: "row" as const,
             alignItems: "center" as const,
             gap: 4,
-            backgroundColor: colors.primaryFixed,
+            backgroundColor: colors.sessionHeaderPill,
             paddingHorizontal: 10,
             paddingVertical: 6,
             borderRadius: BORDER_RADIUS.full,
         },
         timerLow: { backgroundColor: colors.errorLight },
-        timerText: { ...TYPOGRAPHY.labelSm, color: colors.primary },
+        timerText: { ...TYPOGRAPHY.labelSm, color: colors.onSessionHeader },
         timerTextLow: { color: colors.error },
         progressWrap: {
             paddingHorizontal: SPACING[4],
@@ -651,17 +648,35 @@ function createStyles(colors: ColorPalette) {
         footer: {
             paddingHorizontal: SPACING[4],
             paddingVertical: SPACING[4],
-            borderTopWidth: 1,
-            borderTopColor: colors.outlineVariant,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.background,
         },
         footerInner: {
             flexDirection: "row" as const,
             alignItems: "center" as const,
+            justifyContent: "space-between" as const,
             gap: SPACING[2],
             width: "100%" as const,
             maxWidth: 720,
             alignSelf: "center" as const,
+        },
+        footerLeftGroup: {
+            flexDirection: "row" as const,
+            alignItems: "center" as const,
+            gap: SPACING[2],
+        },
+        submitPill: {
+            height: 44,
+            paddingHorizontal: SPACING[6],
+            borderRadius: BORDER_RADIUS.full,
+            backgroundColor: colors.primary,
+            alignItems: "center" as const,
+            justifyContent: "center" as const,
+        },
+        submitPillText: {
+            fontFamily: TYPOGRAPHY.fontFamily.semibold,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            fontWeight: "600" as const,
+            color: colors.onPrimary,
         },
         flagBtn: { padding: SPACING[2] },
         fill: { flex: 1 },

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { BORDER_RADIUS, SPACING, TYPOGRAPHY } from '../../../constants';
 import { useColors, useThemedStyles, type ColorPalette } from '../../../theme';
 import { QuestionCardShell } from '../QuestionCardShell';
-import { OptionGrid } from '../OptionGrid';
+import { OptionStack } from '../OptionStack';
 import { LatexText } from '../LatexText';
 import { shellFromShared } from '../shellHelpers';
 import type { SharedQuestionProps } from '../types';
@@ -27,7 +27,7 @@ function createStyles(colors: ColorPalette) {
     };
 }
 
-/** Word stem with expression chips and a 2×2 numeric grid. */
+/** Word stem with expression chips and full-width numeric rows. */
 export const McqInlineMath: React.FC<SharedQuestionProps> = (props) => {
     const styles = useThemedStyles(createStyles);
     const colors = useColors();
@@ -46,8 +46,8 @@ export const McqInlineMath: React.FC<SharedQuestionProps> = (props) => {
                         content={props.question.question_text || ''}
                         color={colors.onSurface}
                         fontSize={16}
-                        fontFamily={TYPOGRAPHY.fontFamily.semibold}
-                        fontWeight="600"
+                        fontFamily={TYPOGRAPHY.fontFamily.medium}
+                        fontWeight="500"
                         lineHeight={22}
                     />
                     {chips?.length ? (
@@ -68,7 +68,7 @@ export const McqInlineMath: React.FC<SharedQuestionProps> = (props) => {
                 </View>
             }
         >
-            <OptionGrid
+            <OptionStack
                 options={props.question.options}
                 selectedValue={props.selectedValue}
                 selectionMode={props.selectionMode}
@@ -76,7 +76,6 @@ export const McqInlineMath: React.FC<SharedQuestionProps> = (props) => {
                 revealed={props.revealed}
                 browseRevealed={browseRevealed}
                 onSelect={props.onSelect}
-                layoutMode="equation"
             />
         </QuestionCardShell>
     );

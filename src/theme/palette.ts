@@ -47,6 +47,10 @@ export interface ColorPalette {
     inversePrimary: string;
     outline: string;
     outlineVariant: string;
+    /** Active session (mock/practice/paper) header bar and its content. */
+    sessionHeader: string;
+    onSessionHeader: string;
+    sessionHeaderPill: string;
     surfaceTint: string;
     success: string;
     successLight: string;
@@ -98,6 +102,12 @@ export interface ColorPalette {
     onTertiaryFixedVariant: string;
     /** Light plate for exam figures in both appearances. */
     figurePlate: string;
+    /**
+     * Option tile surface inside the answer well. Must read *lighter* than the
+     * well in both appearances so tiles sit on the tray — Material's surface
+     * ladder is inverted between light and dark, so this cannot be inferred.
+     */
+    optionSurface: string;
 }
 
 export const lightColors: ColorPalette = {
@@ -145,6 +155,9 @@ export const lightColors: ColorPalette = {
     inversePrimary: '#c0c1ff',
     outline: '#767586',
     outlineVariant: '#c7c4d7',
+    sessionHeader: '#111C2D',
+    onSessionHeader: '#F9F9FF',
+    sessionHeaderPill: 'rgba(255, 255, 255, 0.14)',
     surfaceTint: '#494bd6',
     success: '#22C55E',
     successLight: '#DCFCE7',
@@ -195,6 +208,7 @@ export const lightColors: ColorPalette = {
     onTertiaryFixed: '#341100',
     onTertiaryFixedVariant: '#783200',
     figurePlate: '#ffffff',
+    optionSurface: '#ffffff',
 };
 
 export const darkColors: ColorPalette = {
@@ -242,6 +256,9 @@ export const darkColors: ColorPalette = {
     inversePrimary: '#4648d4',
     outline: '#9090a3',
     outlineVariant: '#454555',
+    sessionHeader: '#161C2C',
+    onSessionHeader: '#E8EDF8',
+    sessionHeaderPill: 'rgba(255, 255, 255, 0.10)',
     surfaceTint: '#c0c1ff',
     success: '#4ade80',
     successLight: '#14532d',
@@ -292,6 +309,7 @@ export const darkColors: ColorPalette = {
     onTertiaryFixed: '#ffdbca',
     onTertiaryFixedVariant: '#341100',
     figurePlate: '#f4f6ff',
+    optionSurface: '#242c40',
 };
 
 export function paletteFor(appearance: Appearance | null | undefined): ColorPalette {
